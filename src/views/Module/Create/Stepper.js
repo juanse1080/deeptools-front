@@ -7,6 +7,9 @@ import Button from '@material-ui/core/Button'
 
 import axios from 'axios'
 
+import { useDispatch, useSelector } from "react-redux";
+import { actions } from '_redux';
+
 import { Protocol, Structure, ModelDetail } from './components'
 
 import { example as options } from 'utils'
@@ -101,6 +104,7 @@ const rulesThree = {
 
 export default function Steppers() {
   const classes = useStyles()
+  const dispatch = useDispatch()
 
   const ref = useRef(null)
 
@@ -255,18 +259,22 @@ export default function Steppers() {
   })
 
   const save = () => {
+    dispatch(actions.startLoading())
     const data = { protocol, ...details, elements: activeElements() }
     console.log(data)
     axios.post(`${host}/module/create/`, data, authHeaderJSON()).then(
       function (res) {
+        dispatch(actions.finishLoading())
         build_image(res.data)
       }
     ).catch(
       function (err) {
+        dispatch(actions.finishLoading())
         console.log(err.response.data)
         setForm(form => ({ ...form, errors: err.response.data }))
       }
     )
+    
   }
 
   const sendData = () => {

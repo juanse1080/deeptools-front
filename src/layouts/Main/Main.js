@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/styles';
-import { useMediaQuery } from '@material-ui/core';
+import { useMediaQuery, LinearProgress } from '@material-ui/core';
+import { useSelector } from "react-redux";
 
 import { Sidebar, Topbar, Footer } from './components';
 
@@ -27,6 +28,7 @@ const useStyles = makeStyles(theme => ({
 
 const Main = props => {
   const { children } = props;
+  const loading = useSelector(state => state.loading)
 
   const classes = useStyles();
   const theme = useTheme();
@@ -53,6 +55,9 @@ const Main = props => {
         [classes.shiftContent]: isDesktop
       })}
     >
+      {
+        loading ? <LinearProgress color="primary" style={{height:'3px'}}/> : null
+      }
       <Topbar onSidebarOpen={handleSidebarOpen} className={classes.topbar} />
       {children}
       <Sidebar

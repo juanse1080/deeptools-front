@@ -93,7 +93,6 @@ const SignIn = props => {
 
   const classes = useStyles()
   const dispatch = useDispatch()
-  const loading = useSelector(state => state.loading)
   const error = useSelector(state => state.error)
 
   const [formState, setFormState] = useState({ isValid: false, values: {}, touched: {}, errors: {} })

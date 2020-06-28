@@ -9,6 +9,18 @@ const initialState = {
     user: null
 }
 
+const startLoading = (state, action) => {
+    return updateObject(state, {
+        loading: true
+    })
+}
+
+const finishLoading = (state, action) => {
+    return updateObject(state, {
+        loading: false
+    })
+}
+
 const authStart = (state, action) => {
     return updateObject(state, {
         error: null,
@@ -55,6 +67,8 @@ const reducer = (state = initialState, action) => {
         case actions_types.AUTH_FAIL: return authFail(state, action)
         case actions_types.AUTH_LOGOUT: return authLogout(state, action)
         case actions_types.CHECK_LOGIN: return saveTimeOut(state, action)
+        case actions_types.START_LOADING: return startLoading(state, action)
+        case actions_types.FINISH_LOADING: return finishLoading(state, action)
         default:
             return state
     }

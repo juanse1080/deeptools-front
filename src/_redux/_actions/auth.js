@@ -2,6 +2,18 @@ import axios from 'axios'
 import * as actions_types from '../_actions_types/auth.actions'
 import { host, history } from 'helpers/route'
 
+export const startLoading = () => {
+    return {
+        type: actions_types.START_LOADING
+    }
+}
+
+export const finishLoading = () => {
+    return {
+        type: actions_types.FINISH_LOADING
+    }
+}
+
 export const authStart = () => {
     return {
         type: actions_types.AUTH_START

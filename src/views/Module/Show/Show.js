@@ -71,6 +71,8 @@ export default function ({ match, ...others }) {
     const data = JSON.parse(state)
     console.log("Data:", data)
     setProgress([...data])
+    if(data[data.length - 1].state === 'success')
+      setBuild(false)
   }
 
   useEffect(() => {
@@ -92,7 +94,8 @@ export default function ({ match, ...others }) {
       }
     ).catch(
       function (err) {
-        console.log(err.response.data)
+        // console.log(err.response.data)
+        console.error(err)
       }
     )
   }, [match.params.id])

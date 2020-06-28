@@ -6,6 +6,7 @@ import { Main as MainLayout, Minimal as MinimalLayout } from 'layouts';
 
 import Create from './Create';
 import Show from './Show';
+import List from './List';
 
 const Routes = (props) => {
 
@@ -17,6 +18,7 @@ const Routes = (props) => {
     <Switch>
       <RouteWithLayout component={Create} exact layout={MainLayout} path="/module/create" />
       <RouteWithLayout component={Show} exact layout={MainLayout} path="/module/:id" />
+      <RouteWithLayout component={List} exact layout={MainLayout} path="/module" />
     </Switch>
   );
 };

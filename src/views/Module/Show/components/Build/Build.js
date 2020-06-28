@@ -42,31 +42,44 @@ export default function ({ progress }) {
     setShow(show => !show)
   }
 
+  const getState = () => {
+    if (progress.length > 0) {
+      switch (progress[progress.length - 1].state) {
+        case 'success':
+          return '#689f38'
+        case 'error':
+          return '#f44336'
+        default:
+          return 'inherit'
+      }
+    }
+  }
+
   return (
     <div className={classes.root}>
       <Grid container justify="flex-end">
         <Grid item>
-          <FormHelperText>
+          <FormHelperText style={{color: getState() }}>
             {
               progress.length > 0 ?
-                parseInt(progress[progress.length - 1].state) : 0
+                parseInt(progress[progress.length - 1].progress) : 0
             }%
           </FormHelperText>
         </Grid>
       </Grid>
-      <BorderLinearProgress variant="buffer"
+      <BorderLinearProgress variant="buffer" style={{ backgroundColor: getState() }}
         value={
           progress.length > 0 ?
-            progress[progress.length - 1].state : 0
+            progress[progress.length - 1].progress : 0
         }
         valueBuffer={
           progress.length > 0 ?
-            progress[progress.length - 1].state : 0
+            progress[progress.length - 1].progress : 0
         }
       />
       <Grid container justify="space-between" className="mb-3">
         <Grid item>
-          <FormHelperText>
+          <FormHelperText style={{color: getState() }}>
             {
               progress.length > 0 ?
                 progress[progress.length - 1].description : 'Starting process...'
@@ -74,7 +87,7 @@ export default function ({ progress }) {
           </FormHelperText>
         </Grid>
         <Grid item>
-          <FormHelperText>
+          <FormHelperText style={{color: getState() }}>
             <Link component="button" onClick={toggleShow}>{show ? 'show less' : 'show more'}</Link>
           </FormHelperText>
         </Grid>
