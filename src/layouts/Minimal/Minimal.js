@@ -6,8 +6,6 @@ import { LinearProgress } from '@material-ui/core'
 
 import { useSelector } from "react-redux";
 
-import { Topbar } from './components';
-
 const useStyles = makeStyles(() => ({
   root: {
     // paddingTop: 64,

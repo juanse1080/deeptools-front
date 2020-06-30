@@ -14,7 +14,7 @@ const Routes = () => {
       <RoutePublicLayout component={SignUpView} exact path="/sign-up" />
       <RoutePublicLayout component={SignInView} exact path="/sign-in" />
       <RoutePublicLayout component={NotFoundView} exact path="/not-found" />
-      <RouteCrud component={Module} exact layout={MainLayout} path="/module/:view?" />
+      <RouteCrud component={Module} exact layout={MainLayout} path="/module/:action?/:id?" />
       <RouteWithLayout component={DashboardView} exact layout={MainLayout} path="/dashboard" />
       <RouteWithLayout component={UserListView} exact layout={MainLayout} path="/users" />
       <RouteWithLayout component={ProductListView} exact layout={MainLayout} path="/products" />

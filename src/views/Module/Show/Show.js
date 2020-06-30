@@ -7,6 +7,8 @@ import axios from 'axios'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
 
+import errores from 'utils/error'
+
 import { Build, Detail } from './components'
 
 const useStyles = makeStyles((theme) => ({
@@ -76,10 +78,10 @@ export default function ({ match, ...others }) {
   }
 
   useEffect(() => {
-    axios.get(`${host}/module/build/${match.params.id}`, authHeaderJSON()).then(
+    axios.get(`${host}/module/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
-        if (res.data.build) {
+        if (res.data.state === 'building') {
           build_image(match.params.id)
         }
         const graphs = res.data.elements_type.filter(item => item.kind === 'graph')
@@ -89,13 +91,13 @@ export default function ({ match, ...others }) {
         })
         elements["graph"] = graphs
         setModule({ ...res.data, elements: elements })
-        setBuild(res.data.build)
+        setBuild(res.data.state === 'building')
         setLoading(false)
       }
     ).catch(
       function (err) {
-        // console.log(err.response.data)
-        console.error(err)
+        errores(err)
+        console.error(err.response)
       }
     )
   }, [match.params.id])

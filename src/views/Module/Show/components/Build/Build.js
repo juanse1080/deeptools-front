@@ -36,7 +36,7 @@ const BorderLinearProgress = withStyles(theme => ({
 
 export default function ({ progress }) {
   const classes = useStyles()
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(true)
 
   const toggleShow = () => {
     setShow(show => !show)

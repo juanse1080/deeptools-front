@@ -256,13 +256,13 @@ export default function Steppers() {
       if (red.current)
         ref.current.close()
     }
-  })
+  }, [])
 
   const save = () => {
     dispatch(actions.startLoading())
     const data = { protocol, ...details, elements: activeElements() }
     console.log(data)
-    axios.post(`${host}/module/create/`, data, authHeaderJSON()).then(
+    axios.post(`${host}/module/create`, data, authHeaderJSON()).then(
       function (res) {
         dispatch(actions.finishLoading())
         build_image(res.data)

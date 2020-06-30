@@ -4,10 +4,12 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress } from '@material-ui/core'
+import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
+
+import { title as ucWords, format_date as getDate } from 'utils'
 
 import { useDispatch } from "react-redux";
 import { actions } from '_redux';
@@ -16,30 +18,25 @@ import axios from "axios"
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    marginTop: theme.spacing(3),
+    width: '100%',
+    padding: theme.spacing(4),
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(3),
+      backgroundColor: theme.palette.white
+    }
   },
   media: {
     height: 0,
     paddingTop: '56.25%', // 16:9
   },
-  // expand: {
-  //   transform: 'rotate(0deg)',
-  //   marginLeft: 'auto',
-  //   transition: theme.transitions.create('transform', {
-  //     duration: theme.transitions.duration.shortest,
-  //   }),
-  // },
-  // expandOpen: {
-  //   transform: 'rotate(180deg)',
-  // },
   colorPreview: {
     fontSize: '0.8rem'
   },
-  root: {
+  alerts: {
     padding: '2px 4px',
     display: 'flex',
     alignItems: 'center',
-    width: 500,
+    width: '100%',
   },
   main: {
     display: 'flex',
@@ -48,9 +45,6 @@ const useStyles = makeStyles((theme) => ({
   input: {
     marginLeft: theme.spacing(1),
     flex: 1,
-  },
-  iconButton: {
-    padding: 10,
   },
   fullHeight: {
     paddingTop: "100%",
@@ -61,41 +55,22 @@ const useStyles = makeStyles((theme) => ({
   },
   owner: {
     fontSize: 11,
+  },
+  iconButton: {
+    fontSize: 15,
+    margin: 5
+  },
+  cardContent: {
+    '&:last-child': {
+      paddingBottom: '14px'
+    }
+  },
+  rootTitleDialog: {
+    flex: '0 0 auto',
+    margin: 0,
+    padding: '24px 24px',
   }
 }))
-
-const getDate = (date) => {
-  const data = new Date(date)
-  const current = new Date()
-
-  const mes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-
-  const equal = current - data
-  const ayer = 24 * 1000 * 3600
-  const semana = 24 * 7 * 1000 * 3600
-
-  if (equal === 0) {
-    return "Hoy"
-  } else if (equal <= ayer) {
-    return "Ayer"
-  } else if (equal > ayer && equal < semana) {
-    const diff = parseInt(equal / (3600 * 1000 * 24))
-    if (diff > 1) {
-      return `Hace ${diff} dias`
-    }
-    return `Hace un dia`
-  } else if (equal === semana) {
-    return "Hace una semana"
-  } else if (equal > semana) {
-    return `${data.getDate()} de ${mes[data.getMonth()]} ${data.getFullYear()}`
-  }
-}
-
-const ucWords = (word) => {
-  const words = word.split(' ')
-  const upper = words.map(item => `${item.substr(0, 1).toUpperCase()}${item.substr(1)}`)
-  return upper.join(' ')
-}
 
 const default_ = { name: '', owner: '' }
 
@@ -115,23 +90,36 @@ export default function List(props) {
   }
 
   const handleModule = (index, name, value) => {
-    let aux = [...modules]
+    let aux = [...filter]
     aux[index] = { ...aux[index], [name]: value }
-    setModules(aux)
+    setModules(modules.map(item => item.id === aux[index].id ? { ...item, [name]: value } : item))
+    setFilter(aux)
   }
 
-  const check = (index) => () => {
-    handleModule(index, 'loading', true)
-    axios.post(`${host}/module/stop/${modules[index].image_name}`, {}, authHeaderJSON()).then(
+  const triedDelete = (index) => () => {
+    setDeleting({ ...filter[index], index: index })
+    handleDialog(true)()
+  }
+
+  const cancelDelete = () => {
+    handleDialog(false)()
+  }
+
+  const deleteModule = () => {
+    handleDialog(false)()
+    handleModule(deleting.index, 'loading', true)
+    axios.delete(`${host}/module/delete/${deleting.image_name}`, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
-        handleModule(index, 'loading', false)
+        handleModule(deleting.index, 'loading', false)
+        setModules(modules => modules.filter(item => item.image_name !== deleting.image_name))
+        setFilter(filter => filter.filter(item => item.image_name !== deleting.image_name))
+        setDeleting(default_)
       }
     ).catch(
       function (err) {
-        // console.log(err.response.data)
         console.error(err)
-        handleModule(index, 'loading', false)
+        handleModule(deleting.index, 'loading', false)
+        setDeleting(default_)
       }
     )
   }
@@ -142,6 +130,54 @@ export default function List(props) {
     dispatch(actions.finishLoading())
   }
 
+  const run = (id) => () => {
+    dispatch(actions.startLoading())
+    history.push(`/module/run/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
+  const start = (index, id) => () => {
+    handleModule(index, 'loading', true)
+    axios.put(`${host}/module/start/${id}`, {}, authHeaderJSON()).then(
+      function (res) {
+        handleModule(index, 'loading', false)
+        handleModule(index, 'state', 'active')
+      }
+    ).catch(
+      function (err) {
+        console.error(err)
+        handleModule(index, 'loading', false)
+      }
+    )
+  }
+
+  const stop = (index, id) => () => {
+    handleModule(index, 'loading', true)
+    axios.put(`${host}/module/stop/${id}`, {}, authHeaderJSON()).then(
+      function (res) {
+        handleModule(index, 'loading', false)
+        handleModule(index, 'state', 'stopped')
+      }
+    ).catch(
+      function (err) {
+        console.error(err)
+        handleModule(index, 'loading', false)
+      }
+    )
+  }
+
+  // Filtrar contenedores
+  const filterModules = (e) => {
+    const val = e.target.value
+    if (val) {
+      const query = modules.filter(module => module.name.toLowerCase().indexOf(val.toLowerCase()) > -1 || module.image.toLowerCase().indexOf(val.toLowerCase()) > -1 || `${module.user.first_name} ${module.user.last_name}`.toLowerCase().indexOf(val.toLowerCase()) > -1)
+      console.log(query)
+      setFilter(query)
+    } else {
+      setFilter(modules)
+    }
+  }
+
   useEffect(() => {
     axios.get(`${host}/module`, authHeaderJSON()).then(function (res) {
       setModules(res.data)
@@ -149,20 +185,21 @@ export default function List(props) {
       setFilter(res.data)
       setLoading(false)
     }).catch(function (err) {
-      console.error(err)
+      console.log(err)
     })
   }, [])
 
-  return (
-    <>
+  return <>
+    <div className={classes.root}>
       {
         loading ? <>
-          <div className={classes.main}>
-            <Skeleton className="mt-4" animation="wave" width={135} height={41 + 41 * 0.2} variant="text" />
-          </div>
-          <div className={classes.main}>
-            <Skeleton className={classes.disableScale} animation="wave" width={500} height={50} variant="text" />
-          </div>
+          <Grid container className="mt-3" justify="center" direction="row">
+            <Grid item xs={12} sm={10} md={8} xl={6}>
+              <div className={clsx(classes.main, "m-2")}>
+                <Skeleton className={classes.disableScale} animation="wave" width="100%" height={50} variant="text" />
+              </div>
+            </Grid>
+          </Grid>
           <>
             <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
               {
@@ -176,6 +213,16 @@ export default function List(props) {
                               <Grid item>
                                 <Skeleton animation="wave" variant="text" height={10} width={200} />
                                 <Skeleton animation="wave" variant="text" height={10} width={150} />
+                              </Grid>
+                              <Grid item>
+                                <Skeleton animation="wave" variant="text" height={10} width={40} />
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                          <Grid item>
+                            <Grid container direction="row" justify="space-between" alignItems="flex-start">
+                              <Grid item>
+                                <Skeleton animation="wave" variant="text" height={10} width={80} />
                               </Grid>
                               <Grid item>
                                 <Grid container spacing={1}>
@@ -192,96 +239,60 @@ export default function List(props) {
                               </Grid>
                             </Grid>
                           </Grid>
-                          <Grid item>
-                            <Grid container direction="row" justify="space-between" alignItems="flex-start">
-                              <Grid item>
-                                <Skeleton animation="wave" variant="text" height={10} width={80} />
-                              </Grid>
-                              <Grid item>
-                                <Skeleton animation="wave" variant="text" height={10} width={40} />
-                              </Grid>
-                            </Grid>
-                          </Grid>
                         </Grid>
                       </CardContent>
                     </Card>
                   </Grid>
-                  // <Grid item lg={6} md={6} sm={6} xs={12} key={service}>
-                  //   <Card className="m-2">
-                  //     <CardHeader
-                  //       avatar={
-                  //         <Skeleton animation="wave" variant="circle" width={32} height={32} />
-                  //       }
-                  //       title={
-                  //         <Skeleton animation="wave" height={10} />
-                  //       }
-                  //       subheader={
-                  //         <Skeleton animation="wave" height={10} width="40%" />
-                  //       }
-                  //     />
-                  //     <Skeleton animation="wave" variant="rect" className={classes.media} />
-                  //     <CardContent>
-                  //       <Skeleton animation="wave" height={10} variant="text" />
-                  //       <Skeleton animation="wave" height={10} variant="text" />
-                  //       <Skeleton animation="wave" height={10} variant="text" width="40%" />
-                  //     </CardContent>
-                  //     <CardActions disableSpacing>
-                  //       <IconButton aria-label="Ver">
-                  //         <Visibility />
-                  //       </IconButton>
-                  //       <IconButton aria-label="Editar">
-                  //         <Edit />
-                  //       </IconButton>
-                  //       <IconButton aria-label="Eliminar">
-                  //         <Delete />
-                  //       </IconButton>
-                  //     </CardActions>
-                  //   </Card>
-                  // </Grid>
                 )
               }
             </Grid>
           </>
         </> : <>
-            <div className={classes.main}>
-              <Paper className={classes.root}>
-                <IconButton color="primary" className={classes.iconButton} aria-label="search">
-                  <Search />
-                </IconButton>
-                <InputBase
-                  // onChange={filterActivities}
-                  className={classes.input}
-                  placeholder="Buscar Actividades"
-                  inputProps={{ 'aria-label': 'search' }}
-                />
-              </Paper>
-            </div>
+            <Grid container className="mt-3" justify="center" direction="row">
+              <Grid item xs={12} sm={10} md={8} xl={6}>
+                <Paper className={classes.alerts}>
+                  <IconButton size="small" color="primary" className={classes.iconButton} aria-label="search">
+                    <Search />
+                  </IconButton>
+                  <InputBase
+                    onChange={filterModules}
+                    className={classes.input}
+                    placeholder="Find modules"
+                    inputProps={{ 'aria-label': 'search' }}
+                  />
+                </Paper>
+              </Grid>
+            </Grid>
             {
               modules.length === 0 ? (
-                <div className={classes.main}>
-                  <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.root)}>
-                    No existen registros
-                </Alert>
-                </div>
+                <Grid container className="mt-3" justify="center" direction="row">
+                  <Grid item xs={12} sm={10} md={8} xl={6}>
+                    <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.alerts)}>
+                      There are no records
+                    </Alert>
+                  </Grid>
+                </Grid>
               ) : (
                   <>
                     {
                       filter.length === 0 ? (
-                        <div className={classes.main}>
-                          <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.root)}>
-                            No se encontraron concurrencias
-                        </Alert>
-                        </div>
+                        <Grid container className="mt-3" justify="center" direction="row">
+                          <Grid item xs={12} sm={10} md={8} xl={6}>
+                            <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.alerts)}>
+                              No concurrences were found
+                            </Alert>
+                          </Grid>
+                        </Grid>
                       ) : null
                     }
                     <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
                       {
-                        modules.map((item, index) =>
+                        filter.map((item, index) =>
                           <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
-                            <Card className="m-2">
+                            <Card className="m-2" >
                               {item.loading ? <LinearProgress /> : null}
-                              <CardContent>
-                                <Grid container direction="column" justify="space-between" alignItems="stretch">
+                              <CardContent classes={{ root: classes.cardContent }}>
+                                <Grid container direction="column" justify="space-between">
                                   <Grid item>
                                     <Grid container direction="row" justify="space-between" alignItems="flex-start">
                                       <Grid item>
@@ -293,23 +304,44 @@ export default function List(props) {
                                         </Typography>
                                       </Grid>
                                       <Grid item>
-                                        <i className="ml-2 fas fa-vial text-success" />
-                                        <i className="ml-2 fas fa-stop-circle text-secondary" />
-                                        <i className="ml-2 fas fa-trash text-danger" />
+                                        <span className={classes.owner}>
+                                          {getDate(item.timestamp)}
+                                        </span>
                                       </Grid>
                                     </Grid>
                                   </Grid>
                                   <Grid item>
-                                    <Grid container direction="row" justify="space-between" alignItems="flex-start">
+                                    <Grid container direction="row" justify="space-between" alignItems="flex-end">
                                       <Grid item>
                                         <span className={classes.owner}>
                                           {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
                                         </span>
                                       </Grid>
                                       <Grid item>
-                                        <span className={classes.owner}>
-                                          {getDate(item.timestamp)}
-                                        </span>
+                                        <>
+                                          {
+                                            item.state === 'active' ? <>
+                                              <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                              </IconButton>
+                                              <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
+                                              </IconButton>
+                                            </> : null
+                                          }
+                                        </>
+                                        <>
+                                          {
+                                            item.state === 'stopped' ? <>
+                                              <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
+                                              </IconButton>
+                                            </> : null
+                                          }
+                                        </>
+                                        <IconButton size="small" onClick={triedDelete(index)}>
+                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
+                                        </IconButton>
                                       </Grid>
                                     </Grid>
                                   </Grid>
@@ -321,16 +353,16 @@ export default function List(props) {
                         )
                       }
                     </Grid>
-                    <Dialog open={dialog} keepMounted onClose={handleDialog(false)} aria-labelledby="alert-dialog-slide-title" aria-describedby="alert-dialog-slide-description">
-                      <DialogTitle id="alert-dialog-slide-title">{`Actividad ${deleting.id}`}</DialogTitle>
+                    <Dialog open={dialog} keepMounted onClose={cancelDelete} aria-labelledby="alert-dialog-slide-title" aria-describedby="alert-dialog-slide-description">
+                      <DialogTitle id="alert-dialog-slide-title" classes={{ root: classes.rootTitleDialog }}>{`Module ${deleting.name}`}</DialogTitle>
                       <DialogContent>
                         <DialogContentText id="alert-dialog-slide-description">
-                          {`¿Desea eliminar la actividad "${deleting.title}"?`}
+                          {`¿Do want delete background "${deleting.name}"?`}
                         </DialogContentText>
                       </DialogContent>
                       <DialogActions>
-                        <Button onClick={handleDialog(false)} color="primary">Cancelar</Button>
-                        <Button onClick={handleDialog(false)} color="primary">Eliminar</Button>
+                        <Button onClick={cancelDelete} color="primary">Cancel</Button>
+                        <Button onClick={deleteModule} color="primary">Confirm</Button>
                       </DialogActions>
                     </Dialog>
                   </>
@@ -339,6 +371,6 @@ export default function List(props) {
           </>
 
       }
-    </>
-  )
+    </div>
+  </>
 }

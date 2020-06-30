@@ -1,2 +1,5 @@
 export { init, contrast, randomNumber } from './color'
 export { example, default_options } from './options'
+export { default as format_date } from './date'
+export { default as title } from './title'
+export { default as error } from './error'

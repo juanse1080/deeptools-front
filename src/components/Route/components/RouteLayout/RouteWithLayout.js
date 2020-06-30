@@ -2,13 +2,28 @@ import React, { useEffect } from 'react';
 import { Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Footer from '../Footer';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { actions } from '_redux'
 
+import { makeStyles } from '@material-ui/styles';
 
-const RouteWithLayout = props => {
-  const { layout: Layout, component: Component, ...rest } = props;
+const useStyles = makeStyles(() => ({
+  root: {
+    // paddingTop: 64,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%'
+  },
+  content: {
+    height: '100%'
+  }
+}));
 
+
+const RouteWithLayout = ({ layout: Layout, component: Component, ...rest }) => {
+
+  const classes = useStyles()
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -20,10 +35,10 @@ const RouteWithLayout = props => {
       {...rest}
       render={matchProps => (
         <Layout>
-          <Component {...matchProps}>
-
-          </Component>
-          <Footer />
+          <div className={classes.root}>
+            <Component {...matchProps} />
+            <Footer />
+          </div>
         </Layout>
       )}
     />

@@ -27,7 +27,7 @@ export default function ({ value, change, errors, ...others }) {
   const [images, setImages] = useState([])
 
   const getImages = () => {
-    axios.get(`${host}/module/images/`, authHeaderJSON()).then(
+    axios.get(`${host}/module/images`, authHeaderJSON()).then(
       function (res) {
         setImages(res.data)
       }
