@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import PropTypes from 'prop-types'
 import { Link as RouterLink } from 'react-router-dom'
 import { makeStyles } from '@material-ui/styles'
-import { Drawer } from '@material-ui/core'
+import { Drawer, Icon } from '@material-ui/core'
 import DashboardIcon from '@material-ui/icons/Dashboard'
 import PeopleIcon from '@material-ui/icons/People'
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket'
@@ -42,50 +42,55 @@ const Sidebar = props => {
 
   const pages = [
     {
+      title: 'List',
+      href: '/module/',
+      icon: <Icon fontSize="small" className="fas fa-list-ul" />
+    },
+    {
       title: 'Create',
       href: '/module/create',
       icon: <AddCircleIcon />
     },
-    {
-      title: 'Dashboard',
-      href: '/dashboard',
-      icon: <DashboardIcon />
-    },
-    {
-      title: 'Users',
-      href: '/users',
-      icon: <PeopleIcon />
-    },
-    {
-      title: 'Products',
-      href: '/products',
-      icon: <ShoppingBasketIcon />
-    },
-    {
-      title: 'Authentication',
-      href: '/sign-in',
-      icon: <LockOpenIcon />
-    },
-    {
-      title: 'Typography',
-      href: '/typography',
-      icon: <TextFieldsIcon />
-    },
-    {
-      title: 'Icons',
-      href: '/icons',
-      icon: <ImageIcon />
-    },
-    {
-      title: 'Account',
-      href: '/account',
-      icon: <AccountBoxIcon />
-    },
-    {
-      title: 'Settings',
-      href: '/settings',
-      icon: <SettingsIcon />
-    }
+    // {
+    //   title: 'Dashboard',
+    //   href: '/dashboard',
+    //   icon: <DashboardIcon />
+    // },
+    // {
+    //   title: 'Users',
+    //   href: '/users',
+    //   icon: <PeopleIcon />
+    // },
+    // {
+    //   title: 'Products',
+    //   href: '/products',
+    //   icon: <ShoppingBasketIcon />
+    // },
+    // {
+    //   title: 'Authentication',
+    //   href: '/sign-in',
+    //   icon: <LockOpenIcon />
+    // },
+    // {
+    //   title: 'Typography',
+    //   href: '/typography',
+    //   icon: <TextFieldsIcon />
+    // },
+    // {
+    //   title: 'Icons',
+    //   href: '/icons',
+    //   icon: <ImageIcon />
+    // },
+    // {
+    //   title: 'Account',
+    //   href: '/account',
+    //   icon: <AccountBoxIcon />
+    // },
+    // {
+    //   title: 'Settings',
+    //   href: '/settings',
+    //   icon: <SettingsIcon />
+    // }
   ]
 
   return (
@@ -104,6 +109,7 @@ const Sidebar = props => {
         <RouterLink to="/">
           <img
             alt="Logo"
+            // width="200"
             src="/images/logos/logo--white.svg"
           />
         </RouterLink>

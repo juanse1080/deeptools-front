@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon } from '@material-ui/core'
+import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
@@ -321,27 +321,35 @@ export default function List(props) {
                                         <>
                                           {
                                             item.state === 'active' ? <>
-                                              <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
-                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                              </IconButton>
-                                              <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
-                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
-                                              </IconButton>
+                                              <Tooltip title="Experiment">
+                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                                </IconButton>
+                                              </Tooltip>
+                                              <Tooltip title="Stop">
+                                                <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
+                                                </IconButton>
+                                              </Tooltip>
                                             </> : null
                                           }
                                         </>
                                         <>
                                           {
                                             item.state === 'stopped' ? <>
-                                              <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
-                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
-                                              </IconButton>
+                                              <Tooltip title="Start">
+                                                <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
+                                                </IconButton>
+                                              </Tooltip>
                                             </> : null
                                           }
                                         </>
-                                        <IconButton size="small" onClick={triedDelete(index)}>
-                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
-                                        </IconButton>
+                                        <Tooltip title="Delete">
+                                          <IconButton size="small" onClick={triedDelete(index)}>
+                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
+                                          </IconButton>
+                                        </Tooltip>
                                       </Grid>
                                     </Grid>
                                   </Grid>

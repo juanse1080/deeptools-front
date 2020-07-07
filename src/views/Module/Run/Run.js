@@ -6,7 +6,10 @@ import ReactHtmlParser, { convertNodeToElement } from 'react-html-parser';
 
 import { makeStyles, Backdrop, CircularProgress, Button } from '@material-ui/core'
 
-import { host, authHeaderJSON, history, ws } from 'helpers'
+import { useDispatch } from "react-redux";
+import { actions } from '_redux';
+
+import { host, authHeaderJSON, history, ws, authHeaderForm } from 'helpers'
 import { error } from 'utils'
 
 import { InputFile } from './components'
@@ -63,24 +66,100 @@ const options = {
 
 export default function Run({ match, ...others }) {
   const classes = useStyles()
+  const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)
   const [module, setModule] = useState(null)
   const [media, setMedia] = useState([])
+  const [refs, setRefs] = useState([])
+  const [cancel, setCancel] = useState([])
 
-  const addMedia = (many, items) => {
-    if (many) {
-      setMedia([...media, ...items.map(item => ({ file: item, hover: false, progress: 0 }))])
-    } else {
-      setMedia([...items.map(item => ({ file: item, hover: false, progress: 0 }))])
-    }
+  const addMedia = items => {
+    const len = media.length
+    const cancels = []
+    items.forEach((element, index) => {
+      const source = axios.CancelToken.source()
+      const form = new FormData()
+      form.append('file', element)
+
+      appendMedia({ name: element.name, hover: false, progress: 0, uploaded: false, ref: index })
+
+      const config = {
+        ...authHeaderForm(),
+        cancelToken: source.token,
+        onUploadProgress: (progressEvent) => {
+          let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          handleMedia(len + index, 'progress', percentCompleted)
+        }
+      }
+
+      cancels.push(source)
+
+      axios.post(`${host}/module/upload/${match.params.id}`, form, config).then(
+        function (res) {
+          console.log(res.data)
+          handleMedia(len + index, 'uploaded', true)
+          setMedia(media => {
+            let aux = [...media]
+            aux[len + index] = { ...aux[len + index], ...res.data }
+            return aux
+          })
+        }
+      ).catch(
+        function (err) {
+          // handleMedia(len + index, 'uploaded', false)
+        }
+      )
+
+    })
+    setCancel([...cancel, ...cancels])
+  }
+
+  const appendMedia = value => {
+    setMedia(media => {
+      let aux = [...media]
+      aux[aux.length] = value
+      return aux
+    })
+  }
+
+  const handleMedia = (index, name, value) => {
+    setMedia(media => {
+      let aux = [...media]
+      aux[index] = { ...aux[index], [name]: value }
+      return aux
+    })
   }
 
   const deleteMedia = index => () => {
+    handleMedia(index, 'deleting', true)
+    console.log(media, index)
+    axios.delete(`${host}/module/upload/remove/${media[index].id}`, authHeaderJSON()).then(
+      function (res) {
+        handleMedia(index, 'deleting', false)
+        let aux = [...media]
+        aux.splice(index, 1)
+        setMedia(aux)
+      }
+    ).catch(
+      function (err) {
+        handleMedia(index, 'deleting', false)
+      }
+    )
+  }
+
+  const cancelUpload = index => () => {
+    const index_cancel = media[index].ref
+    cancel[index_cancel].cancel('')
+
     let aux = [...media]
     aux.splice(index, 1)
     setMedia(aux)
+
+    let aux_c = [...cancel]
+    aux_c.splice(index_cancel, 1)
+    setCancel(aux_c)
   }
 
   const enterMedia = index => () => {
@@ -93,15 +172,93 @@ export default function Run({ match, ...others }) {
     setMedia(media.map(item => ({ ...item, 'hover': false })))
   }
 
+  const connect = (id) => {
+    const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
+    webSocket.onopen = () => {
+      console.log("show: CONNECT")
+    }
+    webSocket.onclose = () => {
+      console.log("show: CLOSE")
+      // connect(id)
+    }
+    webSocket.onmessage = e => {
+      console.log("show: MESSAGES")
+    }
+
+    waitForSocketConnection(webSocket, () => {
+      sendMessage(webSocket, { command: 'execute' })
+    })
+
+    return webSocket
+  }
+
+  const waitForSocketConnection = (webSocket, callback) => {
+    setTimeout(
+      function () {
+        // Check if websocket state is OPEN
+        if (webSocket.readyState === 1) {
+          callback()
+          return
+        } else {
+          console.log("show: wait for connection...")
+          waitForSocketConnection(webSocket, callback)
+        }
+      }, 100) // wait 100 milisecond for the connection...
+  }
+
+  const check = (list) => list.reduce((reducer, item) => item.ws.readyState === 1 ? true : false && reducer, true)
+
+  const tryCheck = (ch, callback) => {
+    setTimeout(
+      function () {
+        if (check(ch)) {
+          callback()
+          return
+        } else {
+          console.log("show: wait for connection...")
+          tryCheck(ch, callback)
+        }
+      }, 100)
+  }
+
+  const sendMessage = (webSocket, data) => {
+    try {
+      webSocket.send(JSON.stringify({ ...data }))
+    }
+    catch (err) {
+      console.log(err.message)
+    }
+  }
+
+  const execute = () => {
+    dispatch(actions.startLoading())
+    let channels = []
+    media.forEach(item => {
+      if (!channels.includes({ 'id': item.experiment }))
+        channels.push({ 'id': item.experiment })
+    })
+    const ch = channels.map(item => ({ ...item, 'ws': connect(item.id) }))
+    console.log(ch)
+    setRefs(ch)
+    tryCheck(ch, () => {
+      ch.forEach(item => item.ws.close())
+      dispatch(actions.finishLoading())
+      if (ch.length === 1) {
+        history.push(`/module/experiment/${ch[0].id}`)
+      } else {
+        history.push(`/module/experiment`)
+      }
+    })
+  }
+
   useEffect(() => {
     axios.post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
-        if (res.data.docker.state !== 'active') history.goBack()
+        console.log(res.data.elements)
+        if (res.data.state !== 'active') history.goBack()
         const obj = new showdown.Converter()
-        const many = [...res.data.docker.elements_type].filter(item => item.kind === 'input')[0].len === '1' ? true : false
-        console.log(many)
-        setModule({ ...res.data.docker, html: obj.makeHtml(res.data.docker.protocol), many: many })
+        setModule({ ...res.data, html: obj.makeHtml(res.data.protocol) })
+        setMedia(res.data.elements.map(item => ({ ...item, hover: false, progress: 100, uploaded: true })))
         setLoading(false)
       }
     ).catch(
@@ -114,12 +271,11 @@ export default function Run({ match, ...others }) {
 
   const content = () => {
     if (step === 0) {
-      console.log("ENTRO")
       return <>
         {ReactHtmlParser(module.html, options)}
       </>
     } else {
-      return <InputFile many={module.many} enterMedia={enterMedia} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} />
+      return <InputFile enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} />
     }
   }
 
@@ -138,7 +294,7 @@ export default function Run({ match, ...others }) {
             {content()}
             <div className={classes.buttons}>
               <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-              <Button disabled={step === 1} variant="contained" color="primary" onClick={handleStep(step + 1)}>Next</Button>
+              <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : execute}>{step === 0 ? 'Next' : 'Execute'}</Button>
             </div>
           </>
       }

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 
-import { makeStyles, Paper, Icon, Snackbar, Grid, Typography, CircularProgress } from '@material-ui/core'
+import { makeStyles, Paper, Icon, Snackbar, Grid, Typography, CircularProgress, Tooltip } from '@material-ui/core'
 import { Alert } from '@material-ui/lab'
-import { Cancel } from '@material-ui/icons'
+import { Cancel, Delete } from '@material-ui/icons'
 
 import clsx from 'clsx'
 
@@ -43,10 +43,14 @@ const useStyles = makeStyles((theme) => ({
   deleteFile: {
     color: theme.palette.error.main,
     cursor: 'pointer',
+  },
+  progressIcon: {
+    height: 24,
+    width: 24,
   }
 }))
 
-export default function InputFile({ media, addMedia, deleteMedia, pattern, enterMedia, leaveMedia, many, ...others }) {
+export default function InputFile({ media, addMedia, deleteMedia, cancelUpload, pattern, enterMedia, leaveMedia, ...others }) {
   const classes = useStyles()
 
   const [error, setError] = useState(false)
@@ -75,17 +79,7 @@ export default function InputFile({ media, addMedia, deleteMedia, pattern, enter
   }
 
   const handleMedia = e => {
-
-    let files
-    if (many) {
-      files = Array.from(e.target.files || e.dataTransfer.files)
-    } else {
-      files = Array.from(e.target.files || e.dataTransfer.files)
-      files = [files[0]]
-    }
-
-    console.log(files)
-
+    const files = Array.from(e.target.files || e.dataTransfer.files)
     let errors = []
     files.forEach((file, index, files_) => {
       if (!file.type.match(pattern || "")) {
@@ -94,13 +88,9 @@ export default function InputFile({ media, addMedia, deleteMedia, pattern, enter
       }
     })
 
-    addMedia(many, files)
+    addMedia(files)
     if (errors.length > 0) {
-      if (many) {
-        setMessage(message => `${errors.join(', ')} files do not correspond to the allowed format`)
-      } else {
-        setMessage(message => `${errors[0]} file does not correspond to the allowed format`)
-      }
+      setMessage(message => `${errors.join(', ')} files do not correspond to the allowed format`)
     }
   }
 
@@ -128,20 +118,28 @@ export default function InputFile({ media, addMedia, deleteMedia, pattern, enter
         </div>
       </label>
       {
-        !many && media.label > 0 ? null : <input multiple={many} type="file" id="input" accept="image/*" style={{ display: 'none' }} onChange={handleMedia} />
+        <input multiple type="file" id="input" accept="image/*" style={{ display: 'none' }} onChange={handleMedia} />
       }
-      
+
     </Paper>
     <Grid container spacing={2}>
       {
-        media.map((item, key) =>
-          <Grid key={key} item xs={12} sm={many ? 6 : 12} md={many ? 6 : 12} lg={many ? 6 : 12} xl={many ? 4 : 12}>
-
+        media.map((item, key, media_array) =>          
+          <Grid key={key} item xs={12} sm={6} md={6} lg={4} xl={3}>
             <Paper className={classes.file} onMouseEnter={enterMedia(key)} onMouseLeave={leaveMedia} onMouseOver={enterMedia(key)}>
-              <Typography noWrap align="left" className="mr-2"> {item.file.name} </Typography>
-              {
-                item.hover ? <Cancel className={classes.deleteFile} onClick={deleteMedia(key)} /> : <CircularProgress variant="determinate" value={100} size={24} thickness={5} />
-              }
+              <Tooltip title={item.name}>
+                <Typography noWrap align="left" className="mr-2"> {item.name} </Typography>
+              </Tooltip>
+              <div className={classes.progressIcon}>
+                {
+                  item.hover ?
+                    <Tooltip title={item.uploaded ? "Delete" : "Cancel"}>
+                      {
+                        item.uploaded ? item.deleting ? <CircularProgress variant="indeterminate" value={item.progress} size={24} /> : <Delete className={classes.deleteFile} onClick={deleteMedia(key)}/> : <Cancel className={classes.deleteFile} onClick={cancelUpload(key)} />
+                      }
+                    </Tooltip> : item.uploaded ? null : <CircularProgress variant="determinate" value={item.progress} size={24} />
+                }
+              </div>
             </Paper>
           </Grid>
         )

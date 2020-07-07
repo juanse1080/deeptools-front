@@ -4,13 +4,16 @@ import theme from "theme"
 
 const useStyles = makeStyles({
   root: {
-    width: "100%"
+    width: "100%",
+    
   },
   paper: {
     backgroundColor: '#29292e',
     color: theme.palette.white,
     padding: theme.spacing(2),
-    borderRadius: 12
+    borderRadius: 12,
+    overflowY: 'scroll',
+    height: '500px',
   },
   div: {
     fontSize: 12
@@ -59,7 +62,7 @@ export default function ({ progress }) {
     <div className={classes.root}>
       <Grid container justify="flex-end">
         <Grid item>
-          <FormHelperText style={{color: getState() }}>
+          <FormHelperText style={{ color: getState() }}>
             {
               progress.length > 0 ?
                 parseInt(progress[progress.length - 1].progress) : 0
@@ -70,16 +73,16 @@ export default function ({ progress }) {
       <BorderLinearProgress variant="buffer" style={{ backgroundColor: getState() }}
         value={
           progress.length > 0 ?
-            progress[progress.length - 1].progress : 0
+            parseInt(progress[progress.length - 1].progress) : 0
         }
         valueBuffer={
           progress.length > 0 ?
-            progress[progress.length - 1].progress : 0
+            parseInt(progress[progress.length - 1].progress) : 0
         }
       />
       <Grid container justify="space-between" className="mb-3">
         <Grid item>
-          <FormHelperText style={{color: getState() }}>
+          <FormHelperText style={{ color: getState() }}>
             {
               progress.length > 0 ?
                 progress[progress.length - 1].description : 'Starting process...'
@@ -87,7 +90,7 @@ export default function ({ progress }) {
           </FormHelperText>
         </Grid>
         <Grid item>
-          <FormHelperText style={{color: getState() }}>
+          <FormHelperText style={{ color: getState() }}>
             <Link component="button" onClick={toggleShow}>{show ? 'show less' : 'show more'}</Link>
           </FormHelperText>
         </Grid>
