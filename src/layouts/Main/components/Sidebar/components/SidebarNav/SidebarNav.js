@@ -27,16 +27,12 @@ const useStyles = makeStyles(theme => ({
     }
   },
   icon: {
-    color: 'rgba(255,255,255,.6)',
+    color: 'inherit',
     width: 24,
     height: 24,
     display: 'flex',
     alignItems: 'center',
     marginRight: theme.spacing(1),
-  },
-  active: {
-    color: theme.palette.white,
-    fontWeight: theme.typography.fontWeightMedium,
   }
 }));
 
@@ -66,7 +62,6 @@ const SidebarNav = props => {
           key={page.title}
         >
           <Button
-            activeClassName={classes.active}
             className={classes.button}
             component={CustomRouterLink}
             to={page.href}

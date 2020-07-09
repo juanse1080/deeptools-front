@@ -174,16 +174,6 @@ export default function Run({ match, ...others }) {
 
   const connect = (id) => {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
-    webSocket.onopen = () => {
-      console.log("show: CONNECT")
-    }
-    webSocket.onclose = () => {
-      console.log("show: CLOSE")
-      // connect(id)
-    }
-    webSocket.onmessage = e => {
-      console.log("show: MESSAGES")
-    }
 
     waitForSocketConnection(webSocket, () => {
       sendMessage(webSocket, { command: 'execute' })
@@ -206,7 +196,7 @@ export default function Run({ match, ...others }) {
       }, 100) // wait 100 milisecond for the connection...
   }
 
-  const check = (list) => list.reduce((reducer, item) => item.ws.readyState === 1 ? true : false && reducer, true)
+  const check = (list) => list.reduce((reducer, item) => reducer && item.ws.readyState === 1 ? true : false, true)
 
   const tryCheck = (ch, callback) => {
     setTimeout(
@@ -234,10 +224,10 @@ export default function Run({ match, ...others }) {
     dispatch(actions.startLoading())
     let channels = []
     media.forEach(item => {
-      if (!channels.includes({ 'id': item.experiment }))
-        channels.push({ 'id': item.experiment })
+      if (!channels.includes(item.experiment))
+        channels.push(item.experiment)
     })
-    const ch = channels.map(item => ({ ...item, 'ws': connect(item.id) }))
+    const ch = channels.map(item => ({ id: item, 'ws': connect(item) }))
     console.log(ch)
     setRefs(ch)
     tryCheck(ch, () => {
@@ -267,6 +257,12 @@ export default function Run({ match, ...others }) {
         console.error(err.response)
       }
     )
+
+    return () => {
+      if (refs.length > 0) {
+        refs.forEach(ref => ref.ws.close())
+      }
+    }
   }, [match.params.id])
 
   const content = () => {

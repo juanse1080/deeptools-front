@@ -8,7 +8,8 @@ import { host, authHeaderJSON, history, ws } from 'helpers'
 import { title as ucWords, format_date as getDate } from 'utils'
 import errores from 'utils/error'
 
-
+import { useDispatch } from "react-redux";
+import { actions } from '_redux';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,34 +32,33 @@ const useStyles = makeStyles((theme) => ({
 
 export default function () {
   const classes = useStyles()
+  const dispatch = useDispatch()
   const [loading, setLoading] = useState(true)
+
   const [experiments, setExperiments] = useState([])
 
   const connect = (id, index) => {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
-    webSocket.onopen = () => {
-      console.log("show: CONNECT")
-    }
-    webSocket.onclose = () => {
-      console.log("show: CLOSE")
-      // connect(id)
-    }
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
       addMessage(index, data)
     }
-
     return webSocket
   }
 
   const addMessage = (index, value) => {
     setExperiments(experiments => {
       let temp = [...experiments]
-      temp[index] = { ...temp[index], states: value }
+      temp[index] = { ...temp[index], states: [...temp[index].states, ...value] }
       return temp
     })
   }
 
+  const show = (id) => () => {
+    dispatch(actions.startLoading())
+    history.push(`/module/experiment/${id}`)
+    dispatch(actions.finishLoading())
+  }
 
   useEffect(() => {
     axios.get(`${host}/module/experiment`, authHeaderJSON()).then(
@@ -108,20 +108,30 @@ export default function () {
             experiments.map((item, index) =>
               <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
                 <Card className="m-2" >
-                  <LinearProgress variant="determinate" value={item.states.length > 0 ? item.states[item.states.length - 1].progress : 0} />
+                  <LinearProgress variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} />
                   <CardContent classes={{ root: classes.cardContent }}>
                     <Grid container direction="column" justify="space-between">
                       <Grid item>
-                        <Grid container direction="row" justify="space-between" alignItems="flex-start">
+                        <Grid container direction="row" justify="space-between">
                           <Grid item>
                             <Typography component="h5" variant="h5">
-                              <Link component="button">{ucWords(item.docker.name)}</Link>
+                              <Link component="button" onClick={show(item.id)}>{ucWords(item.docker.name)}</Link>
                             </Typography>
+                          </Grid>
+                          <Grid item>
                             <Typography variant="caption" color="textSecondary">
                               {getDate(item.timestamp)}
                             </Typography>
                           </Grid>
                         </Grid>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="caption" color="textSecondary">
+                          {
+                            item.states.length > 0 ?
+                              item.states[item.states.length - 1].description : 'Starting process...'
+                          }
+                        </Typography>
                       </Grid>
                     </Grid>
                   </CardContent>

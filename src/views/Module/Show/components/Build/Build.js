@@ -5,7 +5,6 @@ import theme from "theme"
 const useStyles = makeStyles({
   root: {
     width: "100%",
-    
   },
   paper: {
     backgroundColor: '#29292e',
@@ -14,6 +13,19 @@ const useStyles = makeStyles({
     borderRadius: 12,
     overflowY: 'scroll',
     height: '500px',
+    '&::-webkit-scrollbar': {
+      backgroundColor: '#29292e',
+      width: 12,
+      borderRadius: 12,
+    },
+    '&::-webkit-scrollbar-track': {
+      background: '#7e7e7e',
+      borderRadius: 12,
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: '#e1e1e1',
+      borderRadius: 12,
+    }
   },
   div: {
     fontSize: 12

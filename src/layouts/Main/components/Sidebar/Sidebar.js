@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
   },
   nav: {
     marginBottom: theme.spacing(2)
-  }
+  },
 }))
 
 const Sidebar = props => {
@@ -50,6 +50,11 @@ const Sidebar = props => {
       title: 'Create',
       href: '/module/create',
       icon: <AddCircleIcon />
+    },
+    {
+      title: 'Experiments',
+      href: '/module/experiment',
+      icon: <Icon fontSize="small" className="fas fa-vial" />
     },
     // {
     //   title: 'Dashboard',

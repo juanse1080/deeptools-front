@@ -37,12 +37,6 @@ export default function ({ match, ...others }) {
 
   const connect = (id) => {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
-    webSocket.onopen = () => {
-      console.log("show: CONNECT")
-    }
-    webSocket.onclose = () => {
-      console.log("show: CLOSE")
-    }
     webSocket.onmessage = e => {
       addDescription(JSON.parse(e.data))
     }
@@ -50,10 +44,11 @@ export default function ({ match, ...others }) {
   }
 
   const addDescription = (state) => {
-    console.log("Data:", state)
-    setProgress([...state])
-    if (state[state.length - 1].state === 'success')
-      setExecute(false)
+    setProgress(progress => ([...progress, ...state]))
+    if (state.length > 0){
+      if (state[state.length - 1].state === 'success')
+        setExecute(false)
+    }
   }
 
   useEffect(() => {
@@ -61,7 +56,7 @@ export default function ({ match, ...others }) {
       function (res) {
         console.log(res.data)
         setExperiment({ ...res.data, ws: connect(res.data.id) })
-        setExecute(res.data.state === 'executing')
+        setExecute(true)
         setLoading(false)
       }
     ).catch(
