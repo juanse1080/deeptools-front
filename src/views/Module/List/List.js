@@ -9,7 +9,7 @@ import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
 
-import { title as ucWords, format_date as getDate } from 'utils'
+import { title as ucWords, format_date as getDate, error } from 'utils'
 
 import { useDispatch } from "react-redux";
 import { actions } from '_redux';
@@ -185,7 +185,7 @@ export default function List(props) {
       setFilter(res.data)
       setLoading(false)
     }).catch(function (err) {
-      console.log(err)
+      error(err)
     })
   }, [])
 

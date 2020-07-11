@@ -14,6 +14,8 @@ import SettingsIcon from '@material-ui/icons/Settings'
 import LockOpenIcon from '@material-ui/icons/LockOpen'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 
+import { useSelector } from 'react-redux'
+
 import { SidebarNav } from './components'
 
 const useStyles = makeStyles(theme => ({
@@ -37,23 +39,25 @@ const useStyles = makeStyles(theme => ({
 
 const Sidebar = props => {
   const { open, variant, onClose, className, ...rest } = props
-
   const classes = useStyles()
 
   const pages = [
     {
       title: 'List',
       href: '/module/',
+      roles: ['admin', 'developer'],
       icon: <Icon fontSize="small" className="fas fa-list-ul" />
     },
     {
       title: 'Create',
       href: '/module/create',
+      roles: ['admin', 'developer'],
       icon: <AddCircleIcon />
     },
     {
       title: 'Experiments',
       href: '/module/experiment',
+      roles: ['admin', 'developer', 'user'],
       icon: <Icon fontSize="small" className="fas fa-vial" />
     },
     // {

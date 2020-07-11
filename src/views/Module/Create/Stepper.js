@@ -4,6 +4,8 @@ import Stepper from '@material-ui/core/Stepper'
 import Step from '@material-ui/core/Step'
 import StepButton from '@material-ui/core/StepButton'
 import Button from '@material-ui/core/Button'
+import Skeleton from '@material-ui/lab/Skeleton'
+import Grid from '@material-ui/core/Grid'
 
 import axios from 'axios'
 
@@ -12,7 +14,7 @@ import { actions } from '_redux';
 
 import { Protocol, Structure, ModelDetail } from './components'
 
-import { example as options } from 'utils'
+import { example as options, error } from 'utils'
 
 import validate from 'validate.js'
 
@@ -105,6 +107,7 @@ const rulesThree = {
 export default function Steppers() {
   const classes = useStyles()
   const dispatch = useDispatch()
+  const [loading, setLoading] = useState(true)
 
   const ref = useRef(null)
 
@@ -252,6 +255,15 @@ export default function Steppers() {
   }
 
   useEffect(() => {
+    axios.post(`${host}/module/check`, { permissions: ['module.add_docker'] }, authHeaderJSON()).then(
+      function (res) {
+        setLoading(!res.data)
+      }
+    ).catch(
+      function (err) {
+        error(err)
+      }
+    )
     return () => {
       if (red.current)
         ref.current.close()
@@ -274,7 +286,7 @@ export default function Steppers() {
         setForm(form => ({ ...form, errors: err.response.data }))
       }
     )
-    
+
   }
 
   const sendData = () => {
@@ -301,23 +313,45 @@ export default function Steppers() {
   ]
 
   return <div className={classes.root}>
-    <Stepper alternativeLabel nonLinear activeStep={step} classes={{ root: classes.stepper }}>
-      {
-        steps.map(({ label }, item) =>
-          <Step key={label}>
-            <StepButton onClick={handleStep(item)} >
-              {label}
-            </StepButton>
-          </Step>
-        )
-      }
-    </Stepper>
-    {steps[step].content}
-    <div className={classes.buttons}>
-      <Button disabled={step === 0} onClick={handleBack} className={classes.backButton}>Back</Button>
-      <Button variant="contained" color="primary" onClick={step >= steps.length - 1 ? sendData : handleNext}>
-        {step >= steps.length - 1 ? 'Send' : 'Next'}
-      </Button>
-    </div>
+    {
+      loading ? <>
+        <Grid container justify="space-around" spacing={3}>
+          <Grid item>
+            <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
+            <Skeleton animation="wave" variant="text" height={10} width={40} />
+          </Grid>
+          <Grid item>
+            <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
+            <Skeleton animation="wave" variant="text" height={10} width={40} />
+          </Grid>
+          <Grid item>
+            <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
+            <Skeleton animation="wave" variant="text" height={10} width={40} />
+          </Grid>
+          <Grid item xs={12}>
+            <Skeleton className={classes.fullHeight} animation="wave" variant="text" />
+          </Grid>
+        </Grid>
+      </> : <>
+          <Stepper alternativeLabel nonLinear activeStep={step} classes={{ root: classes.stepper }}>
+            {
+              steps.map(({ label }, item) =>
+                <Step key={label}>
+                  <StepButton onClick={handleStep(item)} >
+                    {label}
+                  </StepButton>
+                </Step>
+              )
+            }
+          </Stepper>
+          {steps[step].content}
+          <div className={classes.buttons}>
+            <Button disabled={step === 0} onClick={handleBack} className={classes.backButton}>Back</Button>
+            <Button variant="contained" color="primary" onClick={step >= steps.length - 1 ? sendData : handleNext}>
+              {step >= steps.length - 1 ? 'Send' : 'Next'}
+            </Button>
+          </div>
+        </>
+    }
   </div >
 }

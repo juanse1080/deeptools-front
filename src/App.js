@@ -37,7 +37,7 @@ const App = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(actions.authCheckState())
+    dispatch(actions.reloadState())
   }, [])
 
   return (

@@ -7,6 +7,8 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import { List, ListItem, Button, colors } from '@material-ui/core';
 
+import { useSelector } from 'react-redux'
+
 const useStyles = makeStyles(theme => ({
   root: {},
   item: {
@@ -49,31 +51,31 @@ const SidebarNav = props => {
   const { pages, className, ...rest } = props;
 
   const classes = useStyles();
+  const state = useSelector(state => state)
 
-  return (
-    <List
-      {...rest}
-      className={clsx(classes.root, className)}
-    >
-      {pages.map(page => (
-        <ListItem
-          className={classes.item}
-          disableGutters
-          key={page.title}
-        >
-          <Button
-            className={classes.button}
-            component={CustomRouterLink}
-            to={page.href}
+  return <List {...rest} className={clsx(classes.root, className)}>
+    {
+      pages.map(page =>
+        state.user ?
+          page.roles.includes(state.user.role) ? <ListItem
+            className={classes.item}
+            disableGutters
+            key={page.title}
           >
-            <div className={classes.icon}>{page.icon}</div>
-            {page.title}
-          </Button>
-        </ListItem>
-      ))}
-    </List>
-  );
-};
+            <Button
+              className={classes.button}
+              component={CustomRouterLink}
+              to={page.href}
+            >
+              <div className={classes.icon}>{page.icon}</div>
+              {page.title}
+            </Button>
+          </ListItem> : null
+          : null
+      )
+    }
+  </List>
+}
 
 SidebarNav.propTypes = {
   className: PropTypes.string,

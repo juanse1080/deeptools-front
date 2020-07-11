@@ -1,5 +1,6 @@
 import * as actions_types from '../_actions_types/auth.actions'
 import { updateObject } from '../utility'
+import { reloadState } from '_redux/_actions/auth'
 
 const initialState = {
     token: null,
