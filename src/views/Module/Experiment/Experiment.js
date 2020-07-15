@@ -10,6 +10,7 @@ import { host, authHeaderJSON, history, ws } from 'helpers'
 import errores from 'utils/error'
 
 import { Build } from '../Show/components'
+import { ShowExperiment } from './components'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,18 +46,37 @@ export default function ({ match, ...others }) {
 
   const addDescription = (state) => {
     setProgress(progress => ([...progress, ...state]))
-    if (state.length > 0){
+    if (state.length > 0) {
       if (state[state.length - 1].state === 'success')
-        setExecute(false)
+        getData()
     }
+  }
+
+  const getData = () => {
+    axios.get(`${host}/module/experiment/${match.params.id}`, authHeaderJSON()).then(
+      function (res) {
+        console.log(res.data)
+        setExperiment({ ...res.data })
+        setTimeout(() => setExecute(res.data.state === 'executing' ? true : false), 1000)
+      }
+    ).catch(
+      function (err) {
+        errores(err)
+        console.error(err.response)
+      }
+    )
   }
 
   useEffect(() => {
     axios.get(`${host}/module/experiment/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
-        setExperiment({ ...res.data, ws: connect(res.data.id) })
-        setExecute(true)
+        if (res.data.state === 'executing') {
+          setExperiment({ ...res.data, ws: connect(res.data.id) })
+        } else {
+          setExperiment({ ...res.data })
+        }
+        setExecute(res.data.state === 'executing' ? true : false)
         setLoading(false)
       }
     ).catch(
@@ -76,7 +96,7 @@ export default function ({ match, ...others }) {
           </Backdrop>
         </> : execute ? <>
           <Build progress={progress} />
-        </> : null
+        </> : <ShowExperiment value={experiment.elements} />
       }
     </div>
   </>

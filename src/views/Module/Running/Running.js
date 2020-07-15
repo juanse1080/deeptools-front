@@ -28,6 +28,15 @@ const useStyles = makeStyles((theme) => ({
       paddingBottom: '14px'
     }
   },
+  error: {
+    backgroundColor: '#f44336'
+  },
+  success: {
+    backgroundColor: '#689f38'
+  },
+  inherit: {
+    backgroundColor: '#3f51b5'
+  }
 }))
 
 export default function () {
@@ -36,6 +45,19 @@ export default function () {
   const [loading, setLoading] = useState(true)
 
   const [experiments, setExperiments] = useState([])
+
+  const getClass = (progress) => {
+    if (progress.length > 0) {
+      switch (progress[progress.length - 1].state) {
+        case 'success':
+          return classes.success
+        case 'error':
+          return classes.error
+        default:
+          return classes.inherit
+      }
+    }
+  }
 
   const connect = (id, index) => {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
@@ -108,7 +130,7 @@ export default function () {
             experiments.map((item, index) =>
               <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
                 <Card className="m-2" >
-                  <LinearProgress variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} />
+                  <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states) }} />
                   <CardContent classes={{ root: classes.cardContent }}>
                     <Grid container direction="column" justify="space-between">
                       <Grid item>

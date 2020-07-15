@@ -9,3 +9,4 @@ export { default as SignUp } from './SignUp';
 export { default as Typography } from './Typography';
 export { default as UserList } from './UserList';
 export { default as Module } from './Module';
+export { default as Subscriptions } from './Subscriptions';

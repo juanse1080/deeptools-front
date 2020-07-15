@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { makeStyles, withStyles, LinearProgress, Grid, Link, FormHelperText, Paper } from "@material-ui/core"
 import theme from "theme"
+import { defaults } from "react-chartjs-2"
 
 const useStyles = makeStyles({
   root: {
@@ -27,27 +28,30 @@ const useStyles = makeStyles({
       borderRadius: 12,
     }
   },
-  div: {
-    fontSize: 12
-  }
-})
-
-const BorderLinearProgress = withStyles(theme => ({
-  root: {
+  linearRoot: {
     height: 15,
     borderRadius: 10
-  },
-  colorPrimary: {
-    backgroundColor:
-      theme.palette.grey[theme.palette.type === "light" ? 200 : 700]
   },
   dashed: {
     marginTop: 6,
   },
   bar: {
     borderRadius: 8,
+  },
+  div: {
+    fontSize: 12
+  },
+
+  error: {
+    backgroundColor: '#f44336'
+  },
+  success: {
+    backgroundColor: '#689f38'
+  },
+  inherit: {
+    backgroundColor: '#3f51b5'
   }
-}))(LinearProgress)
+})
 
 export default function ({ progress }) {
   const classes = useStyles()
@@ -70,6 +74,19 @@ export default function ({ progress }) {
     }
   }
 
+  const getClass = () => {
+    if (progress.length > 0) {
+      switch (progress[progress.length - 1].state) {
+        case 'success':
+          return classes.success
+        case 'error':
+          return classes.error
+        default:
+          return classes.inherit
+      }
+    }
+  }
+
   return (
     <div className={classes.root}>
       <Grid container justify="flex-end">
@@ -82,12 +99,8 @@ export default function ({ progress }) {
           </FormHelperText>
         </Grid>
       </Grid>
-      <BorderLinearProgress variant="buffer" style={{ backgroundColor: getState() }}
+      <LinearProgress variant="determinate" classes={{ dashed: classes.dashed, bar: classes.bar, root: classes.linearRoot, barColorPrimary: getClass() }}
         value={
-          progress.length > 0 ?
-            parseInt(progress[progress.length - 1].progress) : 0
-        }
-        valueBuffer={
           progress.length > 0 ?
             parseInt(progress[progress.length - 1].progress) : 0
         }

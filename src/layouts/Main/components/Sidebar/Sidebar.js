@@ -43,64 +43,52 @@ const Sidebar = props => {
 
   const pages = [
     {
-      title: 'List',
-      href: '/module/',
+      id: '1',
+      title: 'Module',
       roles: ['admin', 'developer'],
-      icon: <Icon fontSize="small" className="fas fa-list-ul" />
+      icon: <Icon fontSize="small" className="fab fa-docker" />,
+      children: [
+        {
+          id: '2',
+          title: 'List',
+          href: '/module/',
+          roles: ['admin', 'developer'],
+          icon: <Icon fontSize="small" className="fas fa-clipboard-list" />
+        },
+        {
+          id: '3',
+          title: 'Create',
+          href: '/module/create',
+          roles: ['admin', 'developer'],
+          icon: <Icon fontSize="small" className="fas fa-plus-circle" />
+        },
+        {
+          id: '4',
+          title: 'Trash',
+          href: '/module/trash',
+          roles: ['admin', 'developer'],
+          icon: <Icon fontSize="small" className="fas fa-trash" />
+        },
+      ]
     },
     {
-      title: 'Create',
-      href: '/module/create',
-      roles: ['admin', 'developer'],
-      icon: <AddCircleIcon />
+      id: '5',
+      title: 'Subscriptions',
+      href: '/subscriptions',
+      roles: ['user'],
+      icon: <Icon fontSize="small" className="fas fa-anchor" />,
     },
     {
+      id: '6',
       title: 'Experiments',
       href: '/module/experiment',
       roles: ['admin', 'developer', 'user'],
       icon: <Icon fontSize="small" className="fas fa-vial" />
     },
-    // {
-    //   title: 'Dashboard',
-    //   href: '/dashboard',
-    //   icon: <DashboardIcon />
-    // },
-    // {
-    //   title: 'Users',
-    //   href: '/users',
-    //   icon: <PeopleIcon />
-    // },
-    // {
-    //   title: 'Products',
-    //   href: '/products',
-    //   icon: <ShoppingBasketIcon />
-    // },
-    // {
-    //   title: 'Authentication',
-    //   href: '/sign-in',
-    //   icon: <LockOpenIcon />
-    // },
-    // {
-    //   title: 'Typography',
-    //   href: '/typography',
-    //   icon: <TextFieldsIcon />
-    // },
-    // {
-    //   title: 'Icons',
-    //   href: '/icons',
-    //   icon: <ImageIcon />
-    // },
-    // {
-    //   title: 'Account',
-    //   href: '/account',
-    //   icon: <AccountBoxIcon />
-    // },
-    // {
-    //   title: 'Settings',
-    //   href: '/settings',
-    //   icon: <SettingsIcon />
-    // }
   ]
+
+
+
 
   return (
     <Drawer
