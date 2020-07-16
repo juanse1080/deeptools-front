@@ -236,7 +236,7 @@ export default function Run({ match, ...others }) {
       if (ch.length === 1) {
         history.push(`/module/experiment/${ch[0].id}`)
       } else {
-        history.push(`/module/experiment`)
+        history.push(`/subscriptions/${match.params.id}`)
       }
     })
   }

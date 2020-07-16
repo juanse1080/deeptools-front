@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ({ match, ...others }) {
   const classes = useStyles()
   const [loading, setLoading] = useState(true)
+  const [module, setModule] = useState({})
 
   const [execute, setExecute] = useState(false)
   const [experiment, setExperiment] = useState({})
@@ -77,6 +78,7 @@ export default function ({ match, ...others }) {
           setExperiment({ ...res.data })
         }
         setExecute(res.data.state === 'executing' ? true : false)
+        setModule({ ...res.data.docker, experiments: res.data.experiments, index: res.data.experiments.indexOf(match.params.id) + 1 })
         setLoading(false)
       }
     ).catch(
@@ -96,7 +98,7 @@ export default function ({ match, ...others }) {
           </Backdrop>
         </> : execute ? <>
           <Build progress={progress} />
-        </> : <ShowExperiment value={experiment.elements} />
+        </> : <ShowExperiment value={experiment.elements} docker={module} id={match.params.id} index={3} />
       }
     </div>
   </>

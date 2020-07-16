@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel } from '@material-ui/core'
+import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility, ExpandMore } from '@material-ui/icons'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
@@ -70,14 +70,36 @@ const useStyles = makeStyles((theme) => ({
     margin: 0,
     padding: '24px 24px',
   },
-  heading: {
-    fontSize: theme.typography.pxToRem(15),
-    flexBasis: '33.33%',
-    flexShrink: 0,
+  expansionPanelContent: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    alignItems: 'center',
   },
-  secondaryHeading: {
+  expansionPanelRoot: {
+    cursor: 'default !important',
+    '&:hover': {
+      cursor: 'default !important',
+    }
+  },
+  heading: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
     fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
+    flexWrap: 'nowrap'
+  },
+  iconsHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'end',
+    alignItems: 'center',
+    marginLeft: theme.spacing(1)
   },
   fullWidth: {
     width: '100%'
@@ -103,6 +125,9 @@ export default function List(props) {
     setExpanded(isExpanded ? panel : false)
   }
 
+  const changeExpanded = panel => () => {
+    setExpanded(expanded => expanded !== panel ? panel : false)
+  }
 
   const handleDialog = (value = !dialog) => () => {
     setDialog(value)
@@ -152,6 +177,18 @@ export default function List(props) {
   const run = (id) => () => {
     dispatch(actions.startLoading())
     history.push(`/module/run/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
+  const showTest = id => () => {
+    dispatch(actions.startLoading())
+    history.push(`/subscriptions/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
+  const subscriptions = () => {
+    dispatch(actions.startLoading())
+    history.push(`/subscriptions`)
     dispatch(actions.finishLoading())
   }
 
@@ -266,6 +303,13 @@ export default function List(props) {
             </Grid>
           </>
         </> : <>
+            <Grid container justify="center" direction="row">
+              <Grid item xs={12}>
+                <Breadcrumbs aria-label="breadcrumb">
+                  <Link color="inherit" component="button" onClick={subscriptions}>Subscriptions</Link>
+                </Breadcrumbs>
+              </Grid>
+            </Grid>
             <Grid container className="mt-3" justify="center" direction="row">
               <Grid item xs={12} sm={10} md={8} xl={6}>
                 <Paper className={classes.alerts}>
@@ -306,14 +350,51 @@ export default function List(props) {
                     <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
                       {
                         filter.map((item, index) =>
-                          <ExpansionPanel key={item.id} expanded={expanded === index} onChange={handleExpanded(index)} className={classes.fullWidth}>
+                          <ExpansionPanel key={item.id} expanded={expanded === index} className={classes.fullWidth}>
                             <ExpansionPanelSummary
-                              expandIcon={<ExpandMore />}
+                              classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
                               aria-controls="panel1bh-content"
                               id="panel1bh-header"
                             >
-                              <Typography className={classes.heading}>{ucWords(item.name)}</Typography>
-                              <Typography className={classes.secondaryHeading}>{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Typography>
+                              <div className={classes.title}>
+                                <Typography className={classes.heading}>
+                                  <Link onClick={show(item.image_name)} component="button">{ucWords(item.name)}</Link>
+                                </Typography>
+
+                                <Typography variant="caption" >
+                                  <Link onClick={show(item.image_name)} component="button">{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
+                                </Typography>
+                              </div>
+
+                              <div>
+                                <Tooltip title="Details">
+                                  <IconButton onClick={changeExpanded(index)} size="small">
+                                    <ExpandMore />
+                                  </IconButton>
+                                </Tooltip>
+                                {
+                                  item.state === 'active' ? <Tooltip title="Test algorith">
+                                    <IconButton size="small" onClick={run(item.image_name)}>
+                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                    </IconButton>
+                                  </Tooltip> : <Tooltip title="This algorith is not active">
+                                      <IconButton size="small" disableFocusRipple disableRipple>
+                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial")} />
+                                      </IconButton>
+                                    </Tooltip>
+                                }
+                                <Tooltip title="Show test">
+                                  <IconButton size="small" onClick={showTest(item.image_name)}>
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Unsubscribe">
+                                  <IconButton size="small">
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
+                                  </IconButton>
+                                </Tooltip>
+                              </div>
+
                             </ExpansionPanelSummary>
                             <ExpansionPanelDetails>
                               <Typography>

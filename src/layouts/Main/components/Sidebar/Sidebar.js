@@ -51,7 +51,7 @@ const Sidebar = props => {
         {
           id: '2',
           title: 'List',
-          href: '/module/',
+          href: '/module',
           roles: ['admin', 'developer'],
           icon: <Icon fontSize="small" className="fas fa-clipboard-list" />
         },
