@@ -305,7 +305,7 @@ export default function List(props) {
                                       </Grid>
                                       <Grid item>
                                         <span className={classes.owner}>
-                                          {getDate(item.timestamp)}
+                                          {getDate(item.created_at)}
                                         </span>
                                       </Grid>
                                     </Grid>
@@ -340,6 +340,17 @@ export default function List(props) {
                                               <Tooltip title="Start">
                                                 <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
                                                   <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </> : null
+                                          }
+                                        </>
+                                        <>
+                                          {
+                                            item.state === 'builded' ? <>
+                                              <Tooltip title="Active">
+                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-rocket text-success")} />
                                                 </IconButton>
                                               </Tooltip>
                                             </> : null

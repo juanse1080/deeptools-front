@@ -1,12 +1,14 @@
 import React, { useEffect, createRef, useState } from 'react'
-import { Grid, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, InputBase, IconButton } from '@material-ui/core'
+import { Grid, Icon, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, InputBase, IconButton, Tooltip, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText, Button, Fab } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
-import { Search } from '@material-ui/icons'
+import { Search, Delete, Visibility, Replay, Add } from '@material-ui/icons'
+
+import clsx from 'clsx'
 
 import axios from 'axios'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
-import { title as ucWords, format_date as getDate } from 'utils'
+import { title as ucWords, format_date as getDate, real_date } from 'utils'
 import errores from 'utils/error'
 
 import { useDispatch } from "react-redux";
@@ -21,14 +23,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.white
     }
   },
-  owner: {
-    fontSize: 11,
-  },
-  cardContent: {
-    '&:last-child': {
-      paddingBottom: '14px'
-    }
-  },
   error: {
     backgroundColor: '#f44336'
   },
@@ -39,8 +33,31 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#3f51b5'
   },
   card: {
-    cursor: 'pointer',
     margin: theme.spacing(1)
+  },
+  file: {
+    padding: theme.spacing(1.3),
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    '&:hover div.actions': {
+      display: 'flex !important'
+    },
+    '&:focus div.actions': {
+      display: 'flex !important'
+    },
+    '&:active div.actions': {
+      display: 'flex !important'
+    },
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  linearProgressRoot: {
+    height: 2
   }
 }))
 
@@ -48,6 +65,7 @@ export default function ({ match }) {
   const classes = useStyles()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(true)
+  const [dialog, setDialog] = useState(false)
   const [module, setModule] = useState({})
   const [experiments, setExperiments] = useState([])
 
@@ -105,11 +123,50 @@ export default function ({ match }) {
     })
   }
 
+  const deleteItem = index => {
+    setExperiments(experiments => {
+      let temp = [...experiments]
+      temp.splice(index, 1)
+      return temp
+    })
+  }
+
+  const deleting = () => {
+    axios.delete(`${host}/accounts/experiment/delete/${experiments[dialog].id}`, authHeaderJSON()).then(
+      function (res) {
+        setDialog(false)
+        deleteItem(dialog)
+      }
+    ).catch(
+      function (err) {
+        console.log(err)
+        setDialog(false)
+      }
+    )
+  }
+
+  const triedDelete = index => () => {
+    setDialog(index)
+  }
+
+  const cancelDelete = () => {
+    setDialog(false)
+  }
+
+  const newTest = () => {
+    dispatch(actions.startLoading())
+    history.push(`/module/run/${match.params.id}`)
+    dispatch(actions.finishLoading())
+  }
+
   useEffect(() => {
     axios.get(`${host}/accounts/subscriptions/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
-        setExperiments(res.data.test.map((item, index) => item.state === 'executing' ? { ...item, ws: connect(item.id, index), states: [] } : { ...item, states: item.records }
+        setExperiments(res.data.test.map((item, index) =>
+          item.state === 'executing' ?
+            { ...item, ws: connect(item.id, index), states: [] } :
+            { ...item, states: item.records }
         ))
         setModule(res.data.docker)
         setLoading(false)
@@ -160,39 +217,78 @@ export default function ({ match }) {
               </Breadcrumbs>
             </Grid>
           </Grid>
-          <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
+          <Grid container className="mt-3" spacing={2}>
             {
               experiments.map((item, index) =>
-                <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
-                  <Card className={classes.card} onClick={show(item.id)}>
-                    <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states) }} />
-                    <CardContent classes={{ root: classes.cardContent }}>
-                      <Grid container direction="column" justify="space-between">
-                        <Grid item>
-                          <Grid container direction="row" justify="space-between">
-                            <Grid item>
-                              <Typography variant="caption" color="textSecondary">
-                                {
-                                  item.states.length > 0 ?
-                                    item.states[item.states.length - 1].description : 'Starting process...'
-                                }
-                              </Typography>
-                            </Grid>
-                            <Grid item>
-                              <Typography variant="caption" color="textSecondary">
-                                {getDate(item.timestamp)}
-                              </Typography>
-                            </Grid>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
+                <Grid item xl={4} lg={6} md={6} sm={12} xs={12} key={item.id}>
+                  <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states), root: classes.linearProgressRoot }} />
+                  <Paper className={classes.file}>
+                    <div className={classes.content}>
+                      <div className={clsx(classes.content, "actions")} style={{ display: 'none' }}>
+                        <Tooltip className="mr-1" title="Show test">
+                          <IconButton size="small" onClick={show(item.id)}>
+                            <Visibility fontSize="small" className={clsx(classes.iconButton, "text-info")} />
+                          </IconButton>
+                        </Tooltip>
+                        {
+                          item.state === 'executed' ? <>
+                            <Tooltip className="mr-1" title="Try again with same data">
+                              <IconButton size="small">
+                                <Replay fontSize="small" className={clsx(classes.iconButton)} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip className="mr-1" title="Delete test">
+                              <IconButton size="small" onClick={triedDelete(index)}>
+                                <Delete fontSize="small" className={clsx(classes.iconButton, "text-danger")} />
+                              </IconButton>
+                            </Tooltip>
+                          </> : null
+                        }
+                      </div>
+                      <Tooltip className="ml-1" title={item.states.length > 0 ? item.states[item.states.length - 1].description : 'Starting process...'} style={{ marginTop: 6, marginBottom: 7 }}>
+                        <Typography noWrap align="left" variant="body2" className="mr-2">
+                          {
+                            item.states.length > 0 ?
+                              item.states[item.states.length - 1].description : 'Starting process...'
+                          }
+                        </Typography>
+                      </Tooltip>
+                    </div>
+
+                    <Tooltip title={real_date(item.created_at)} className={classes.date}>
+                      <Typography variant="caption" noWrap color="textSecondary">
+                        {getDate(item.created_at)}
+                      </Typography>
+                    </Tooltip>
+                  </Paper>
                 </Grid>
               )
             }
           </Grid>
+          <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end">
+            <Grid item>
+              <Tooltip title="Test algorith">
+                <Fab size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
+                  <Icon fontSize="small" className="fas fa-vial text-white" />
+                </Fab>
+              </Tooltip>
+            </Grid>
+          </Grid>
+
+
+          <Dialog open={dialog !== false} keepMounted onClose={cancelDelete} maxWidth="xs" fullWidth>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-slide-description">
+                ¿Do want delete this test?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={cancelDelete} color="primary">Cancel</Button>
+              <Button onClick={deleting} color="primary">Confirm</Button>
+            </DialogActions>
+          </Dialog>
         </>
     }
+
   </div>
 }

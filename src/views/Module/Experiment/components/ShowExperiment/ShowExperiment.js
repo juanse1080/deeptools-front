@@ -18,31 +18,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function ({ value, docker, id, ...others }) {
+export default function ({ value, to, docker, id, ...others }) {
   const classes = useStyles()
-  const dispatch = useDispatch()
-
-  const to = (href) => () => {
-    dispatch(actions.startLoading())
-    history.push(href)
-    dispatch(actions.finishLoading())
-  }
 
   const handleChange = (e, value) => {
     to(`/module/experiment/${docker.experiments[value - 1]}`)()
   }
 
-  return <div {...others}>
-    <Grid container justify="center" direction="row">
-      <Grid item xs={12}>
-        <Breadcrumbs aria-label="breadcrumb">
-          <Link color="inherit" component="button" onClick={to(`/subscriptions`)}>Subscriptions</Link>
-          <Link color="inherit" component="button" onClick={to(`/module/${docker.image_name}`)}>{ucWords(docker.name)}</Link>
-          <Link color="inherit" component="button" onClick={to(`/subscriptions/${docker.image_name}`)}>Test</Link>
-          <Link color="inherit" component="button" onClick={to(`/module/experiment/${id}`)}>{docker.index}</Link>
-        </Breadcrumbs>
-      </Grid>
-    </Grid>
+  return <div {...others}>    
     <Grid container spacing={2} className="mt-3">
       <Grid item lg={3} md={12} sm={12} xs={12}>
         <Grid container spacing={2}>
@@ -64,12 +47,6 @@ export default function ({ value, docker, id, ...others }) {
         </span>
       </Grid>
     </Grid>
-    <Grid container className="mt-3" direction="row" justify="flex-end" >
-      <Grid item xs={12}>
-        <Pagination count={docker.experiments.length} page={docker.index} color="primary" onChange={handleChange} />
-      </Grid>
-    </Grid>
-
   </div>
 
 }

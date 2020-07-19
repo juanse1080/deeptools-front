@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-import { makeStyles, Paper, Icon, Snackbar, Grid, Typography, CircularProgress, Tooltip } from '@material-ui/core'
+import { makeStyles, Paper, Icon, Snackbar, Grid, Typography, CircularProgress, Tooltip, Box } from '@material-ui/core'
 import { Alert } from '@material-ui/lab'
 import { Cancel, Delete } from '@material-ui/icons'
 
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function InputFile({ media, addMedia, deleteMedia, cancelUpload, pattern, enterMedia, leaveMedia, ...others }) {
+export default function InputFile({ media, init, addMedia, deleteMedia, cancelUpload, pattern, enterMedia, leaveMedia, ...others }) {
   const classes = useStyles()
 
   const [error, setError] = useState(false)
@@ -101,6 +101,11 @@ export default function InputFile({ media, addMedia, deleteMedia, cancelUpload, 
   }
 
   return <>
+    {
+      init ? <Box className="p-2" variant="h3">
+        <Typography>To activate your algorithm you must provide a base dataset for simple tests.</Typography>
+      </Box> : null
+    }
     <Paper className={classes.paper}>
       <label htmlFor="input" className={classes.label} onDragEnter={onDragEnter} onDragLeave={onDragLeave} onDragOver={onDragOver} onDrop={onDrop}>
         <div className={classes.paperContent} style={{ borderColor: over ? '#007bff' : '#6a6a6a', color: over ? '#007bff' : '#6a6a6a' }}>
@@ -124,7 +129,7 @@ export default function InputFile({ media, addMedia, deleteMedia, cancelUpload, 
     </Paper>
     <Grid container spacing={2}>
       {
-        media.map((item, key, media_array) =>          
+        media.map((item, key, media_array) =>
           <Grid key={key} item xs={12} sm={6} md={6} lg={4} xl={3}>
             <Paper className={classes.file} onMouseEnter={enterMedia(key)} onMouseLeave={leaveMedia} onMouseOver={enterMedia(key)}>
               <Tooltip title={item.name}>
@@ -135,7 +140,7 @@ export default function InputFile({ media, addMedia, deleteMedia, cancelUpload, 
                   item.hover ?
                     <Tooltip title={item.uploaded ? "Delete" : "Cancel"}>
                       {
-                        item.uploaded ? item.deleting ? <CircularProgress variant="indeterminate" value={item.progress} size={24} /> : <Delete className={classes.deleteFile} onClick={deleteMedia(key)}/> : <Cancel className={classes.deleteFile} onClick={cancelUpload(key)} />
+                        item.uploaded ? item.deleting ? <CircularProgress variant="indeterminate" value={item.progress} size={24} /> : <Delete className={classes.deleteFile} onClick={deleteMedia(key)} /> : <Cancel className={classes.deleteFile} onClick={cancelUpload(key)} />
                       }
                     </Tooltip> : item.uploaded ? null : <CircularProgress variant="determinate" value={item.progress} size={24} />
                 }

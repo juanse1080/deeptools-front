@@ -142,7 +142,7 @@ export default function () {
                           </Grid>
                           <Grid item>
                             <Typography variant="caption" color="textSecondary">
-                              {getDate(item.timestamp)}
+                              {getDate(item.created_at)}
                             </Typography>
                           </Grid>
                         </Grid>

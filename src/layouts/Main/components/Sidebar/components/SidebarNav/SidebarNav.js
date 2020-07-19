@@ -50,11 +50,11 @@ const useStyles = makeStyles(theme => ({
     fontWeight: 'inherit',
     flexGrow: 1,
   },
-  // content: {
-  //   display: 'inherit',
-  //   cursor: 'pointer',
-  //   width: '100%'
-  // },
+  content: {
+    display: 'inherit',
+    cursor: 'pointer',
+    width: '100%'
+  },
   label: {
     color: 'rgba(255,255,255,.6)',
     '&:hover': {

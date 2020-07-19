@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs } from '@material-ui/core'
+import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs, LinearProgress } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility, ExpandMore } from '@material-ui/icons'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
@@ -259,45 +259,35 @@ export default function List(props) {
             <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
               {
                 [1, 2, 3, 4, 5, 6].map(item =>
-                  <Grid item lg={6} md={6} sm={6} xs={12} key={item}>
-                    <Card className="m-2">
-                      <CardContent>
-                        <Grid container direction="column" spacing={3}>
-                          <Grid item>
-                            <Grid container direction="row" alignItems="flex-start">
-                              <Grid item>
-                                <Skeleton animation="wave" variant="text" height={10} width={200} />
-                                <Skeleton animation="wave" variant="text" height={10} width={150} />
-                              </Grid>
-                              <Grid item>
-                                <Skeleton animation="wave" variant="text" height={10} width={40} />
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                          <Grid item>
-                            <Grid container direction="row" justify="space-between" alignItems="flex-start">
-                              <Grid item>
-                                <Skeleton animation="wave" variant="text" height={10} width={80} />
-                              </Grid>
-                              <Grid item>
-                                <Grid container spacing={1}>
-                                  <Grid item>
-                                    <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                                  </Grid>
-                                  <Grid item>
-                                    <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                                  </Grid>
-                                  <Grid item>
-                                    <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                                  </Grid>
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                  <ExpansionPanel key={item} expanded={false} className={classes.fullWidth}>
+                    <ExpansionPanelSummary
+                      classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
+                      aria-controls="panel1bh-content"
+                    >
+                      <div className={classes.title}>
+                        <Typography className={classes.heading}>
+                          <Skeleton animation="wave" variant="text" height={20} width={200} />
+                        </Typography>
+
+                        <Typography variant="caption" >
+                          <Skeleton animation="wave" variant="text" height={10} width={80} />
+                        </Typography>
+                      </div>
+
+                      <div className={classes.iconsHeading}>
+                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                      </div>
+
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                      <Typography>
+                        {item.description || "Description not supplied"}
+                      </Typography>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
                 )
               }
             </Grid>
@@ -351,11 +341,11 @@ export default function List(props) {
                       {
                         filter.map((item, index) =>
                           <ExpansionPanel key={item.id} expanded={expanded === index} className={classes.fullWidth}>
+                            
                             <ExpansionPanelSummary
                               classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
-                              aria-controls="panel1bh-content"
-                              id="panel1bh-header"
                             >
+                              
                               <div className={classes.title}>
                                 <Typography className={classes.heading}>
                                   <Link onClick={show(item.image_name)} component="button">{ucWords(item.name)}</Link>

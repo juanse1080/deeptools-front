@@ -4,7 +4,7 @@ import axios from 'axios'
 import showdown from 'showdown'
 import ReactHtmlParser, { convertNodeToElement } from 'react-html-parser';
 
-import { makeStyles, Backdrop, CircularProgress, Button } from '@material-ui/core'
+import { makeStyles, Backdrop, CircularProgress, Button, Link, Typography } from '@material-ui/core'
 
 import { useDispatch } from "react-redux";
 import { actions } from '_redux';
@@ -13,6 +13,7 @@ import { host, authHeaderJSON, history, ws, authHeaderForm } from 'helpers'
 import { error } from 'utils'
 
 import { InputFile } from './components'
+import { Example } from './components'
 
 import "./bootstrap4.4.min.css"
 
@@ -37,6 +38,12 @@ const useStyles = makeStyles((theme) => ({
   buttons: {
     marginTop: theme.spacing(2),
   },
+  actions: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }
 }))
 
 const transform = (node, index) => {
@@ -69,9 +76,10 @@ export default function Run({ match, ...others }) {
   const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(1)
   const [module, setModule] = useState(null)
   const [media, setMedia] = useState([])
+  const [example, setExample] = useState([])
   const [refs, setRefs] = useState([])
   const [cancel, setCancel] = useState([])
 
@@ -145,6 +153,20 @@ export default function Run({ match, ...others }) {
     ).catch(
       function (err) {
         handleMedia(index, 'deleting', false)
+      }
+    )
+  }
+
+  const uploadExamples = () => {
+    axios.post(`${host}/module/upload/${match.params.id}/examples`, { examples: example.map(item => item.id) }, authHeaderJSON()).then(
+      function (res) {
+        console.log(res.data)
+        setStep(1)
+      }
+    ).catch(
+      function (err) {
+        error(err)
+        console.error(err.response)
       }
     )
   }
@@ -244,8 +266,7 @@ export default function Run({ match, ...others }) {
   useEffect(() => {
     axios.post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data.elements)
-        if (res.data.state !== 'active') history.goBack()
+        if (!['active', 'builded'].includes(res.data.state)) history.goBack()
         const obj = new showdown.Converter()
         setModule({ ...res.data, html: obj.makeHtml(res.data.protocol) })
         setMedia(res.data.elements.map(item => ({ ...item, hover: false, progress: 100, uploaded: true })))
@@ -263,15 +284,17 @@ export default function Run({ match, ...others }) {
         refs.forEach(ref => ref.ws.close())
       }
     }
-  }, [match.params.id])
+  }, [match.params.id, step])
 
   const content = () => {
     if (step === 0) {
       return <>
         {ReactHtmlParser(module.html, options)}
       </>
+    } else if (step === 1) {
+      return <InputFile init={module.state === 'builded' ? true : false} enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} />
     } else {
-      return <InputFile enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} />
+      return <Example change={setExample} examples={example} id={match.params.id} />
     }
   }
 
@@ -288,9 +311,17 @@ export default function Run({ match, ...others }) {
           </Backdrop>
         </> : <>
             {content()}
-            <div className={classes.buttons}>
-              <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-              <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : execute}>{step === 0 ? 'Next' : 'Execute'}</Button>
+            <div className={classes.actions}>
+              <div className={classes.buttons}>
+                <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
+                <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
+              </div>
+              {
+                step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
+                  <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
+                </Link> : null
+              }
+
             </div>
           </>
       }
