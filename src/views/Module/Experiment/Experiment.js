@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 
 import { Pagination } from '@material-ui/lab'
-import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button } from '@material-ui/core'
+import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button, Icon } from '@material-ui/core'
 import { Replay, Delete } from '@material-ui/icons'
 
 import axios from 'axios'
@@ -65,6 +65,12 @@ export default function ({ match, ...others }) {
     setDialog(false)
   }
 
+  const newTest = () => {
+    dispatch(actions.startLoading())
+    history.push(`/module/run/${module.image_name}`)
+    dispatch(actions.finishLoading())
+  }
+
   const connect = (id) => {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
     webSocket.onmessage = e => {
@@ -93,6 +99,20 @@ export default function ({ match, ...others }) {
     setProgress([])
     history.push(href)
     dispatch(actions.finishLoading())
+  }
+
+  const clone = () => {
+    axios.post(`${host}/accounts/experiment/clone/${match.params.id}`, {}, authHeaderJSON()).then(
+      function (res) {
+        dispatch(actions.startLoading())
+        history.push(`/module/run/${module.image_name}`)
+        dispatch(actions.finishLoading())
+      }
+    ).catch(
+      function (err) {
+        console.log(err)
+      }
+    )
   }
 
   const handlePage = (e, value) => {
@@ -167,9 +187,14 @@ export default function ({ match, ...others }) {
               <Grid item>
                 {
                   experiment.state === 'executed' ? <>
-                    <Tooltip title="Try again with same data">
-                      <Button size="small" variant="contained" color="default" startIcon={<Replay />} className="mr-2" >
-                        Try
+                    <Tooltip title="Test algorith">
+                      <Button disabled={module.state !== 'active'} onClick={newTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className={module.state !== 'active' ? "fas fa-vial" : "fas fa-vial text-success"} />} className="mr-2">
+                        New
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Clone test with same data">
+                      <Button onClick={clone} disabled={module.state !== 'active'} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className={module.state !== 'active' ? "fas fa-clone" : "fas fa-clone text-secondary"} />} className="mr-2" >
+                        Clone
                       </Button>
                     </Tooltip>
                     <Tooltip className="mr-1" title="Delete test">

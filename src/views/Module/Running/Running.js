@@ -83,7 +83,7 @@ export default function () {
   }
 
   useEffect(() => {
-    axios.get(`${host}/module/experiment`, authHeaderJSON()).then(
+    axios.get(`${host}/accounts/running`, authHeaderJSON()).then(
       function (res) {
         setExperiments([...res.data].map((item, index) => ({ ...item, ws: connect(item.id, index), states: [] })))
         console.log(res.data)

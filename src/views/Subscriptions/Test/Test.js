@@ -58,7 +58,11 @@ const useStyles = makeStyles((theme) => ({
   },
   linearProgressRoot: {
     height: 2
-  }
+  },
+  iconButton: {
+    fontSize: 15,
+    margin: 5
+  },
 }))
 
 export default function ({ match }) {
@@ -145,6 +149,21 @@ export default function ({ match }) {
     )
   }
 
+  const clone = index => () => {
+    axios.post(`${host}/accounts/experiment/clone/${experiments[index].id}`, {}, authHeaderJSON()).then(
+      function (res) {
+        dispatch(actions.startLoading())
+        history.push(`/module/run/${match.params.id}`)
+        dispatch(actions.finishLoading())
+      }
+    ).catch(
+      function (err) {
+        console.log(err)
+      }
+    )
+  }
+
+
   const triedDelete = index => () => {
     setDialog(index)
   }
@@ -227,19 +246,19 @@ export default function ({ match }) {
                       <div className={clsx(classes.content, "actions")} style={{ display: 'none' }}>
                         <Tooltip className="mr-1" title="Show test">
                           <IconButton size="small" onClick={show(item.id)}>
-                            <Visibility fontSize="small" className={clsx(classes.iconButton, "text-info")} />
+                            <Visibility fontSize="small" className="text-info" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Clone test with same data">
+                          <IconButton size="small" disabled={module.state !== 'active'} onClick={clone(index)}>
+                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
                           </IconButton>
                         </Tooltip>
                         {
                           item.state === 'executed' ? <>
-                            <Tooltip className="mr-1" title="Try again with same data">
-                              <IconButton size="small">
-                                <Replay fontSize="small" className={clsx(classes.iconButton)} />
-                              </IconButton>
-                            </Tooltip>
                             <Tooltip className="mr-1" title="Delete test">
                               <IconButton size="small" onClick={triedDelete(index)}>
-                                <Delete fontSize="small" className={clsx(classes.iconButton, "text-danger")} />
+                                <Delete fontSize="small" className="text-danger" />
                               </IconButton>
                             </Tooltip>
                           </> : null
@@ -268,7 +287,7 @@ export default function ({ match }) {
           <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end">
             <Grid item>
               <Tooltip title="Test algorith">
-                <Fab size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
+                <Fab disabled={module.state !== 'active'} size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
                   <Icon fontSize="small" className="fas fa-vial text-white" />
                 </Fab>
               </Tooltip>

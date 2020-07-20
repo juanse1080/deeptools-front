@@ -5,6 +5,10 @@ export default function error({response}){
     case 404:
       history.push('/not-found')
       break
+
+    case 401:
+      history.goBack()
+      break
       
     case 403:
       history.goBack()
