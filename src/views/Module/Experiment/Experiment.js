@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 
 import { Pagination } from '@material-ui/lab'
-import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button, Icon } from '@material-ui/core'
-import { Replay, Delete } from '@material-ui/icons'
+import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button, Icon, useTheme, useMediaQuery } from '@material-ui/core'
+import { ExpandMore, ExpandLess, Delete } from '@material-ui/icons'
 
 import axios from 'axios'
 
@@ -34,6 +34,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ({ match, ...others }) {
   const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
@@ -69,6 +71,10 @@ export default function ({ match, ...others }) {
     dispatch(actions.startLoading())
     history.push(`/module/run/${module.image_name}`)
     dispatch(actions.finishLoading())
+  }
+
+  const handleExecute = () => {
+    setExecute(execute => !execute)
   }
 
   const connect = (id) => {
@@ -142,6 +148,7 @@ export default function ({ match, ...others }) {
           setExperiment({ ...res.data, ws: connect(res.data.id) })
         } else {
           setExperiment({ ...res.data })
+          setProgress(res.data.records)
         }
         setExecute(res.data.state === 'executed' ? false : true)
         setModule({ ...res.data.docker, experiments: res.data.experiments, index: res.data.experiments.indexOf(match.params.id) + 1 })
@@ -170,7 +177,7 @@ export default function ({ match, ...others }) {
         </> : <>
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
-                <Breadcrumbs aria-label="breadcrumb">
+                <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
                   <Link color="inherit" component="button" onClick={to(`/subscriptions`)}>Subscriptions</Link>
                   <Link color="inherit" component="button" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
                   <Link color="inherit" component="button" onClick={to(`/subscriptions/${module.image_name}`)}>Test</Link>
@@ -180,33 +187,71 @@ export default function ({ match, ...others }) {
             </Grid>
             {
               execute ? <>
-                <Build progress={progress} />
+                <Build progress={progress} download={experiment.state === 'executed' ? experiment.file : false} />
               </> : <ShowExperiment to={to} value={experiment.elements} docker={module} id={match.params.id} />
             }
             <Grid container className="mt-3" spacing={3} direction="row" justify="space-around" >
+              {
+                sm ? <Grid item>
+                  {
+                    experiment.state === 'executed' ? <>
+                      {
+                        module.state !== 'active' ?
+                          <Button disabled size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial" />} className="mr-2"> New </Button> : <Tooltip title="Test algorith">
+                            <Button onClick={newTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial text-success" />} className="mr-2"> New </Button>
+                          </Tooltip>
+                      }
+                      {
+                        module.state !== 'active' ?
+                          <Button disabled size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-clone" />} className="mr-2" > Clone </Button> : <Tooltip title="Clone test with same data">
+                            <Button onClick={clone} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-clone text-secondary" />} className="mr-2" > Clone </Button>
+                          </Tooltip>
+                      }
+                      <Tooltip title={execute ? "Less info" : "More info"}>
+                        <Button onClick={handleExecute} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-info-circle text-info" />} className="mr-2"> {execute ? "less" : "more"} </Button>
+                      </Tooltip>
+                      <Tooltip className="mr-1" title="Delete test">
+                        <Button onClick={triedDelete} size="small" variant="contained" color="default" startIcon={<Delete className="text-danger" />}>
+                          Delete
+                        </Button>
+                      </Tooltip>
+                    </> : null
+                  }
+                </Grid> : <Grid item>
+                    {
+                      experiment.state === 'executed' ? <>
+                        {
+                          module.state !== 'active' ? null :
+                            <Tooltip title="Test algorith">
+                              <IconButton onClick={newTest} size="small" variant="contained" color="default" className="mr-2">
+                                <Icon fontSize="small" className="fas fa-vial text-success" />
+                              </IconButton>
+                            </Tooltip>
+                        }
+                        {
+                          module.state !== 'active' ?
+                            null : <Tooltip title="Clone test with same data">
+                              <IconButton onClick={clone} size="small" variant="contained" color="default" className="mr-2" >
+                                <Icon fontSize="small" className="fas fa-clone text-secondary" />
+                              </IconButton>
+                            </Tooltip>
+                        }
+                        <Tooltip title={execute ? "Less info" : "More info"}>
+                          <IconButton onClick={handleExecute} size="small" variant="contained" color="default" className="mr-2">
+                            {execute ? <ExpandLess /> : <ExpandMore />}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip className="mr-1" title="Delete test">
+                          <IconButton onClick={triedDelete} size="small" variant="contained" color="default">
+                            <Delete className="text-danger" />
+                          </IconButton>
+                        </Tooltip>
+                      </> : null
+                    }
+                  </Grid>
+              }
               <Grid item>
-                {
-                  experiment.state === 'executed' ? <>
-                    <Tooltip title="Test algorith">
-                      <Button disabled={module.state !== 'active'} onClick={newTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className={module.state !== 'active' ? "fas fa-vial" : "fas fa-vial text-success"} />} className="mr-2">
-                        New
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Clone test with same data">
-                      <Button onClick={clone} disabled={module.state !== 'active'} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className={module.state !== 'active' ? "fas fa-clone" : "fas fa-clone text-secondary"} />} className="mr-2" >
-                        Clone
-                      </Button>
-                    </Tooltip>
-                    <Tooltip className="mr-1" title="Delete test">
-                      <Button onClick={triedDelete} size="small" variant="contained" color="default" startIcon={<Delete className="text-danger" />}>
-                        Delete
-                    </Button>
-                    </Tooltip>
-                  </> : null
-                }
-              </Grid>
-              <Grid item>
-                <Pagination count={module.experiments.length} page={module.index} color="primary" onChange={handlePage} />
+                <Pagination size="small" count={module.experiments.length} page={module.index} color="primary" onChange={handlePage} />
               </Grid>
             </Grid>
             <Dialog open={dialog !== false} keepMounted onClose={cancelDelete} maxWidth="xs" fullWidth>

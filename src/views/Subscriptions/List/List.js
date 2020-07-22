@@ -4,17 +4,21 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs, LinearProgress } from '@material-ui/core'
-import { Search, Edit, Delete, Visibility, ExpandMore } from '@material-ui/icons'
+import { Link, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
+import { Search, ExpandMore } from '@material-ui/icons'
 
-import { host, authHeaderJSON, history, ws } from 'helpers'
-
-import { title as ucWords, format_date as getDate, error } from 'utils'
-
-import { useDispatch } from "react-redux";
-import { actions } from '_redux';
-
+import { isMobile } from 'react-device-detect'
+import { useDispatch } from "react-redux"
 import axios from "axios"
+
+import { host, authHeaderJSON, history } from 'helpers'
+
+import { title as ucWords, error } from 'utils'
+
+
+import { actions } from '_redux'
+
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -83,6 +87,9 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'default !important',
     }
   },
+  listItemIconRoot: {
+    minWidth: '30px'
+  },
   heading: {
     display: 'flex',
     flexDirection: 'column',
@@ -102,7 +109,16 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(1)
   },
   fullWidth: {
-    width: '100%'
+    width: '100%',
+    '&:hover div.actions': {
+      display: 'flex !important'
+    },
+    '&:focus div.actions': {
+      display: 'flex !important'
+    },
+    '&:active div.actions': {
+      display: 'flex !important'
+    },
   }
 }))
 
@@ -111,6 +127,8 @@ const default_ = { name: '', owner: '' }
 export default function List(props) {
 
   const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
@@ -121,11 +139,8 @@ export default function List(props) {
   const [dialog, setDialog] = useState(false)
   const [deleting, setDeleting] = useState(default_)
 
-  const handleExpanded = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false)
-  }
-
   const changeExpanded = panel => () => {
+    handleClose(panel)()
     setExpanded(expanded => expanded !== panel ? panel : false)
   }
 
@@ -192,34 +207,12 @@ export default function List(props) {
     dispatch(actions.finishLoading())
   }
 
-  const start = (index, id) => () => {
-    handleModule(index, 'loading', true)
-    axios.put(`${host}/module/start/${id}`, {}, authHeaderJSON()).then(
-      function (res) {
-        handleModule(index, 'loading', false)
-        handleModule(index, 'state', 'active')
-      }
-    ).catch(
-      function (err) {
-        console.error(err)
-        handleModule(index, 'loading', false)
-      }
-    )
+  const handleClick = index => event => {
+    handleModule(index, 'anchor', event.currentTarget)
   }
 
-  const stop = (index, id) => () => {
-    handleModule(index, 'loading', true)
-    axios.put(`${host}/module/stop/${id}`, {}, authHeaderJSON()).then(
-      function (res) {
-        handleModule(index, 'loading', false)
-        handleModule(index, 'state', 'stopped')
-      }
-    ).catch(
-      function (err) {
-        console.error(err)
-        handleModule(index, 'loading', false)
-      }
-    )
+  const handleClose = index => () => {
+    handleModule(index, 'anchor', null)
   }
 
   // Filtrar contenedores
@@ -236,8 +229,8 @@ export default function List(props) {
 
   useEffect(() => {
     axios.get(`${host}/accounts/subscriptions`, authHeaderJSON()).then(function (res) {
-      setModules(res.data)
-      setFilter(res.data)
+      setModules(res.data.map(item => ({ ...item, anchor: null })))
+      setFilter(res.data.map(item => ({ ...item, anchor: null })))
       setLoading(false)
     }).catch(function (err) {
       error(err)
@@ -295,7 +288,7 @@ export default function List(props) {
         </> : <>
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
-                <Breadcrumbs aria-label="breadcrumb">
+                <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
                   <Link color="inherit" component="button" onClick={subscriptions}>Subscriptions</Link>
                 </Breadcrumbs>
               </Grid>
@@ -341,13 +334,13 @@ export default function List(props) {
                       {
                         filter.map((item, index) =>
                           <ExpansionPanel key={item.id} expanded={expanded === index} className={classes.fullWidth}>
-                            
+
                             <ExpansionPanelSummary
                               classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
                             >
-                              
+
                               <div className={classes.title}>
-                                <Typography className={classes.heading}>
+                                <Typography noWrap className={classes.heading}>
                                   <Link onClick={show(item.image_name)} component="button">{ucWords(item.name)}</Link>
                                 </Typography>
 
@@ -356,33 +349,70 @@ export default function List(props) {
                                 </Typography>
                               </div>
 
-                              <div>
-                                <Tooltip title="Details">
-                                  <IconButton onClick={changeExpanded(index)} size="small">
-                                    <ExpandMore />
-                                  </IconButton>
-                                </Tooltip>
+                              <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
                                 {
-                                  item.state === 'active' ? <Tooltip title="Test algorith">
-                                    <IconButton size="small" onClick={run(item.image_name)}>
-                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                    </IconButton>
-                                  </Tooltip> : <Tooltip title="This algorith is not active">
-                                      <IconButton size="small" disableFocusRipple disableRipple>
-                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial")} />
+                                  sm ? <>
+                                    <Tooltip title="Details">
+                                      <IconButton onClick={changeExpanded(index)} size="small">
+                                        <ExpandMore />
                                       </IconButton>
                                     </Tooltip>
+                                    {
+                                      item.state === 'active' ? <Tooltip title="Test algorith">
+                                        <IconButton size="small" onClick={run(item.image_name)}>
+                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                        </IconButton>
+                                      </Tooltip> : <Tooltip title="This algorith is not active">
+                                          <IconButton size="small" disableFocusRipple disableRipple>
+                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial")} />
+                                          </IconButton>
+                                        </Tooltip>
+                                    }
+                                    <Tooltip title="All test">
+                                      <IconButton size="small" onClick={showTest(item.image_name)}>
+                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Unsubscribe">
+                                      <IconButton size="small">
+                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </> : <>
+                                      <IconButton size="small" onClick={handleClick(index)}>
+                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
+                                      </IconButton>
+                                      <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
+                                        <MenuItem onClick={changeExpanded(index)}>
+                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                            <ExpandMore />
+                                          </ListItemIcon>
+                                          <Typography variant="inherit">{expanded !== index ? "More details" : "Less details"}</Typography>
+                                        </MenuItem>
+                                        {
+                                          item.state === 'active' ?
+                                            <MenuItem onClick={run(item.image_name)}>
+                                              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                              </ListItemIcon>
+                                              <Typography variant="inherit">Test algorith</Typography>
+                                            </MenuItem> : null
+                                        }
+                                        <MenuItem onClick={showTest(item.image_name)}>
+                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
+                                          </ListItemIcon>
+                                          <Typography variant="inherit">All test</Typography>
+                                        </MenuItem>
+                                        <MenuItem>
+                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
+                                          </ListItemIcon>
+                                          <Typography variant="inherit">Unsubscribe</Typography>
+                                        </MenuItem>
+                                      </Menu>
+                                    </>
                                 }
-                                <Tooltip title="Show test">
-                                  <IconButton size="small" onClick={showTest(item.image_name)}>
-                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Unsubscribe">
-                                  <IconButton size="small">
-                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
-                                  </IconButton>
-                                </Tooltip>
                               </div>
 
                             </ExpansionPanelSummary>

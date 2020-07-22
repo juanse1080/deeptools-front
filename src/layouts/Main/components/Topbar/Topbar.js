@@ -13,6 +13,8 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
+import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+import Slide from '@material-ui/core/Slide';
 
 import { useDispatch } from 'react-redux'
 import { actions } from '_redux'
@@ -34,18 +36,23 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(1)
   },
   listItemIconRoot: {
-    minWidth: '26px'
+    minWidth: '30px'
   },
   divider: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
-  }
+  },
+  // menuList: {
+  //   paddingTop: 0,
+  //   paddingBottom: 0,
+  // }
 }));
 
 const Topbar = props => {
-  const { className, onSidebarOpen, ...rest } = props;
+  const { className, onSidebarOpen, window, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const trigger = useScrollTrigger({ target: window ? window() : undefined });
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [notifications] = useState([]);
@@ -63,43 +70,34 @@ const Topbar = props => {
     handleClose()
   }
 
-  return (
-    <AppBar
-      {...rest}
-      color="inherit"
-      className={clsx(classes.root, className)}
-    >
-
+  return <Slide appear={false} direction="down" in={!trigger}>
+    <AppBar {...rest} color="inherit" className={clsx(classes.root, className)}>
       <Toolbar className={clsx(classes.flexGrow, "shadow")}>
         <Hidden lgUp>
-          <IconButton
-            color="inherit"
-            className={classes.drawerIcon}
-            onClick={onSidebarOpen}
-          >
+          <IconButton size="small" color="inherit" className={classes.drawerIcon} onClick={onSidebarOpen}>
             <MenuIcon />
           </IconButton>
         </Hidden>
         <div className={classes.flexGrow} />
         <IconButton>
-          <Badge badgeContent={7} max={9} color='secondary' children={<NotificationsIcon className={classes.Button} />} />
+          <Badge badgeContent={7} max={9} variant="dot" color='secondary' children={<NotificationsIcon className={classes.Button} />} />
         </IconButton>
 
         <IconButton className={classes.profileButton} onClick={handleMenu}>
           <Avatar alt="Remy Sharp" src="/images/avatars/avatar_1.png" />
         </IconButton>
         <Menu
+          classes={{ list: classes.menuList }}
           id="menu-appbar"
           anchorEl={anchorEl}
           anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
+            vertical: 'top',
+            horizontal: 'right',
           }}
-          getContentAnchorEl={null}
           keepMounted
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'left',
+            horizontal: 'right',
           }}
           open={open}
           onClose={handleClose}
@@ -110,7 +108,7 @@ const Topbar = props => {
             </ListItemIcon>
             <Typography variant="inherit">Profile</Typography>
           </MenuItem>
-          <Divider className={classes.divider} />
+          {/* <Divider className={classes.divider} /> */}
           <MenuItem onClick={() => dispatch(actions.logout())}>
             <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
               <ExitToApp fontSize="small" />
@@ -120,8 +118,8 @@ const Topbar = props => {
         </Menu>
       </Toolbar>
     </AppBar>
-  );
-};
+  </Slide>
+}
 
 Topbar.propTypes = {
   className: PropTypes.string,

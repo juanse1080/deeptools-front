@@ -4,7 +4,8 @@ import axios from 'axios'
 import showdown from 'showdown'
 import ReactHtmlParser, { convertNodeToElement } from 'react-html-parser';
 
-import { makeStyles, Backdrop, CircularProgress, Button, Link, Typography } from '@material-ui/core'
+import { makeStyles, Backdrop, CircularProgress, Button, Link, Typography, useTheme, useMediaQuery, IconButton } from '@material-ui/core'
+import { ArrowBack, ArrowForward, PlayArrow, Save } from '@material-ui/icons'
 
 import { useDispatch } from "react-redux";
 import { actions } from '_redux';
@@ -36,13 +37,13 @@ const useStyles = makeStyles((theme) => ({
     color: '#fff',
   },
   buttons: {
-    marginTop: theme.spacing(2),
   },
   actions: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginTop: theme.spacing(2),
   }
 }))
 
@@ -73,10 +74,12 @@ const options = {
 
 export default function Run({ match, ...others }) {
   const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)
   const [module, setModule] = useState(null)
   const [media, setMedia] = useState([])
   const [example, setExample] = useState([])
@@ -311,18 +314,31 @@ export default function Run({ match, ...others }) {
           </Backdrop>
         </> : <>
             {content()}
-            <div className={classes.actions}>
-              <div className={classes.buttons}>
-                <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-                <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
-              </div>
-              {
-                step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
-                  <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
-                </Link> : null
-              }
-
-            </div>
+            {
+              sm ? <div className={classes.actions}>
+                <div className={classes.buttons}>
+                  <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
+                  <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
+                </div>
+                {
+                  step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
+                    <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
+                  </Link> : null
+                }
+              </div> : <div className={classes.actions}>
+                  <div className={classes.buttons}>
+                    <IconButton disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>
+                      <ArrowBack />
+                    </IconButton>
+                    <IconButton variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? <ArrowForward /> : step == 1 ? <PlayArrow /> : <Save />}</IconButton>
+                  </div>
+                  {
+                    step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
+                      <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
+                    </Link> : null
+                  }
+                </div>
+            }
           </>
       }
     </div>

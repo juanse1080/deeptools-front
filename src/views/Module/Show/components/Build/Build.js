@@ -1,13 +1,14 @@
 import React, { useState } from "react"
-import { makeStyles, withStyles, LinearProgress, Grid, Link, FormHelperText, Paper } from "@material-ui/core"
+import { makeStyles, LinearProgress, Grid, Link, FormHelperText, Paper, Fab, Icon } from "@material-ui/core"
 import theme from "theme"
-import { defaults } from "react-chartjs-2"
+import { host } from 'helpers'
 
 const useStyles = makeStyles({
   root: {
     width: "100%",
   },
   paper: {
+    position: 'relative',
     backgroundColor: '#29292e',
     color: theme.palette.white,
     padding: theme.spacing(2),
@@ -16,7 +17,7 @@ const useStyles = makeStyles({
     height: '500px',
     '&::-webkit-scrollbar': {
       backgroundColor: '#29292e',
-      width: 12,
+      width: 10,
       borderRadius: 12,
     },
     '&::-webkit-scrollbar-track': {
@@ -27,6 +28,12 @@ const useStyles = makeStyles({
       background: '#e1e1e1',
       borderRadius: 12,
     }
+  },
+  download: {
+    position: 'sticky',
+    left: '100%',
+    right: 0,
+    bottom: 0
   },
   linearRoot: {
     height: 15,
@@ -41,7 +48,6 @@ const useStyles = makeStyles({
   div: {
     fontSize: 12
   },
-
   error: {
     backgroundColor: '#f44336'
   },
@@ -53,7 +59,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default function ({ progress }) {
+export default function ({ progress, download }) {
   const classes = useStyles()
   const [show, setShow] = useState(true)
 
@@ -129,6 +135,13 @@ export default function ({ progress }) {
                   {item.description}
                 </div>
               )
+            }
+            {
+              download ? <Link href={host+download} target="_blank" download>
+                <Fab size="small" color="primary" aria-label="add" className={classes.download}>
+                  <Icon className="fas fa-link text-white" fontSize="small"/>
+                </Fab>
+              </Link> : null
             }
           </Paper>
         </> : null

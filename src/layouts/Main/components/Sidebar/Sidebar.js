@@ -80,10 +80,10 @@ const Sidebar = props => {
     },
     {
       id: '6',
-      title: 'Experiments',
+      title: 'Running',
       href: '/module/experiment',
       roles: ['admin', 'developer', 'user'],
-      icon: <Icon fontSize="small" className="fas fa-vial" />
+      icon: <Icon fontSize="small" className="fas fa-running" />
     },
   ]
 

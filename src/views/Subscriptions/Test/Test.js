@@ -1,27 +1,43 @@
-import React, { useEffect, createRef, useState } from 'react'
-import { Grid, Icon, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, InputBase, IconButton, Tooltip, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText, Button, Fab } from '@material-ui/core'
+import React, { useEffect, useState } from 'react'
+import { Grid, Icon, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogContentText, Button, Fab, useTheme, useMediaQuery, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
-import { Search, Delete, Visibility, Replay, Add } from '@material-ui/icons'
+import { Delete, Visibility } from '@material-ui/icons'
 
-import clsx from 'clsx'
-
+import { isMobile } from 'react-device-detect'
 import axios from 'axios'
+import clsx from 'clsx'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
 import { title as ucWords, format_date as getDate, real_date } from 'utils'
 import errores from 'utils/error'
 
-import { useDispatch } from "react-redux";
-import { actions } from '_redux';
+import { useDispatch } from "react-redux"
+import { actions } from '_redux'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
-      padding: theme.spacing(3),
+      padding: theme.spacing(2),
       backgroundColor: theme.palette.white
+    },
+    '&::-webkit-scrollbar': {
+      backgroundColor: '#29292e',
+      width: 10,
+      borderRadius: 12,
+    },
+    '&::-webkit-scrollbar-track': {
+      background: '#7e7e7e',
+      borderRadius: 12,
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: '#e1e1e1',
+      borderRadius: 12,
     }
+  },
+  listItemIconRoot: {
+    minWidth: '30px'
   },
   error: {
     backgroundColor: '#f44336'
@@ -67,7 +83,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ({ match }) {
   const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
+
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
   const [module, setModule] = useState({})
@@ -114,7 +133,7 @@ export default function ({ match }) {
     const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
-      addMessage(index, data)
+      addMessage(id, data)
     }
     return webSocket
   }
@@ -122,7 +141,14 @@ export default function ({ match }) {
   const addMessage = (index, value) => {
     setExperiments(experiments => {
       let temp = [...experiments]
-      temp[index] = { ...temp[index], states: [...temp[index].states, ...value] }
+      let key
+      temp.forEach((item, index_) => {
+        if (item.id === index) {
+          key = index_
+          return
+        }
+      })
+      temp[key] = { ...temp[key], states: [...temp[key].states, ...value] }
       return temp
     })
   }
@@ -165,6 +191,7 @@ export default function ({ match }) {
 
 
   const triedDelete = index => () => {
+    handleClose(index)()
     setDialog(index)
   }
 
@@ -178,14 +205,28 @@ export default function ({ match }) {
     dispatch(actions.finishLoading())
   }
 
+  const handleExperiments = (index, name, value) => {
+    let aux = [...experiments]
+    aux[index] = { ...aux[index], [name]: value }
+    setExperiments(aux)
+  }
+
+  const handleClick = index => event => {
+    handleExperiments(index, 'anchor', event.currentTarget)
+  }
+
+  const handleClose = index => () => {
+    handleExperiments(index, 'anchor', null)
+  }
+
   useEffect(() => {
     axios.get(`${host}/accounts/subscriptions/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
         setExperiments(res.data.test.map((item, index) =>
           item.state === 'executing' ?
-            { ...item, ws: connect(item.id, index), states: [] } :
-            { ...item, states: item.records }
+            { ...item, ws: connect(item.id, index), states: [], anchor: null } :
+            { ...item, states: item.records, anchor: null }
         ))
         setModule(res.data.docker)
         setLoading(false)
@@ -229,7 +270,7 @@ export default function ({ match }) {
       </> : <>
           <Grid container justify="center" direction="row">
             <Grid item xs={12}>
-              <Breadcrumbs aria-label="breadcrumb">
+              <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
                 <Link color="inherit" component="button" onClick={subscriptions}>Subscriptions</Link>
                 <Link color="inherit" component="button" onClick={showModule}>{ucWords(module.name)}</Link>
                 <Link color="inherit" component="button" onClick={showTest}>Test</Link>
@@ -243,25 +284,62 @@ export default function ({ match }) {
                   <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states), root: classes.linearProgressRoot }} />
                   <Paper className={classes.file}>
                     <div className={classes.content}>
-                      <div className={clsx(classes.content, "actions")} style={{ display: 'none' }}>
-                        <Tooltip className="mr-1" title="Show test">
-                          <IconButton size="small" onClick={show(item.id)}>
-                            <Visibility fontSize="small" className="text-info" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Clone test with same data">
-                          <IconButton size="small" disabled={module.state !== 'active'} onClick={clone(index)}>
-                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
-                          </IconButton>
-                        </Tooltip>
+                      <div className={clsx(classes.content, "actions")} style={{ display: isMobile ? 'flex' : 'none' }}>
                         {
-                          item.state === 'executed' ? <>
-                            <Tooltip className="mr-1" title="Delete test">
-                              <IconButton size="small" onClick={triedDelete(index)}>
-                                <Delete fontSize="small" className="text-danger" />
+                          sm ? <>
+                            <Tooltip className="mr-1" title="Show test">
+                              <IconButton size="small" onClick={show(item.id)}>
+                                <Visibility fontSize="small" className="text-info" />
                               </IconButton>
                             </Tooltip>
-                          </> : null
+                            {
+                              module.state !== 'active' ? <IconButton size="small" disabled={true} >
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                              </IconButton> : <Tooltip title="Clone test with same data">
+                                  <IconButton size="small" onClick={clone(index)}>
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                                  </IconButton>
+                                </Tooltip>
+                            }
+                            {
+                              item.state === 'executed' ? <>
+                                <Tooltip className="mr-1" title="Delete test">
+                                  <IconButton size="small" onClick={triedDelete(index)}>
+                                    <Delete fontSize="small" className="text-danger" />
+                                  </IconButton>
+                                </Tooltip>
+                              </> : null
+                            }
+                          </> : <>
+                              <IconButton size="small" onClick={handleClick(index)}>
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
+                              </IconButton>
+                              <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
+                                <MenuItem onClick={show(item.id)}>
+                                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                    <Visibility fontSize="small" className="text-info" />
+                                  </ListItemIcon>
+                                  <Typography variant="inherit">Show test</Typography>
+                                </MenuItem>
+                                {
+                                  module.state !== 'active' ? <MenuItem onClick={clone(index)}>
+                                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                                    </ListItemIcon>
+                                    <Typography variant="inherit">Clone test with same data</Typography>
+                                  </MenuItem> : null
+                                }
+                                {
+                                  item.state === 'executed' ?
+                                    <MenuItem onClick={triedDelete(index)}>
+                                      <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                        <Delete fontSize="small" className="text-danger" />
+                                      </ListItemIcon>
+                                      <Typography variant="inherit">Delete test</Typography>
+                                    </MenuItem> : null
+                                }
+                              </Menu>
+                            </>
                         }
                       </div>
                       <Tooltip className="ml-1" title={item.states.length > 0 ? item.states[item.states.length - 1].description : 'Starting process...'} style={{ marginTop: 6, marginBottom: 7 }}>
@@ -286,15 +364,17 @@ export default function ({ match }) {
           </Grid>
           <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end">
             <Grid item>
-              <Tooltip title="Test algorith">
-                <Fab disabled={module.state !== 'active'} size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
+              {
+                module.state !== 'active' ? <Fab disabled={true} size="small" color="primary" aria-label="Test algorith">
                   <Icon fontSize="small" className="fas fa-vial text-white" />
-                </Fab>
-              </Tooltip>
+                </Fab> : <Tooltip title="Test algorith">
+                    <Fab disabled={module.state !== 'active'} size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
+                      <Icon fontSize="small" className="fas fa-vial text-white" />
+                    </Fab>
+                  </Tooltip>
+              }
             </Grid>
           </Grid>
-
-
           <Dialog open={dialog !== false} keepMounted onClose={cancelDelete} maxWidth="xs" fullWidth>
             <DialogContent>
               <DialogContentText id="alert-dialog-slide-description">
@@ -308,6 +388,5 @@ export default function ({ match }) {
           </Dialog>
         </>
     }
-
   </div>
 }
