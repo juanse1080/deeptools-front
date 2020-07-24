@@ -35,18 +35,24 @@ validate.validators = {
 const App = () => {
 
   const dispatch = useDispatch()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     dispatch(actions.reloadState())
+    setLoading(false)
   }, [])
 
-  return (
-    <ThemeProvider theme={theme}>
-      <Router history={history}>
-        <Routes />
-      </Router>
-    </ThemeProvider>
-  )
+  return <>
+    {
+      loading ? null : <ThemeProvider theme={theme}>
+        <Router history={history}>
+          <Routes />
+        </Router>
+      </ThemeProvider>
+    }
+  </>
+
+
 }
 
 export default App

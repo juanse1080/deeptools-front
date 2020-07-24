@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
+      // backgroundColor: theme.palette.white
     }
   },
   stepper: {
@@ -102,6 +102,12 @@ const rulesThree = {
       message: '^The classname field cannot be empty.'
     }
   },
+  description: {
+    presence: {
+      allowEmpty: false,
+      message: '^The description field cannot be empty.'
+    }
+  },
 }
 
 export default function Steppers() {
@@ -113,7 +119,7 @@ export default function Steppers() {
 
   const [step, setStep] = useState(0)
   const [protocol, setProtocol] = useState('')
-  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '' })
+  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '', description: '' })
   const [elements, setElements] = useState({
     input: { state: true, len: 0, value: 'video' }, response: { state: true, len: 0, value: 'text' }, output: { state: true, len: 0, value: 'video' }, graph: { state: true, len: 1, value: options }
   })

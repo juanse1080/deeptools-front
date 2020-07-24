@@ -4,8 +4,10 @@ import MuiPaper from './MuiPaper';
 import MuiTableCell from './MuiTableCell';
 import MuiTableHead from './MuiTableHead';
 import MuiTypography from './MuiTypography';
+import MuiLink from './MuiLink';
 
 export default {
+  MuiLink,
   MuiButton,
   MuiIconButton,
   MuiPaper,

@@ -26,6 +26,7 @@ const Footer = props => {
           component="a"
           href="https://devias.io/"
           target="_blank"
+          rel="noreferrer"
         >
           Devias IO
         </Link>

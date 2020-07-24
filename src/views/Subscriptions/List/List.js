@@ -4,8 +4,8 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Link, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
-import { Search, ExpandMore } from '@material-ui/icons'
+import { Link, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Icon, Tooltip, ExpansionPanelSummary, ExpansionPanelDetails, ExpansionPanel, Breadcrumbs, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Fab } from '@material-ui/core'
+import { Search, ExpandMore, ExpandLess } from '@material-ui/icons'
 
 import { isMobile } from 'react-device-detect'
 import { useDispatch } from "react-redux"
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
+      // backgroundColor: theme.palette.white
     }
   },
   media: {
@@ -87,18 +87,26 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'default !important',
     }
   },
+  expansionPanelDetails: {
+    position: 'relative',
+  },
+  lessDetails: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10
+  },
   listItemIconRoot: {
     minWidth: '30px'
   },
   heading: {
-    display: 'flex',
+    display: 'block',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     fontSize: theme.typography.pxToRem(15),
-    flexWrap: 'nowrap'
+    minWidth: 0,
   },
   iconsHeading: {
     fontSize: theme.typography.pxToRem(15),
@@ -111,13 +119,22 @@ const useStyles = makeStyles((theme) => ({
   fullWidth: {
     width: '100%',
     '&:hover div.actions': {
-      display: 'flex !important'
+      display: 'block !important',
+      [theme.breakpoints.up('sm')]: {
+        minWidth: '123px',
+      }
     },
     '&:focus div.actions': {
-      display: 'flex !important'
+      display: 'block !important',
+      [theme.breakpoints.up('sm')]: {
+        minWidth: '123px',
+      }
     },
     '&:active div.actions': {
-      display: 'flex !important'
+      display: 'block !important',
+      [theme.breakpoints.up('sm')]: {
+        minWidth: '123px',
+      }
     },
   }
 }))
@@ -201,12 +218,6 @@ export default function List(props) {
     dispatch(actions.finishLoading())
   }
 
-  const subscriptions = () => {
-    dispatch(actions.startLoading())
-    history.push(`/subscriptions`)
-    dispatch(actions.finishLoading())
-  }
-
   const handleClick = index => event => {
     handleModule(index, 'anchor', event.currentTarget)
   }
@@ -275,7 +286,7 @@ export default function List(props) {
                       </div>
 
                     </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
+                    <ExpansionPanelDetails classes={{ root: classes.expansionPanelDetails }}>
                       <Typography>
                         {item.description || "Description not supplied"}
                       </Typography>
@@ -289,7 +300,7 @@ export default function List(props) {
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Link color="inherit" component="button" onClick={subscriptions}>Subscriptions</Link>
+                  <Typography color="textSecondary">Algorithms</Typography>
                 </Breadcrumbs>
               </Grid>
             </Grid>
@@ -340,11 +351,13 @@ export default function List(props) {
                             >
 
                               <div className={classes.title}>
-                                <Typography noWrap className={classes.heading}>
-                                  <Link onClick={show(item.image_name)} component="button">{ucWords(item.name)}</Link>
+                                <Typography noWrap>
+                                  <Link onClick={show(item.image_name)}>
+                                    {ucWords(item.name)}
+                                  </Link>
                                 </Typography>
 
-                                <Typography variant="caption" >
+                                <Typography variant="caption" style={{ whiteSpace: 'noWrap' }}>
                                   <Link onClick={show(item.image_name)} component="button">{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
                                 </Typography>
                               </div>
@@ -352,9 +365,11 @@ export default function List(props) {
                               <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
                                 {
                                   sm ? <>
-                                    <Tooltip title="Details">
+                                    <Tooltip title={expanded !== index ? "More details" : "Less details"}>
                                       <IconButton onClick={changeExpanded(index)} size="small">
-                                        <ExpandMore />
+                                        {
+                                          expanded !== index ? <ExpandMore /> : <ExpandLess />
+                                        }
                                       </IconButton>
                                     </Tooltip>
                                     {
@@ -385,7 +400,9 @@ export default function List(props) {
                                       <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
                                         <MenuItem onClick={changeExpanded(index)}>
                                           <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                            <ExpandMore />
+                                            {
+                                              expanded !== index ? <ExpandMore /> : <ExpandLess />
+                                            }
                                           </ListItemIcon>
                                           <Typography variant="inherit">{expanded !== index ? "More details" : "Less details"}</Typography>
                                         </MenuItem>
@@ -416,10 +433,13 @@ export default function List(props) {
                               </div>
 
                             </ExpansionPanelSummary>
-                            <ExpansionPanelDetails>
+                            <ExpansionPanelDetails classes={{ root: classes.expansionPanelDetails }}>
                               <Typography>
                                 {item.description || "Description not supplied"}
                               </Typography>
+                              <IconButton size="small" className={classes.lessDetails} onClick={changeExpanded(index)}>
+                                <ExpandLess />
+                              </IconButton>
                             </ExpansionPanelDetails>
                           </ExpansionPanel>
                         )

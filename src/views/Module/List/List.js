@@ -4,8 +4,10 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, CardHeader, Link, CardContent, CardActions, Avatar, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip } from '@material-ui/core'
+import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
+
+import { isMobile } from 'react-device-detect'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
 
@@ -22,15 +24,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
     }
-  },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-  },
-  colorPreview: {
-    fontSize: '0.8rem'
   },
   alerts: {
     padding: '2px 4px',
@@ -46,10 +40,6 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(1),
     flex: 1,
   },
-  fullHeight: {
-    paddingTop: "100%",
-    transform: 'scale(1, 1) !important'
-  },
   disableScale: {
     transform: 'scale(1, 1) !important'
   },
@@ -60,16 +50,50 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
     margin: 5
   },
-  cardContent: {
-    '&:last-child': {
-      paddingBottom: '14px'
-    }
-  },
   rootTitleDialog: {
     flex: '0 0 auto',
     margin: 0,
     padding: '24px 24px',
-  }
+  },
+  details: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  alignItemsStart: {
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing(1.5)
+  },
+  alignItemsEnd: {
+    alignItems: 'center',
+    height: 31,
+  },
+  title: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    marginRight: theme.spacing(1),
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  paper: {
+    padding: theme.spacing(2),
+    '&:hover div.actions': {
+      display: 'flex !important'
+    },
+    '&:focus div.actions': {
+      display: 'flex !important'
+    },
+    '&:active div.actions': {
+      display: 'flex !important'
+    },
+  },
+  listItemIconRoot: {
+    minWidth: '30px'
+  },
+  linearProgressRoot: {
+    height: 2
+  },
 }))
 
 const default_ = { name: '', owner: '' }
@@ -77,6 +101,8 @@ const default_ = { name: '', owner: '' }
 export default function List(props) {
 
   const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
 
   const [loading, setLoading] = useState(true)
@@ -96,7 +122,7 @@ export default function List(props) {
     setFilter(aux)
   }
 
-  const triedDelete = (index) => () => {
+  const triedDelete = index => () => {
     setDeleting({ ...filter[index], index: index })
     handleDialog(true)()
   }
@@ -124,13 +150,13 @@ export default function List(props) {
     )
   }
 
-  const show = (id) => () => {
+  const show = id => () => {
     dispatch(actions.startLoading())
     history.push(`/module/${id}`)
     dispatch(actions.finishLoading())
   }
 
-  const run = (id) => () => {
+  const run = id => () => {
     dispatch(actions.startLoading())
     history.push(`/module/run/${id}`)
     dispatch(actions.finishLoading())
@@ -167,7 +193,7 @@ export default function List(props) {
   }
 
   // Filtrar contenedores
-  const filterModules = (e) => {
+  const filterModules = e => {
     const val = e.target.value
     if (val) {
       const query = modules.filter(module => module.name.toLowerCase().indexOf(val.toLowerCase()) > -1 || module.image.toLowerCase().indexOf(val.toLowerCase()) > -1 || `${module.user.first_name} ${module.user.last_name}`.toLowerCase().indexOf(val.toLowerCase()) > -1)
@@ -178,11 +204,26 @@ export default function List(props) {
     }
   }
 
+
+  const handleModuleFilter = (index, name, value) => {
+    let aux = [...filter]
+    aux[index] = { ...aux[index], [name]: value }
+    setFilter(aux)
+  }
+
+  const handleClick = index => event => {
+    handleModuleFilter(index, 'anchor', event.currentTarget)
+  }
+
+  const handleClose = index => () => {
+    handleModuleFilter(index, 'anchor', null)
+  }
+
   useEffect(() => {
     axios.get(`${host}/module`, authHeaderJSON()).then(function (res) {
-      setModules(res.data)
-      console.log(res.data)
-      setFilter(res.data)
+      const data = res.data.map(item => ({ ...item, anchor: null }))
+      setModules(data)
+      setFilter(data)
       setLoading(false)
     }).catch(function (err) {
       error(err)
@@ -289,85 +330,118 @@ export default function List(props) {
                       {
                         filter.map((item, index) =>
                           <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
-                            <Card className="m-2" >
-                              {item.loading ? <LinearProgress /> : null}
-                              <CardContent classes={{ root: classes.cardContent }}>
-                                <Grid container direction="column" justify="space-between">
-                                  <Grid item>
-                                    <Grid container direction="row" justify="space-between" alignItems="flex-start">
-                                      <Grid item>
-                                        <Typography component="h5" variant="h5">
-                                          <Link component="button" onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
-                                        </Typography>
-                                        <Typography variant="caption" color="textSecondary">
-                                          {item.image}
-                                        </Typography>
-                                      </Grid>
-                                      <Grid item>
-                                        <span className={classes.owner}>
-                                          {getDate(item.created_at)}
-                                        </span>
-                                      </Grid>
-                                    </Grid>
-                                  </Grid>
-                                  <Grid item>
-                                    <Grid container direction="row" justify="space-between" alignItems="flex-end">
-                                      <Grid item>
-                                        <span className={classes.owner}>
-                                          {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
-                                        </span>
-                                      </Grid>
-                                      <Grid item>
-                                        <>
+                            {item.loading ? <LinearProgress classes={{ root: classes.linearProgressRoot }} /> : null}
+                            <Paper className={classes.paper} >
+                              <div className={clsx(classes.details, classes.alignItemsStart)}>
+                                <div className={classes.title}>
+                                  <Typography noWrap>
+                                    <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
+                                  </Typography>
+                                  <Typography variant="caption" color="textSecondary">
+                                    {item.image}
+                                  </Typography>
+                                </div>
+                                <span className={classes.owner}>
+                                  <Typography noWrap variant="caption" color="textSecondary">
+                                    {getDate(item.created_at)}
+                                  </Typography>
+                                </span>
+                              </div>
+                              <div className={clsx(classes.details, classes.alignItemsEnd)}>
+                                <Typography noWrap variant="caption" >
+                                  {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
+                                </Typography>
+                                <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
+                                  {
+                                    sm ? <>
+                                      {
+                                        item.state === 'active' ? <>
+                                          <Tooltip title="Experiment">
+                                            <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
+                                            </IconButton>
+                                          </Tooltip>
+                                          <Tooltip title="Stop">
+                                            <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </> : null
+                                      }
+                                      {
+                                        item.state === 'stopped' ? <>
+                                          <Tooltip title="Start">
+                                            <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </> : null
+                                      }
+                                      {
+                                        item.state === 'builded' ? <>
+                                          <Tooltip title="Active">
+                                            <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-rocket text-success")} />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </> : null
+                                      }
+                                      <Tooltip title="Delete">
+                                        <IconButton size="small" onClick={triedDelete(index)}>
+                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </> : <>
+                                        <IconButton size="small" onClick={handleClick(index)}>
+                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
+                                        </IconButton>
+                                        <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
                                           {
-                                            item.state === 'active' ? <>
-                                              <Tooltip title="Experiment">
-                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                            item.state === 'active' ? <div>
+                                              <MenuItem onClick={run(item.image_name)}>
+                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                                                   <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                                </IconButton>
-                                              </Tooltip>
-                                              <Tooltip title="Stop">
-                                                <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
+                                                </ListItemIcon>
+                                                <Typography variant="inherit">Experiment</Typography>
+                                              </MenuItem>
+                                              <MenuItem onClick={stop(index, item.image_name)}>
+                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                                                   <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </> : null
+                                                </ListItemIcon>
+                                                <Typography variant="inherit">Stop</Typography>
+                                              </MenuItem>
+                                            </div> : null
                                           }
-                                        </>
-                                        <>
                                           {
-                                            item.state === 'stopped' ? <>
-                                              <Tooltip title="Start">
-                                                <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
-                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
-                                                </IconButton>
-                                              </Tooltip>
-                                            </> : null
+                                            item.state === 'stopped' ? <MenuItem onClick={start(index, item.image_name)}>
+                                              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
+                                              </ListItemIcon>
+                                              <Typography variant="inherit">Start</Typography>
+                                            </MenuItem> : null
                                           }
-                                        </>
-                                        <>
                                           {
                                             item.state === 'builded' ? <>
-                                              <Tooltip title="Active">
-                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                              <MenuItem onClick={run(item.image_name)}>
+                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                                                   <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-rocket text-success")} />
-                                                </IconButton>
-                                              </Tooltip>
+                                                </ListItemIcon>
+                                                <Typography variant="inherit">Active</Typography>
+                                              </MenuItem>
                                             </> : null
                                           }
-                                        </>
-                                        <Tooltip title="Delete">
-                                          <IconButton size="small" onClick={triedDelete(index)}>
-                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
-                                          </IconButton>
-                                        </Tooltip>
-                                      </Grid>
-                                    </Grid>
-                                  </Grid>
-                                </Grid>
-
-                              </CardContent>
-                            </Card>
+                                          <MenuItem onClick={triedDelete(index)}>
+                                            <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
+                                            </ListItemIcon>
+                                            <Typography variant="inherit">Delete</Typography>
+                                          </MenuItem>
+                                        </Menu>
+                                      </>
+                                  }
+                                </div>
+                              </div>
+                            </Paper>
                           </Grid>
                         )
                       }

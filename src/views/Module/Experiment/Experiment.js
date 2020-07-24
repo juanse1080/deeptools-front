@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 
 import { Pagination } from '@material-ui/lab'
-import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button, Icon, useTheme, useMediaQuery } from '@material-ui/core'
+import { makeStyles, Grid, CircularProgress, Backdrop, Link, Breadcrumbs, Tooltip, IconButton, Dialog, DialogContentText, DialogContent, DialogActions, Button, Icon, useTheme, useMediaQuery, Typography } from '@material-ui/core'
 import { ExpandMore, ExpandLess, Delete } from '@material-ui/icons'
 
 import axios from 'axios'
 
 import { host, authHeaderJSON, history, ws } from 'helpers'
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from '_redux';
 
 import errores from 'utils/error'
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
+      // backgroundColor: theme.palette.white
     }
   },
   backdrop: {
@@ -37,6 +37,7 @@ export default function ({ match, ...others }) {
   const theme = useTheme()
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
+  const access = useSelector(state => state.user.id)
 
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
@@ -78,7 +79,7 @@ export default function ({ match, ...others }) {
   }
 
   const connect = (id) => {
-    const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
+    const webSocket = new WebSocket(`${ws}/ws/execute/${access}/${id}`)
     webSocket.onmessage = e => {
       addDescription(JSON.parse(e.data))
     }
@@ -178,10 +179,10 @@ export default function ({ match, ...others }) {
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Link color="inherit" component="button" onClick={to(`/subscriptions`)}>Subscriptions</Link>
-                  <Link color="inherit" component="button" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
-                  <Link color="inherit" component="button" onClick={to(`/subscriptions/${module.image_name}`)}>Test</Link>
-                  <Link color="inherit" component="button" onClick={to(`/module/experiment/${match.params.id}`)}>{module.index}</Link>
+                  <Link color="inherit" onClick={to(`/subscriptions`)}>Algorithms</Link>
+                  <Link color="inherit" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
+                  <Link color="inherit" onClick={to(`/subscriptions/${module.image_name}`)}>Test</Link>
+                  <Typography color="textSecondary">{module.index}</Typography>
                 </Breadcrumbs>
               </Grid>
             </Grid>

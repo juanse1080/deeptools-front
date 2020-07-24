@@ -137,7 +137,7 @@ export default function ({ progress, download }) {
               )
             }
             {
-              download ? <Link href={host+download} target="_blank" download>
+              download ? <Link href={host+download} target="_blank" download rel="noreferrer">
                 <Fab size="small" color="primary" aria-label="add" className={classes.download}>
                   <Icon className="fas fa-link text-white" fontSize="small"/>
                 </Fab>

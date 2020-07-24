@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
+      // backgroundColor: theme.palette.white
     }
   },
   fullHeight: {

@@ -1,6 +1,6 @@
 import React, { useEffect, createRef, useState } from 'react'
-import { Grid, makeStyles, Card, CardContent, LinearProgress, Typography, Link, IconButton, Paper, MobileStepper, Tooltip, Icon } from '@material-ui/core'
-import { Skeleton } from '@material-ui/lab'
+import { Grid, makeStyles, Card, CardContent, LinearProgress, Typography, Link, IconButton, Paper, MobileStepper, Tooltip, Icon, Breadcrumbs } from '@material-ui/core'
+import { Skeleton, Alert } from '@material-ui/lab'
 import { ArrowBack, ArrowForward, Visibility } from '@material-ui/icons'
 
 import clsx from 'clsx'
@@ -13,7 +13,7 @@ import { host, authHeaderJSON, history, ws } from 'helpers'
 import { title as ucWords, format_date as getDate, real_date } from 'utils'
 import errores from 'utils/error'
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from '_redux';
 
 const useStyles = makeStyles((theme) => ({
@@ -22,7 +22,6 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(2),
-      backgroundColor: theme.palette.white
     }
   },
   owner: {
@@ -93,14 +92,17 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 15,
     margin: 5
   },
-
+  date: {
+    whiteSpace: 'noWrap'
+  },
 }))
 
 export default function () {
   const classes = useStyles()
   const dispatch = useDispatch()
-  const [loading, setLoading] = useState(true)
+  const access = useSelector(state => state.user.id)
 
+  const [loading, setLoading] = useState(true)
   const [experiments, setExperiments] = useState([])
 
   const getClass = (progress) => {
@@ -117,7 +119,7 @@ export default function () {
   }
 
   const connect = (id, group, index) => {
-    const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
+    const webSocket = new WebSocket(`${ws}/ws/execute/${access}/${id}`)
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
       addMessage(group, index, data)
@@ -211,9 +213,14 @@ export default function () {
             )
           }
         </Grid>
-      </> : <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
+      </> : <Grid container style={{ maxWidth: '100%' }}>
+          <Grid item xs={12} className="mb-2">
+            <Breadcrumbs aria-label="breadcrumb">
+              <Typography color="textSecondary">Running</Typography>
+            </Breadcrumbs>
+          </Grid>
           {
-            experiments.map((item, index) =>
+            experiments.length > 0 ? experiments.map((item, index) =>
               <Grid item lg={6} md={6} sm={6} xs={12} key={index} className={classes.group}>
                 {
                   item.index === 0 ? null :
@@ -230,11 +237,11 @@ export default function () {
                       <LinearProgress color="primary" variant="determinate" value={exp.states.length > 0 ? parseInt(exp.states[exp.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(exp.states), root: classes.linearProgressRoot }} />
                       <Paper className={classes.file} elevation={3}>
                         <div className={classes.content}>
-                          <Typography noWrap component="h6" variant="h6">
-                            <Link component="button" onClick={showModule(exp.docker.image_name)}>{ucWords(exp.docker.name)}</Link>
+                          <Typography noWrap className="mr-2">
+                            <Link onClick={showModule(exp.docker.image_name)}>{ucWords(exp.docker.name)}</Link>
                           </Typography>
                           <Tooltip title={real_date(exp.created_at)} className={classes.date}>
-                            <Typography variant="caption" noWrap color="textSecondary">
+                            <Typography variant="caption" color="textSecondary">
                               {getDate(exp.created_at)}
                             </Typography>
                           </Tooltip>
@@ -278,7 +285,13 @@ export default function () {
                   item.items.length > 1 ? <MobileStepper classes={{ root: classes.stepper, dot: classes.dot, dots: classes.dots }} variant="dots" steps={item.items.length} position="static" activeStep={item.index} /> : null
                 }
               </Grid>
-            )
+            ) : <Grid container className="mt-3" justify="center" direction="row">
+                <Grid item xs={12} sm={10} md={8} xl={6}>
+                  <Alert severity="info" variant="outlined" className={clsx(classes.alerts)}>
+                    You have no processes running
+                  </Alert>
+                </Grid>
+              </Grid>
           }
         </Grid>
     }

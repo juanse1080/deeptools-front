@@ -4,14 +4,14 @@ import axios from 'axios'
 import showdown from 'showdown'
 import ReactHtmlParser, { convertNodeToElement } from 'react-html-parser';
 
-import { makeStyles, Backdrop, CircularProgress, Button, Link, Typography, useTheme, useMediaQuery, IconButton } from '@material-ui/core'
+import { makeStyles, Backdrop, CircularProgress, Button, Link, Typography, useTheme, useMediaQuery, IconButton, Grid, Breadcrumbs } from '@material-ui/core'
 import { ArrowBack, ArrowForward, PlayArrow, Save } from '@material-ui/icons'
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from '_redux';
 
 import { host, authHeaderJSON, history, ws, authHeaderForm } from 'helpers'
-import { error } from 'utils'
+import { error, title as ucWords } from 'utils'
 
 import { InputFile } from './components'
 import { Example } from './components'
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(3),
-      backgroundColor: theme.palette.white
+      // backgroundColor: theme.palette.white
     }
   },
   fullHeight: {
@@ -77,6 +77,7 @@ export default function Run({ match, ...others }) {
   const theme = useTheme()
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
+  const access = useSelector(state => state.user.id)
 
   const [loading, setLoading] = useState(true)
   const [step, setStep] = useState(0)
@@ -85,6 +86,12 @@ export default function Run({ match, ...others }) {
   const [example, setExample] = useState([])
   const [refs, setRefs] = useState([])
   const [cancel, setCancel] = useState([])
+
+  const to = href => () => {
+    dispatch(actions.startLoading())
+    history.push(href)
+    dispatch(actions.finishLoading())
+  }
 
   const addMedia = items => {
     const len = media.length
@@ -198,7 +205,7 @@ export default function Run({ match, ...others }) {
   }
 
   const connect = (id) => {
-    const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
+    const webSocket = new WebSocket(`${ws}/ws/execute/${access}/${id}`)
 
     waitForSocketConnection(webSocket, () => {
       sendMessage(webSocket, { command: 'execute' })
@@ -313,6 +320,15 @@ export default function Run({ match, ...others }) {
             <CircularProgress color="inherit" />
           </Backdrop>
         </> : <>
+            <Grid container justify="center" direction="row" className="mb-3">
+              <Grid item xs={12}>
+                <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
+                  <Link color="inherit" onClick={to(`/subscriptions`)}>Algorithms</Link>
+                  <Link color="inherit" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
+                  <Typography color="textSecondary">Run</Typography>
+                </Breadcrumbs>
+              </Grid>
+            </Grid>
             {content()}
             {
               sm ? <div className={classes.actions}>

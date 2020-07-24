@@ -30,7 +30,7 @@ const Protocol = ({ value, change, errors, ...others }) => {
       component="p"
       className="mb-3"
     >
-      In this text box, you can write <a target="_blank" href="https://www.markdownguide.org/getting-started/">Markdown</a> code and HTML code with <a target="_blank" href="https://getbootstrap.com/docs/4.4/components/alerts/">Bootstrap 4.4</a> styles.
+      In this text box, you can write <a target="_blank" href="https://www.markdownguide.org/getting-started/" rel="noreferrer">Markdown</a> code and HTML code with <a target="_blank" href="https://getbootstrap.com" rel="noreferrer">Bootstrap 4.4</a> styles.
     </Typography>
     <SimpleMDE
       onChange={change}

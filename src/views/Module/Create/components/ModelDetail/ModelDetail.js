@@ -15,6 +15,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('xs')]: {
       padding: 0,
       boxShadow: 'none',
+      backgroundColor: 'transparent'
     },
   },
   error: {
@@ -72,6 +73,9 @@ export default function ({ value, change, errors, ...others }) {
       <Grid className="p-2" item sm={12} xs={12}>
         <TextField label="Name" variant="outlined" fullWidth defaultValue={value.name} size="small" name="name" onBlur={setValue} error={hasError('name')} helperText={hasError('name') ? errors.name[0] : null} />
       </Grid>
+      <Grid className="p-2" item sm={12} xs={12}>
+        <TextField multiline rows={4} label="Description" variant="outlined" fullWidth defaultValue={value.description} size="small" name="description" onBlur={setValue} error={hasError('description')} helperText={hasError('description') ? errors.description[0] : null} />
+      </Grid>
       <Grid className="p-2" item sm={6} xs={12}>
         <Autocomplete fullWidth size="small"
           options={images}
@@ -95,7 +99,6 @@ export default function ({ value, change, errors, ...others }) {
       <Grid className="p-2" item sm={6} xs={12}>
         <TextField label="Classname" variant="outlined" fullWidth value={value.classname} size="small" name="classname" onChange={setValue} error={hasError('classname')} helperText={hasError('classname') ? errors.classname[0] : 'how is the class named?'} />
       </Grid>
-
     </Grid>
   </>
 }

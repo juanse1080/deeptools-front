@@ -44,7 +44,7 @@ const Sidebar = props => {
   const pages = [
     {
       id: '1',
-      title: 'Module',
+      title: 'Algorithms',
       roles: ['admin', 'developer'],
       icon: <Icon fontSize="small" className="fab fa-docker" />,
       children: [
@@ -62,28 +62,28 @@ const Sidebar = props => {
           roles: ['admin', 'developer'],
           icon: <Icon fontSize="small" className="fas fa-plus-circle" />
         },
-        {
-          id: '4',
-          title: 'Trash',
-          href: '/module/trash',
-          roles: ['admin', 'developer'],
-          icon: <Icon fontSize="small" className="fas fa-trash" />
-        },
+        // {
+        //   id: '4',
+        //   title: 'Trash',
+        //   href: '/module/trash',
+        //   roles: ['admin', 'developer'],
+        //   icon: <Icon fontSize="small" className="fas fa-trash" />
+        // },
       ]
     },
     {
       id: '5',
-      title: 'Subscriptions',
+      title: 'My algorithms',
       href: '/subscriptions',
       roles: ['user'],
-      icon: <Icon fontSize="small" className="fas fa-anchor" />,
+      icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
     },
     {
       id: '6',
       title: 'Running',
       href: '/module/experiment',
       roles: ['admin', 'developer', 'user'],
-      icon: <Icon fontSize="small" className="fas fa-running" />
+      icon: <Icon fontSize="small" className="fas fa-running" style={{ width: '1.6rem' }} />
     },
   ]
 

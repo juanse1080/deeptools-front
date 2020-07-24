@@ -42,8 +42,12 @@ const useStyles = makeStyles(theme => ({
   labelRoot: {
     display: 'flex',
     alignItems: 'center',
-    padding: '5px 0px',
     color: 'rgba(255,255,255,.6)',
+    textTransform: 'none',
+    width: '100%',
+    '&:hover': {
+      color: theme.palette.white,
+    }
   },
   labelText: {
     marginLeft: theme.spacing(1),
@@ -81,12 +85,13 @@ const SidebarNav = props => {
 
   const renderTree = (nodes) => (
     <TreeItem classes={{ content: classes.content, label: classes.label }} key={nodes.id} nodeId={nodes.id} label={
-      <Link color="inherit" className={classes.labelRoot} underline="none" onClick={() => { if (nodes.href) history.push(nodes.href) }}>
-        {nodes.icon ? nodes.icon : null}
-        <Typography variant="subtitle1" className={classes.labelText} color="inherit">
+      <Button className={classes.labelRoot} onClick={() => {
+        if (nodes.href) history.push(nodes.href)
+      }} startIcon={nodes.icon ? nodes.icon : null}>
+        <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
           {nodes.title}
         </Typography>
-      </Link>
+      </Button>
     }>
       {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
     </TreeItem>

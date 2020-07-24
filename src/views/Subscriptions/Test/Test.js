@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, Icon, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogContentText, Button, Fab, useTheme, useMediaQuery, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
-import { Skeleton } from '@material-ui/lab'
+import { Grid, Icon, makeStyles, Card, CardContent, LinearProgress, Typography, Link, Breadcrumbs, Paper, IconButton, Tooltip, Dialog, DialogActions, DialogContent, DialogContentText, Button, Fab, useTheme, useMediaQuery, Menu, MenuItem, ListItemIcon, TablePagination } from '@material-ui/core'
+import { Skeleton, Alert } from '@material-ui/lab'
 import { Delete, Visibility } from '@material-ui/icons'
 
 import { isMobile } from 'react-device-detect'
@@ -11,7 +11,7 @@ import { host, authHeaderJSON, history, ws } from 'helpers'
 import { title as ucWords, format_date as getDate, real_date } from 'utils'
 import errores from 'utils/error'
 
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { actions } from '_redux'
 
 const useStyles = makeStyles((theme) => ({
@@ -20,24 +20,13 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
     [theme.breakpoints.down('xs')]: {
       padding: theme.spacing(2),
-      backgroundColor: theme.palette.white
     },
-    '&::-webkit-scrollbar': {
-      backgroundColor: '#29292e',
-      width: 10,
-      borderRadius: 12,
-    },
-    '&::-webkit-scrollbar-track': {
-      background: '#7e7e7e',
-      borderRadius: 12,
-    },
-    '&::-webkit-scrollbar-thumb': {
-      background: '#e1e1e1',
-      borderRadius: 12,
-    }
   },
   listItemIconRoot: {
     minWidth: '30px'
+  },
+  date: {
+    whiteSpace: 'noWrap'
   },
   error: {
     backgroundColor: '#f44336'
@@ -72,6 +61,12 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  pagination: {
+    borderBottom: 0
+  },
+  selectRoot: {
+    marginRight: theme.spacing(2)
+  },
   linearProgressRoot: {
     height: 2
   },
@@ -86,11 +81,15 @@ export default function ({ match }) {
   const theme = useTheme()
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
+  const access = useSelector(state => state.user.id)
 
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
+  const [rows, setRows] = useState(5)
+  const [page, setPage] = useState(0)
   const [module, setModule] = useState({})
   const [experiments, setExperiments] = useState([])
+  const [all, setAll] = useState([])
 
   const getClass = (progress) => {
     if (progress.length > 0) {
@@ -111,12 +110,6 @@ export default function ({ match }) {
     dispatch(actions.finishLoading())
   }
 
-  const showTest = () => {
-    dispatch(actions.startLoading())
-    history.push(`/subscriptions/${match.params.id}`)
-    dispatch(actions.finishLoading())
-  }
-
   const show = (id) => () => {
     dispatch(actions.startLoading())
     history.push(`/module/experiment/${id}`)
@@ -130,33 +123,43 @@ export default function ({ match }) {
   }
 
   const connect = (id, index) => {
-    const webSocket = new WebSocket(`${ws}/ws/execute/${id}`)
+    const webSocket = new WebSocket(`${ws}/ws/execute/${access}/${id}`)
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
-      addMessage(id, data)
+      addMessage(index, data)
     }
     return webSocket
   }
 
   const addMessage = (index, value) => {
+    let finished = false
+    value.forEach(element => {
+      if (element.state === 'success') finished = true
+    })
+
     setExperiments(experiments => {
       let temp = [...experiments]
-      let key
-      temp.forEach((item, index_) => {
-        if (item.id === index) {
-          key = index_
-          return
-        }
-      })
-      temp[key] = { ...temp[key], states: [...temp[key].states, ...value] }
+      if (finished) {
+        closeIfExits(temp, index)
+      }
+      temp[index] = finished ? { ...temp[index], states: [...temp[index].states, ...value], state: 'executed' } : { ...temp[index], states: [...temp[index].states, ...value] }
       return temp
     })
   }
 
+  const closeIfExits = (list_, index) => {
+    if (list_[index].ws) list_[index].ws.close()
+  }
+
   const deleteItem = index => {
-    setExperiments(experiments => {
-      let temp = [...experiments]
-      temp.splice(index, 1)
+    setAll(all => {
+      let temp = [...all]
+      temp.some((item, key) => {
+        if (item.id === experiments[index].id) {
+          temp.splice(key, 1)
+          return true
+        }
+      })
       return temp
     })
   }
@@ -166,6 +169,7 @@ export default function ({ match }) {
       function (res) {
         setDialog(false)
         deleteItem(dialog)
+        setPage(0)
       }
     ).catch(
       function (err) {
@@ -176,9 +180,9 @@ export default function ({ match }) {
   }
 
   const clone = index => () => {
+    dispatch(actions.startLoading())
     axios.post(`${host}/accounts/experiment/clone/${experiments[index].id}`, {}, authHeaderJSON()).then(
       function (res) {
-        dispatch(actions.startLoading())
         history.push(`/module/run/${match.params.id}`)
         dispatch(actions.finishLoading())
       }
@@ -188,7 +192,6 @@ export default function ({ match }) {
       }
     )
   }
-
 
   const triedDelete = index => () => {
     handleClose(index)()
@@ -219,15 +222,35 @@ export default function ({ match }) {
     handleExperiments(index, 'anchor', null)
   }
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage)
+    setExperiments(changeExperiments(all.slice(rows * newPage, (newPage + 1) * rows)))
+  }
+
+  const handleChangeRowsPerPage = (event) => {
+    const new_rows = event.target.value
+    setRows(new_rows)
+    setPage(0)
+    setExperiments(changeExperiments(all.slice(0, new_rows)))
+  }
+
+  const changeExperiments = list => {
+    experiments.map(exp => {
+      if (exp.ws) exp.ws.close()
+    })
+
+    return list.map((item, index) =>
+      item.state === 'executing' ?
+        { ...item, ws: connect(item.id, index), states: [], anchor: null } :
+        { ...item, states: item.records, anchor: null }
+    )
+  }
+
   useEffect(() => {
     axios.get(`${host}/accounts/subscriptions/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
-        setExperiments(res.data.test.map((item, index) =>
-          item.state === 'executing' ?
-            { ...item, ws: connect(item.id, index), states: [], anchor: null } :
-            { ...item, states: item.records, anchor: null }
-        ))
+        setAll([...res.data.test])
         setModule(res.data.docker)
         setLoading(false)
       }
@@ -237,7 +260,27 @@ export default function ({ match }) {
         console.error(err.response)
       }
     )
+    return () => {
+      experiments.map(({ ws }) => {
+        if (ws) ws.close()
+      })
+    }
   }, [])
+
+  useEffect(() => {
+    setExperiments(experiments => {
+      experiments.map(exp => {
+        if (exp.ws) exp.ws.close()
+      })
+
+      const data = [...all].splice(0, rows).map((item, index) =>
+        item.state === 'executing' ?
+          { ...item, ws: connect(item.id, index), states: [], anchor: null } :
+          { ...item, states: item.records, anchor: null }
+      )
+      return data
+    })
+  }, [all])
 
   return <div className={classes.root}>
     {
@@ -271,19 +314,19 @@ export default function ({ match }) {
           <Grid container justify="center" direction="row">
             <Grid item xs={12}>
               <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                <Link color="inherit" component="button" onClick={subscriptions}>Subscriptions</Link>
-                <Link color="inherit" component="button" onClick={showModule}>{ucWords(module.name)}</Link>
-                <Link color="inherit" component="button" onClick={showTest}>Test</Link>
+                <Link color="inherit" onClick={subscriptions}>Algorithms</Link>
+                <Link color="inherit" onClick={showModule}>{ucWords(module.name)}</Link>
+                <Typography color="textSecondary">Test</Typography>
               </Breadcrumbs>
             </Grid>
           </Grid>
           <Grid container className="mt-3" spacing={2}>
             {
-              experiments.map((item, index) =>
+              experiments.length > 0 ? experiments.map((item, index) =>
                 <Grid item xl={4} lg={6} md={6} sm={12} xs={12} key={item.id}>
                   <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states), root: classes.linearProgressRoot }} />
                   <Paper className={classes.file}>
-                    <div className={classes.content}>
+                    <div className={classes.content} style={{ minWidth: 0 }}>
                       <div className={clsx(classes.content, "actions")} style={{ display: isMobile ? 'flex' : 'none' }}>
                         {
                           sm ? <>
@@ -322,12 +365,12 @@ export default function ({ match }) {
                                   <Typography variant="inherit">Show test</Typography>
                                 </MenuItem>
                                 {
-                                  module.state !== 'active' ? <MenuItem onClick={clone(index)}>
+                                  module.state !== 'active' ? null : <MenuItem onClick={clone(index)}>
                                     <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                                       <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
                                     </ListItemIcon>
                                     <Typography variant="inherit">Clone test with same data</Typography>
-                                  </MenuItem> : null
+                                  </MenuItem>
                                 }
                                 {
                                   item.state === 'executed' ?
@@ -352,17 +395,26 @@ export default function ({ match }) {
                       </Tooltip>
                     </div>
 
-                    <Tooltip title={real_date(item.created_at)} className={classes.date}>
-                      <Typography variant="caption" noWrap color="textSecondary">
+                    <Tooltip title={real_date(item.created_at)} >
+                      <Typography variant="caption" color="textSecondary" className={classes.date}>
                         {getDate(item.created_at)}
                       </Typography>
                     </Tooltip>
                   </Paper>
                 </Grid>
-              )
+              ) : <Grid container className="mt-3" justify="center" direction="row">
+                  <Grid item xs={12} sm={10} md={8} xl={6}>
+                    <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.alerts)}>
+                      There are no records
+                    </Alert>
+                  </Grid>
+                </Grid>
             }
           </Grid>
-          <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end">
+          <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end" alignItems="center">
+            <Grid item>
+              <TablePagination component="div" count={all.length} page={page} rowsPerPage={rows} onChangePage={handleChangePage} onChangeRowsPerPage={handleChangeRowsPerPage} rowsPerPageOptions={[5]} classes={{ root: classes.pagination, selectRoot: classes.selectRoot }} />
+            </Grid>
             <Grid item>
               {
                 module.state !== 'active' ? <Fab disabled={true} size="small" color="primary" aria-label="Test algorith">

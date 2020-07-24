@@ -15,7 +15,7 @@ const RoutePublicLayout = props => {
       render={matchProps =>
         <Minimal>
           <Component {...matchProps} />
-          <Footer />
+          {/* <Footer /> */}
         </Minimal >
       }
     />
