@@ -1,1 +1,1 @@
-export { default } from './ShowProtocol'
+export { default } from './ShowProtocolV2'

@@ -18,8 +18,6 @@ import { title as ucWords, error } from 'utils'
 
 import { actions } from '_redux'
 
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -344,8 +342,7 @@ export default function List(props) {
                     <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
                       {
                         filter.map((item, index) =>
-                          <ExpansionPanel key={item.id} expanded={expanded === index} className={classes.fullWidth}>
-
+                          <ExpansionPanel key={item.image_name} expanded={expanded === index} className={classes.fullWidth}>
                             <ExpansionPanelSummary
                               classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
                             >

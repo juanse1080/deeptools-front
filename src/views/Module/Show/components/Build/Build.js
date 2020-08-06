@@ -14,7 +14,7 @@ const useStyles = makeStyles({
     padding: theme.spacing(2),
     borderRadius: 12,
     overflowY: 'scroll',
-    height: '500px',
+    maxHeight: '500px',
     '&::-webkit-scrollbar': {
       backgroundColor: '#29292e',
       width: 10,

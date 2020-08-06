@@ -12,6 +12,7 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('xs')]: {
       padding: 0,
       boxShadow: 'none',
+      backgroundColor: 'transparent'
     }
   },
 }))

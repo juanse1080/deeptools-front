@@ -21,10 +21,9 @@ import { Alert } from '@material-ui/lab';
 
 import { useDispatch, useSelector } from 'react-redux'
 import { actions } from '_redux'
-import { format_date } from 'utils'
+import { format_date, error, PushNotification } from 'utils'
 import axios from 'axios'
 import { history, ws as ws_host, host, authHeaderJSON } from 'helpers'
-import { error } from 'utils'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,7 +49,8 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(1),
   },
   menuPaper: {
-    maxWidth: 250
+    maxWidth: 250,
+    width: 250
   },
   description: {
     overflow: 'hidden',
@@ -123,6 +123,15 @@ const Topbar = props => {
 
   const addNotification = (data) => {
     setNotifications(notifications => ([...data.content, ...notifications]))
+    if (data.action === 'append') {
+      const item = data.content[0]
+      const notification = new PushNotification({
+        action: item.link,
+        title: item.title,
+        body: item.description
+      })
+      notification.notify()
+    }
   }
 
   const deleteNotification = index => {
@@ -149,16 +158,20 @@ const Topbar = props => {
     const webSocket = new WebSocket(`${ws_host}/ws/notifications/${access}`)
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
-      if (data.actions === 'append') {
-        addNotification(data)
-      } else if (data.actions === 'delete') {
-        editNotification(data)
-      }
+
+      if (data.action === 'append' || data.action === 'fetch') addNotification(data)
+
+      // if (data.action === 'append' || data.action === 'fetch') {
+      //   addNotification(data)
+      // } else if (data.action === 'delete') {
+      //   editNotification(data)
+      // }
     }
     return webSocket
   }
 
   useEffect(() => {
+    new PushNotification().checkPermission()
     setWs(connect())
     return () => {
       if (ws) ws.close()
@@ -178,15 +191,15 @@ const Topbar = props => {
           <Badge badgeContent={notifications.length} max={9} overlap="circle" color='primary' children={<NotificationsIcon className={classes.Button} />} />
         </IconButton>
         <Menu classes={{ list: classes.menuList, paper: classes.menuPaper }} id="notification-appbar" anchorEl={anchorEl.notifications} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={Boolean(anchorEl.notifications)} onClose={handleClose('notifications')} >
-          {/* <MenuItem style={{ cursor: 'default', pointerEvents: 'none' }}>
+          <MenuItem style={{ cursor: 'default', pointerEvents: 'none', minHeight: 'auto' }}>
             <Typography variant="caption">
               Notifications
               </Typography>
           </MenuItem>
-          <Divider className={classes.divider} /> */}
+          <Divider className={classes.divider} />
           {
             notifications.length > 0 ? notifications.slice(0, notifications.length > 5 ? 5 : notifications.length).map((item, key) =>
-              <MenuItem key={key} onClick={to(item.id, key, item.link)}>
+              <MenuItem key={key} onClick={to(item.id, key, item.link)} style={{ minHeight: 'auto' }}>
                 <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                   {getIcon(item.kind)}
                 </ListItemIcon>
@@ -196,7 +209,7 @@ const Topbar = props => {
                   <Typography variant="caption" noWrap>{format_date(item.created_at)}</Typography>
                 </div>
               </MenuItem>
-            ) : <MenuItem disabled>
+            ) : <MenuItem disabled style={{ minHeight: 'auto' }}>
                 <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                   <Info fontSize="small" />
                 </ListItemIcon>
@@ -205,14 +218,14 @@ const Topbar = props => {
                 </Typography>
               </MenuItem>
           }
-          {/* <Divider className={classes.divider} /> */}
-          {/* <MenuItem >
+          <Divider className={classes.divider} />
+          <MenuItem style={{ minHeight: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
               <Typography variant="caption">
                 Show all
               </Typography>
             </div>
-          </MenuItem> */}
+          </MenuItem>
         </Menu>
 
         <IconButton className={classes.profileButton} onClick={handleMenu('account')}>

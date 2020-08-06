@@ -16,7 +16,7 @@ import {
 const useStyles = makeStyles(theme => ({
   root: {
     padding: theme.spacing(4)
-  }
+  },
 }));
 
 const Dashboard = () => {

@@ -5,6 +5,8 @@ import { makeStyles, Grid } from '@material-ui/core'
 
 import axios from 'axios'
 
+import { useDispatch, useSelector } from 'react-redux'
+
 import { host, authHeaderJSON, history, ws } from 'helpers'
 
 import errores from 'utils/error'
@@ -29,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
 export default function ({ match, ...others }) {
   const classes = useStyles()
   const [loading, setLoading] = useState(true)
+  const access = useSelector(state => state.user.id)
+  const role = useSelector(state => state.user.role)
 
 
   const ref = useRef(null)
@@ -73,7 +77,7 @@ export default function ({ match, ...others }) {
     const data = JSON.parse(state)
     console.log("Data:", data)
     setProgress([...data])
-    if(data[data.length - 1].state === 'success')
+    if (data[data.length - 1].state === 'success')
       setBuild(false)
   }
 
@@ -90,7 +94,8 @@ export default function ({ match, ...others }) {
           elements[element.kind] = element
         })
         elements["graph"] = graphs
-        setModule({ ...res.data, elements: elements })
+        setModule({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
+        console.log({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
         setBuild(res.data.state === 'building')
         setLoading(false)
       }
@@ -103,6 +108,9 @@ export default function ({ match, ...others }) {
   }, [match.params.id])
 
   return <>
+    {
+      !build && !loading ? <Detail module={module} /> : null
+    }
     <div className={classes.root}>
       {
         loading ? <>
@@ -125,9 +133,7 @@ export default function ({ match, ...others }) {
           </Grid>
         </> : build ? <>
           <Build progress={progress} />
-        </> : <>
-              <Detail module={module} />
-            </>
+        </> : null
       }
     </div>
   </>

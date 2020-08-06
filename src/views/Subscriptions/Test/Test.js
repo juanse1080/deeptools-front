@@ -249,7 +249,6 @@ export default function ({ match }) {
   useEffect(() => {
     axios.get(`${host}/accounts/subscriptions/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
         setAll([...res.data.test])
         setModule(res.data.docker)
         setLoading(false)
@@ -395,14 +394,14 @@ export default function ({ match }) {
                       </Tooltip>
                     </div>
 
-                    <Tooltip title={real_date(item.created_at)} >
+                    <Tooltip title={real_date(item.updated_at)} >
                       <Typography variant="caption" color="textSecondary" className={classes.date}>
-                        {getDate(item.created_at)}
+                        {getDate(item.updated_at)}
                       </Typography>
                     </Tooltip>
                   </Paper>
                 </Grid>
-              ) : <Grid container className="mt-3" justify="center" direction="row">
+              ) : <Grid container justify="center" direction="row">
                   <Grid item xs={12} sm={10} md={8} xl={6}>
                     <Alert severity="info" variant="outlined" className={clsx("mt-3", classes.alerts)}>
                       There are no records

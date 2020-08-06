@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function ({ id, change, examples, ...others }) {
+export default function ({ id, change, examples, type, ...others }) {
   const classes = useStyles()
   const dispatch = useDispatch()
 
@@ -28,8 +28,7 @@ export default function ({ id, change, examples, ...others }) {
   useEffect(() => {
     axios.get(`${host}/module/run/${id}/examples`, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
-        setData(res.data)
+        setData([...res.data])
       }
     ).catch(
       function (err) {
@@ -37,7 +36,7 @@ export default function ({ id, change, examples, ...others }) {
         console.error(err.response)
       }
     )
-  }, [id])
+  }, [id, type])
 
   const new_items = (e, values) => {
     change(values)
@@ -72,7 +71,12 @@ export default function ({ id, change, examples, ...others }) {
       {
         examples.map((item, key) =>
           <Grid key={key} item xs={12} sm={6} md={6} lg={4} xl={3}>
-            <ReactPlayer url={`${host}${item.href}`} className='react-player' controls playing muted loop width='100%' height='100%' />
+            {
+              type === 'image' ? <Card>
+                <CardMedia className={classes.media} image={`${host}${item.href}`} title={item.href} />
+              </Card> : <ReactPlayer url={`${host}${item.href}`} className='react-player' controls playing muted loop width='100%' height='100%' />
+            }
+            {console.log(type)}
           </Grid>
         )
       }

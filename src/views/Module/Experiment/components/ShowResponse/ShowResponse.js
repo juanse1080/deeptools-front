@@ -45,7 +45,6 @@ const options = {
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    padding: theme.spacing(3),
     overflow: 'scroll',
     [theme.breakpoints.down('xs')]: {
       padding: 0,
@@ -60,16 +59,15 @@ export default function ({ value }) {
   const [html, setHtml] = useState(null)
 
   useEffect(() => {
-    const obj = new showdown.Converter({tables: true})
+    const obj = new showdown.Converter({ tables: true, tablesHeaderId: true })
     setHtml(obj.makeHtml(value))
-    console.log(html)
+    console.log(value)
+    console.log(obj.makeHtml(value))
   }, [value])
 
-  return <>
-    <Paper className={classes.paper} elevation={3}>
-      {
-        ReactHtmlParser(html, options)
-      }
-    </Paper>
-  </>
+  return <div className={classes.paper}>
+    {
+      ReactHtmlParser(html, options)
+    }
+  </div>
 }

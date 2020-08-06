@@ -11,7 +11,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    height: '100%'
+    height: '100%',
+    alignItems: 'center'
   },
   image: {
     marginTop: 50,

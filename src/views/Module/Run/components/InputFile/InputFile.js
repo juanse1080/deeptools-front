@@ -79,19 +79,25 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
   }
 
   const handleMedia = e => {
-    const files = Array.from(e.target.files || e.dataTransfer.files)
-    let errors = []
-    files.forEach((file, index, files_) => {
-      if (!file.type.match(pattern || "")) {
-        files_.splice(index, 1)
-        errors.push(file.name)
+    let files = Array.from(e.target.files || e.dataTransfer.files)
+    
+    if (pattern) {
+      let errors = []
+      files = files.filter(file => {
+        if (!file.type.match(pattern || "")) {
+          errors.push(file.name)
+          return false
+        } else {
+          return true
+        }
+      })
+    
+      if (errors.length > 0) {
+        setMessage(message => `${errors.join(', ')} files do not correspond to the allowed format`)
+        setError(true)
       }
-    })
-
-    addMedia(files)
-    if (errors.length > 0) {
-      setMessage(message => `${errors.join(', ')} files do not correspond to the allowed format`)
     }
+    addMedia(files)
   }
 
   const handleError = (event, reason) => {
@@ -123,7 +129,7 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
         </div>
       </label>
       {
-        <input multiple type="file" id="input" accept="image/*" style={{ display: 'none' }} onChange={handleMedia} />
+        <input multiple type="file" id="input" accept="image/*,video/*" style={{ display: 'none' }} onChange={handleMedia} />
       }
 
     </Paper>

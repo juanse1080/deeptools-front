@@ -15,6 +15,24 @@ const useStyles = makeStyles(theme => ({
     height: 0,
     width: '100%'
   },
+  stepper: {
+    marginTop: theme.spacing(1),
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    padding: 0
+  },
+  dots: {
+    alignItems: 'center'
+  },
+  dot: {
+    width: 6,
+    height: 6
+  },
+  activeDot: {
+    backgroundColor: 'inherit',
+    width: 8,
+    height: 8
+  },
 }))
 
 export default function ShowMedia({ element }) {
@@ -31,6 +49,7 @@ export default function ShowMedia({ element }) {
     </Card>
     {
       element.len > 0 ? <MobileStepper
+        classes={{ root: classes.stepper, dot: classes.dot, dots: classes.dots }}
         variant="dots"
         steps={6}
         position="static"

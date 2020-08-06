@@ -151,8 +151,17 @@ export default function ({ match, ...others }) {
           setExperiment({ ...res.data })
           setProgress(res.data.records)
         }
+        let types = {}
+        res.data.docker.elements_type.forEach(item => {
+          if (item.kind in types) {
+            types[item.kind] = Array.isArray(types[item.kind]) ? [...types[item.kind], { ...item }] : [{ ...types[item.kind] }, { ...item }]
+          } else {
+            types[item.kind] = { ...item }
+          }
+        })
+
         setExecute(res.data.state === 'executed' ? false : true)
-        setModule({ ...res.data.docker, experiments: res.data.experiments, index: res.data.experiments.indexOf(match.params.id) + 1 })
+        setModule({ ...res.data.docker, experiments: res.data.experiments, elements_type: types, index: res.data.experiments.indexOf(match.params.id) + 1 })
         setLoading(false)
       }
     ).catch(
@@ -224,7 +233,7 @@ export default function ({ match, ...others }) {
                         {
                           module.state !== 'active' ? null :
                             <Tooltip title="Test algorith">
-                              <IconButton onClick={newTest} size="small" variant="contained" color="default" className="mr-2">
+                              <IconButton onClick={newTest} variant="contained" color="default" className="mr-2">
                                 <Icon fontSize="small" className="fas fa-vial text-success" />
                               </IconButton>
                             </Tooltip>
@@ -232,18 +241,18 @@ export default function ({ match, ...others }) {
                         {
                           module.state !== 'active' ?
                             null : <Tooltip title="Clone test with same data">
-                              <IconButton onClick={clone} size="small" variant="contained" color="default" className="mr-2" >
+                              <IconButton onClick={clone} variant="contained" color="default" className="mr-2" >
                                 <Icon fontSize="small" className="fas fa-clone text-secondary" />
                               </IconButton>
                             </Tooltip>
                         }
                         <Tooltip title={execute ? "Less info" : "More info"}>
-                          <IconButton onClick={handleExecute} size="small" variant="contained" color="default" className="mr-2">
+                          <IconButton onClick={handleExecute} variant="contained" color="default" className="mr-2">
                             {execute ? <ExpandLess /> : <ExpandMore />}
                           </IconButton>
                         </Tooltip>
                         <Tooltip className="mr-1" title="Delete test">
-                          <IconButton onClick={triedDelete} size="small" variant="contained" color="default">
+                          <IconButton onClick={triedDelete} variant="contained" color="default">
                             <Delete className="text-danger" />
                           </IconButton>
                         </Tooltip>

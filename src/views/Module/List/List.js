@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon } from '@material-ui/core'
+import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Breadcrumbs } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
 
 import { isMobile } from 'react-device-detect'
@@ -77,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column'
   },
   paper: {
+    // margin: theme.spacing(0, 1, 2, 1),
     padding: theme.spacing(2),
     '&:hover div.actions': {
       display: 'flex !important'
@@ -92,8 +93,14 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '30px'
   },
   linearProgressRoot: {
-    height: 2
+    height: 2,
   },
+  fatherTitle: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'start',
+    justifyContent: 'start'
+  }
 }))
 
 const default_ = { name: '', owner: '' }
@@ -221,6 +228,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios.get(`${host}/module`, authHeaderJSON()).then(function (res) {
+      console.log(res.data)
       const data = res.data.map(item => ({ ...item, anchor: null }))
       setModules(data)
       setFilter(data)
@@ -289,7 +297,12 @@ export default function List(props) {
             </Grid>
           </>
         </> : <>
-            <Grid container className="mt-3" justify="center" direction="row">
+            <Grid container justify="center" direction="row">
+              <Grid item xs={12} className="mb-2">
+                <Breadcrumbs aria-label="breadcrumb">
+                  <Typography color="textSecondary">Algorithms</Typography>
+                </Breadcrumbs>
+              </Grid>
               <Grid item xs={12} sm={10} md={8} xl={6}>
                 <Paper className={classes.alerts}>
                   <IconButton size="small" color="primary" className={classes.iconButton} aria-label="search">
@@ -326,21 +339,27 @@ export default function List(props) {
                         </Grid>
                       ) : null
                     }
-                    <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
+                    <Grid container className="mt-3" spacing={1}>
                       {
                         filter.map((item, index) =>
-                          <Grid item lg={6} md={6} sm={6} xs={12} key={item.id}>
+                          <Grid item lg={6} md={6} sm={6} xs={12} key={item.id} >
                             {item.loading ? <LinearProgress classes={{ root: classes.linearProgressRoot }} /> : null}
                             <Paper className={classes.paper} >
                               <div className={clsx(classes.details, classes.alignItemsStart)}>
-                                <div className={classes.title}>
-                                  <Typography noWrap>
-                                    <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
-                                  </Typography>
-                                  <Typography variant="caption" color="textSecondary">
-                                    {item.image}
-                                  </Typography>
+                                <div className={classes.fatherTitle}>
+                                  <Tooltip title={item.state} className="mr-2">
+                                    <Icon fontSize="default" className={clsx(`fas ${item.state === 'active' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-secondary'}`)} />
+                                  </Tooltip>
+                                  <div className={classes.title}>
+                                    <Typography noWrap>
+                                      <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
+                                    </Typography>
+                                    <Typography variant="caption" color="textSecondary">
+                                      {item.image}
+                                    </Typography>
+                                  </div>
                                 </div>
+
                                 <span className={classes.owner}>
                                   <Typography noWrap variant="caption" color="textSecondary">
                                     {getDate(item.created_at)}
@@ -356,7 +375,7 @@ export default function List(props) {
                                     sm ? <>
                                       {
                                         item.state === 'active' ? <>
-                                          <Tooltip title="Experiment">
+                                          <Tooltip title="Test">
                                             <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
                                               <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
                                             </IconButton>
@@ -402,7 +421,7 @@ export default function List(props) {
                                                 <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
                                                   <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
                                                 </ListItemIcon>
-                                                <Typography variant="inherit">Experiment</Typography>
+                                                <Typography variant="inherit">Test</Typography>
                                               </MenuItem>
                                               <MenuItem onClick={stop(index, item.image_name)}>
                                                 <ListItemIcon classes={{ root: classes.listItemIconRoot }}>

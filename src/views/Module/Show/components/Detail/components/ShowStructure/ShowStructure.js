@@ -16,7 +16,6 @@ export default function ShowStructure({ elements }) {
     }
   }
   console.log(elements)
-  console.log(renderStructure())
 
   const views = [
     <Full elements={elements} />,

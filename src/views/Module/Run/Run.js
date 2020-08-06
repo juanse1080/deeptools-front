@@ -54,6 +54,12 @@ const transform = (node, index) => {
 
   if (node.type === 'tag' && node.name === 'ul') {
     node.name = 'ol';
+    node.attribs.class = "ml-4"
+    return convertNodeToElement(node, index, transform);
+  }
+
+  if (node.type === 'tag' && node.name === 'ol') {
+    node.attribs.class = "ml-4"
     return convertNodeToElement(node, index, transform);
   }
 
@@ -277,8 +283,17 @@ export default function Run({ match, ...others }) {
     axios.post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON()).then(
       function (res) {
         if (!['active', 'builded'].includes(res.data.state)) history.goBack()
-        const obj = new showdown.Converter()
-        setModule({ ...res.data, html: obj.makeHtml(res.data.protocol) })
+        const obj = new showdown.Converter({tables: true})
+
+        let type
+        [...res.data.elements_type].some(item => {
+          if (item.kind === 'input') {
+            type = item.value
+            return true
+          }
+        })
+        console.log({ ...res.data, html: obj.makeHtml(res.data.protocol), type })
+        setModule({ ...res.data, html: obj.makeHtml(res.data.protocol), type })
         setMedia(res.data.elements.map(item => ({ ...item, hover: false, progress: 100, uploaded: true })))
         setLoading(false)
       }
@@ -298,13 +313,13 @@ export default function Run({ match, ...others }) {
 
   const content = () => {
     if (step === 0) {
-      return <>
+      return <div className="p-3" style={{ overflow: 'scroll' }}>
         {ReactHtmlParser(module.html, options)}
-      </>
+      </div>
     } else if (step === 1) {
-      return <InputFile init={module.state === 'builded' ? true : false} enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} />
+      return <InputFile init={module.state === 'builded' ? true : false} enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} pattern={module.extensions ? new RegExp(`.*(${module.extensions.split(' ').join('|')})$`) : null} />
     } else {
-      return <Example change={setExample} examples={example} id={match.params.id} />
+      return <Example change={setExample} examples={example} id={match.params.id} type={module.type} />
     }
   }
 
@@ -334,11 +349,11 @@ export default function Run({ match, ...others }) {
               sm ? <div className={classes.actions}>
                 <div className={classes.buttons}>
                   <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-                  <Button variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
+                  <Button disabled={step === 1 && media.length === 0} variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
                 </div>
                 {
                   step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
-                    <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
+                    <Typography variant="h5" color="primary">Do you want to do a little test?</Typography>
                   </Link> : null
                 }
               </div> : <div className={classes.actions}>
@@ -346,11 +361,11 @@ export default function Run({ match, ...others }) {
                     <IconButton disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>
                       <ArrowBack />
                     </IconButton>
-                    <IconButton variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? <ArrowForward /> : step == 1 ? <PlayArrow /> : <Save />}</IconButton>
+                    <IconButton disabled={step === 1 && media.length === 0} variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step === 1 ? execute : uploadExamples}>{step === 0 ? <ArrowForward /> : step === 1 ? <PlayArrow /> : <Save />}</IconButton>
                   </div>
                   {
                     step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
-                      <Typography variant="caption" color="primary">Do you want to do a little test?</Typography>
+                      <Typography variant="h5" color="primary">Do you want to do a little test?</Typography>
                     </Link> : null
                   }
                 </div>

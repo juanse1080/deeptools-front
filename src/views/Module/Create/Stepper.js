@@ -119,7 +119,7 @@ export default function Steppers() {
 
   const [step, setStep] = useState(0)
   const [protocol, setProtocol] = useState('')
-  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '', description: '' })
+  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '', description: '', view: '', extensions: '' })
   const [elements, setElements] = useState({
     input: { state: true, len: 0, value: 'video' }, response: { state: true, len: 0, value: 'text' }, output: { state: true, len: 0, value: 'video' }, graph: { state: true, len: 1, value: options }
   })
@@ -134,6 +134,7 @@ export default function Steppers() {
   }
 
   const handleProtocol = (value) => {
+    console.log(value)
     setProtocol(value)
   }
 
@@ -203,7 +204,7 @@ export default function Steppers() {
               state: true,
               len: graph.len,
               kind: key,
-              value: JSON.stringify(graph),
+              value: JSON.stringify(graph.options),
             })
           })
         } else {
@@ -310,7 +311,7 @@ export default function Steppers() {
     },
     {
       label: 'Representation',
-      content: <Structure check={checkElements} change={handleElements} elements={elements} errors={form.errors} />
+      content: <Structure check={checkElements} change={handleElements} elements={elements} errors={form.errors} changeView={handleDetails} />
     },
     {
       label: 'Model detail',

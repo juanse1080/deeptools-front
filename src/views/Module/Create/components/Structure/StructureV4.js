@@ -31,7 +31,7 @@ function View(props) {
   );
 }
 
-const Structure = ({ elements, change, check, ...others }) => {
+const Structure = ({ elements, change, check, changeView, ...others }) => {
   const classes = useStyles()
   const [index, setIndex] = useState(2)
 
@@ -55,7 +55,9 @@ const Structure = ({ elements, change, check, ...others }) => {
 
   // Actualiza la visualización cuando la propiedad cambia
   useEffect(() => {
-    setIndex(() => handleStructure())
+    const view = handleStructure()
+    setIndex(view)
+    changeView('view', view)
   }, [elements])
 
   return (

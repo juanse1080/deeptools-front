@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import PropTypes from 'prop-types'
 import { Link as RouterLink } from 'react-router-dom'
 import { makeStyles } from '@material-ui/styles'
-import { Drawer, Icon } from '@material-ui/core'
+import { Drawer, Icon, Button, Typography } from '@material-ui/core'
 import DashboardIcon from '@material-ui/icons/Dashboard'
 import PeopleIcon from '@material-ui/icons/People'
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket'
@@ -14,9 +14,10 @@ import SettingsIcon from '@material-ui/icons/Settings'
 import LockOpenIcon from '@material-ui/icons/LockOpen'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 
-import { useSelector } from 'react-redux'
-
 import { SidebarNav } from './components'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { actions } from '_redux'
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -27,7 +28,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    padding: theme.spacing(2)
+    padding: theme.spacing(2),
+    justifyContent: 'space-between'
   },
   divider: {
     margin: theme.spacing(1, 0)
@@ -35,65 +37,89 @@ const useStyles = makeStyles(theme => ({
   nav: {
     marginBottom: theme.spacing(2)
   },
+  labelRoot: {
+    paddingLeft: 18,
+    display: 'flex',
+    alignItems: 'center',
+    color: 'rgba(255,255,255,.6)',
+    textTransform: 'none',
+    width: '100%',
+    '&:hover': {
+      color: theme.palette.white,
+    }
+  },
+  labelText: {
+    marginLeft: theme.spacing(1),
+    fontWeight: 'inherit',
+    flexGrow: 1,
+  },
+  paperAnchorLeft: {
+    borderRight: 0
+  }
 }))
+
+const pages = [
+  {
+    id: '0',
+    title: 'Home',
+    href: '/algorithms',
+    roles: ['user'],
+    icon: <Icon fontSize="small" className="fas fa-home" />,  
+  },
+  {
+    id: '1',
+    title: 'Algorithms',
+    roles: ['admin', 'developer'],
+    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
+    children: [
+      {
+        id: '2',
+        title: 'List',
+        href: '/module',
+        roles: ['admin', 'developer'],
+        icon: <Icon fontSize="small" className="fas fa-clipboard-list" />
+      },
+      {
+        id: '3',
+        title: 'Create',
+        href: '/module/create',
+        roles: ['admin', 'developer'],
+        icon: <Icon fontSize="small" className="fas fa-plus-circle" />
+      },
+      // {
+      //   id: '4',
+      //   title: 'Trash',
+      //   href: '/module/trash',
+      //   roles: ['admin', 'developer'],
+      //   icon: <Icon fontSize="small" className="fas fa-trash" />
+      // },
+    ]
+  },
+  {
+    id: '5',
+    title: 'My algorithms',
+    href: '/subscriptions',
+    roles: ['user'],
+    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
+  },
+  {
+    id: '6',
+    title: 'Running',
+    href: '/module/experiment',
+    roles: ['admin', 'developer', 'user'],
+    icon: <Icon fontSize="small" className="fas fa-running" style={{ width: '1.6rem' }} />
+  },
+]
 
 const Sidebar = props => {
   const { open, variant, onClose, className, ...rest } = props
   const classes = useStyles()
-
-  const pages = [
-    {
-      id: '1',
-      title: 'Algorithms',
-      roles: ['admin', 'developer'],
-      icon: <Icon fontSize="small" className="fab fa-docker" />,
-      children: [
-        {
-          id: '2',
-          title: 'List',
-          href: '/module',
-          roles: ['admin', 'developer'],
-          icon: <Icon fontSize="small" className="fas fa-clipboard-list" />
-        },
-        {
-          id: '3',
-          title: 'Create',
-          href: '/module/create',
-          roles: ['admin', 'developer'],
-          icon: <Icon fontSize="small" className="fas fa-plus-circle" />
-        },
-        // {
-        //   id: '4',
-        //   title: 'Trash',
-        //   href: '/module/trash',
-        //   roles: ['admin', 'developer'],
-        //   icon: <Icon fontSize="small" className="fas fa-trash" />
-        // },
-      ]
-    },
-    {
-      id: '5',
-      title: 'My algorithms',
-      href: '/subscriptions',
-      roles: ['user'],
-      icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
-    },
-    {
-      id: '6',
-      title: 'Running',
-      href: '/module/experiment',
-      roles: ['admin', 'developer', 'user'],
-      icon: <Icon fontSize="small" className="fas fa-running" style={{ width: '1.6rem' }} />
-    },
-  ]
-
-
-
+  const dispatch = useDispatch()
 
   return (
     <Drawer
       anchor="left"
-      classes={{ paper: classes.drawer }}
+      classes={{ paper: classes.drawer, paperAnchorLeft: classes.paperAnchorLeft }}
       onClose={onClose}
       open={open}
       variant={variant}
@@ -102,19 +128,25 @@ const Sidebar = props => {
         {...rest}
         className={clsx(classes.root, className)}
       >
-        {/* <Profile /> */}
-        <RouterLink to="/">
-          <img
-            alt="Logo"
-            // width="200"
-            src="/images/logos/logo--white.svg"
+        <div>
+          <RouterLink to="/">
+            <img
+              alt="Logo"
+              // width="200"
+              src="/images/logos/logo--white.svg"
+            />
+          </RouterLink>
+          <div className={classes.divider} />
+          <SidebarNav
+            className={classes.nav}
+            pages={pages}
           />
-        </RouterLink>
-        <div className={classes.divider} />
-        <SidebarNav
-          className={classes.nav}
-          pages={pages}
-        />
+        </div>
+        <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fas fa-sign-out-alt" />}>
+          <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
+            Logout
+          </Typography>
+        </Button>
       </div>
     </Drawer>
   )

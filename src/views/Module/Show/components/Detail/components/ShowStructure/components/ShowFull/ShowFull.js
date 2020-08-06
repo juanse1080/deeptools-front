@@ -1,28 +1,16 @@
 import React from 'react'
 
-import { Paper, Grid, useMediaQuery, makeStyles } from '@material-ui/core'
+import { Grid, useMediaQuery } from '@material-ui/core'
 
 import Highcharts from '../ShowHighcharts'
 import Media from '../ShowMedia'
 
-const useStyles = makeStyles(theme => ({
-  paper: {
-    padding: theme.spacing(3),
-    [theme.breakpoints.down('xs')]: {
-      padding: 0,
-      boxShadow: 'none',
-      backgroundColor: 'inherit'
-    },
-  },
-}))
-
 export default function ({ elements }) {
-  const classes = useStyles()
   const md = useMediaQuery(theme => theme.breakpoints.down('md'))
   const lg = useMediaQuery(theme => theme.breakpoints.up('lg'))
 
   return <>
-    <Paper className={classes.paper} elevation={3}>
+    <div>
       <Grid container spacing={2}>
         <Grid item lg={7} md={12} sm={12} xs={12}>
           <Grid container spacing={2}>
@@ -53,6 +41,6 @@ export default function ({ elements }) {
             : null
         }
       </Grid>
-    </Paper>
+    </div>
   </>
 }
