@@ -120,14 +120,16 @@ export default function ({ progress, download }) {
             }
           </FormHelperText>
         </Grid>
-        <Grid item>
-          <FormHelperText style={{ color: getState() }}>
-            <Link component="button" onClick={toggleShow}>{show ? 'show less' : 'show more'}</Link>
-          </FormHelperText>
-        </Grid>
+        {
+          progress.length > 0 ? <Grid item>
+            <FormHelperText style={{ color: getState() }}>
+              <Link component="button" onClick={toggleShow}>{show ? 'show less' : 'show more'}</Link>
+            </FormHelperText>
+          </Grid> : null
+        }
       </Grid>
       {
-        show ? <>
+        show && progress.length > 0 ? <>
           <Paper className={classes.paper}>
             {
               progress.map((item, key) =>
@@ -137,9 +139,9 @@ export default function ({ progress, download }) {
               )
             }
             {
-              download ? <Link href={host+download} target="_blank" download rel="noreferrer">
+              download ? <Link href={host + download} target="_blank" download rel="noreferrer">
                 <Fab size="small" color="primary" aria-label="add" className={classes.download}>
-                  <Icon className="fas fa-link text-white" fontSize="small"/>
+                  <Icon className="fas fa-link text-white" fontSize="small" />
                 </Fab>
               </Link> : null
             }

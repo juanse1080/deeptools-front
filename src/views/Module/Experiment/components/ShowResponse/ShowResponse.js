@@ -61,8 +61,6 @@ export default function ({ value }) {
   useEffect(() => {
     const obj = new showdown.Converter({ tables: true, tablesHeaderId: true })
     setHtml(obj.makeHtml(value))
-    console.log(value)
-    console.log(obj.makeHtml(value))
   }, [value])
 
   return <div className={classes.paper}>

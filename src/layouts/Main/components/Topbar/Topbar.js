@@ -118,7 +118,12 @@ const Topbar = props => {
         dispatch(actions.finishLoading())
       }
     )
+  }
 
+  const viewAll = () => {
+    dispatch(actions.startLoading())
+    history.push('/notifications')
+    dispatch(actions.finishLoading())
   }
 
   const addNotification = (data) => {
@@ -219,7 +224,7 @@ const Topbar = props => {
               </MenuItem>
           }
           <Divider className={classes.divider} />
-          <MenuItem style={{ minHeight: 'auto' }}>
+          <MenuItem style={{ minHeight: 'auto' }} onClick={viewAll}>
             <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
               <Typography variant="caption">
                 Show all

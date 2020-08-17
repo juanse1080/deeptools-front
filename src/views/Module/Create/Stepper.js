@@ -18,7 +18,7 @@ import { example as options, error } from 'utils'
 
 import validate from 'validate.js'
 
-import { host, ws, authHeaderJSON, history } from 'helpers'
+import { host, ws, authHeaderForm, authHeaderJSON, history } from 'helpers'
 import { red } from '@material-ui/core/colors'
 
 const useStyles = makeStyles((theme) => ({
@@ -102,6 +102,18 @@ const rulesThree = {
       message: '^The classname field cannot be empty.'
     }
   },
+  extensions: {
+    presence: {
+      allowEmpty: false,
+      message: '^The extensions field cannot be empty.'
+    }
+  },
+  background: {
+    presence: {
+      allowEmpty: false,
+      message: '^Select an image that represents your algorithm.'
+    }
+  },
   description: {
     presence: {
       allowEmpty: false,
@@ -119,7 +131,7 @@ export default function Steppers() {
 
   const [step, setStep] = useState(0)
   const [protocol, setProtocol] = useState('')
-  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '', description: '', view: '', extensions: '' })
+  const [details, setDetails] = useState({ name: '', image: '', workdir: '', file: '', classname: '', description: '', view: 0, extensions: '', background: '' })
   const [elements, setElements] = useState({
     input: { state: true, len: 0, value: 'video' }, response: { state: true, len: 0, value: 'text' }, output: { state: true, len: 0, value: 'video' }, graph: { state: true, len: 1, value: options }
   })
@@ -212,7 +224,7 @@ export default function Steppers() {
         }
       }
     }
-    return elements_
+    return JSON.stringify(elements_)
   }
 
   const connect = (id) => {
@@ -280,8 +292,7 @@ export default function Steppers() {
   const save = () => {
     dispatch(actions.startLoading())
     const data = { protocol, ...details, elements: activeElements() }
-    console.log(data)
-    axios.post(`${host}/module/create`, data, authHeaderJSON()).then(
+    axios.post(`${host}/module/create`, dataToForm(data), authHeaderJSON()).then(
       function (res) {
         dispatch(actions.finishLoading())
         build_image(res.data)
@@ -294,6 +305,14 @@ export default function Steppers() {
       }
     )
 
+  }
+
+  const dataToForm = data => {
+    let form = new FormData()
+    Object.keys(data).forEach(key => {
+      form.append(key, data[key])
+    })
+    return form
   }
 
   const sendData = () => {

@@ -118,21 +118,12 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     '&:hover div.actions': {
       display: 'block !important',
-      [theme.breakpoints.up('sm')]: {
-        minWidth: '123px',
-      }
     },
     '&:focus div.actions': {
       display: 'block !important',
-      [theme.breakpoints.up('sm')]: {
-        minWidth: '123px',
-      }
     },
     '&:active div.actions': {
       display: 'block !important',
-      [theme.breakpoints.up('sm')]: {
-        minWidth: '123px',
-      }
     },
   }
 }))
@@ -298,25 +289,10 @@ export default function List(props) {
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Typography color="textSecondary">Algorithms</Typography>
+                  <Typography color="textSecondary">My algorithms</Typography>
                 </Breadcrumbs>
               </Grid>
-            </Grid>
-            <Grid container className="mt-3" justify="center" direction="row">
-              <Grid item xs={12} sm={10} md={8} xl={6}>
-                <Paper className={classes.alerts}>
-                  <IconButton size="small" color="primary" className={classes.iconButton} aria-label="search">
-                    <Search />
-                  </IconButton>
-                  <InputBase
-                    onChange={filterModules}
-                    className={classes.input}
-                    placeholder="Find modules"
-                    inputProps={{ 'aria-label': 'search' }}
-                  />
-                </Paper>
-              </Grid>
-            </Grid>
+            </Grid>            
             {
               modules.length === 0 ? (
                 <Grid container className="mt-3" justify="center" direction="row">
@@ -384,12 +360,7 @@ export default function List(props) {
                                       <IconButton size="small" onClick={showTest(item.image_name)}>
                                         <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
                                       </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Unsubscribe">
-                                      <IconButton size="small">
-                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
-                                      </IconButton>
-                                    </Tooltip>
+                                    </Tooltip>                                    
                                   </> : <>
                                       <IconButton size="small" onClick={handleClick(index)}>
                                         <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
@@ -417,13 +388,7 @@ export default function List(props) {
                                             <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
                                           </ListItemIcon>
                                           <Typography variant="inherit">All test</Typography>
-                                        </MenuItem>
-                                        <MenuItem>
-                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-anchor text-danger")} />
-                                          </ListItemIcon>
-                                          <Typography variant="inherit">Unsubscribe</Typography>
-                                        </MenuItem>
+                                        </MenuItem>                                        
                                       </Menu>
                                     </>
                                 }

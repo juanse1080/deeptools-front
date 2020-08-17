@@ -99,7 +99,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'start',
-    justifyContent: 'start'
+    justifyContent: 'start',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   }
 }))
 

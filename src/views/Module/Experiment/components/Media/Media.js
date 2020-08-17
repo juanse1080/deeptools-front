@@ -92,8 +92,23 @@ export default function ({ type, values, ...others }) {
     {
       type === 'image' ? <>
         {
-          values.length < 2 ? <Card>
+          values.length < 2 ? <Card className={classes.group}>
             <CardMedia className={classes.media} image={`${host}${values[0]}`} />
+            <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, bottom: 10 }} className="actions">
+              <IconButton size="small" onClick={handleShowView}  >
+                <Visibility fontSize="small" />
+              </IconButton>
+            </Paper>
+            <Dialog
+              classes={{ root: classes.rootDialog, paperScrollBody: classes.paperScrollBody }}
+              scroll="body"
+              onClose={handleCloseView}
+              aria-labelledby="customized-dialog-title"
+              open={image}
+              TransitionComponent={Transition}
+            >
+              <img className={classes.viewPreview} src={`${host}${values[index]}`} />
+            </Dialog>
           </Card> : <>
               <Card className={classes.group}>
                 {

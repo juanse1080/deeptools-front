@@ -61,10 +61,10 @@ const useStyles = makeStyles(theme => ({
 const pages = [
   {
     id: '0',
-    title: 'Home',
+    title: 'Algorithms',
     href: '/algorithms',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fas fa-home" />,  
+    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
   },
   {
     id: '1',
@@ -100,7 +100,7 @@ const pages = [
     title: 'My algorithms',
     href: '/subscriptions',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
+    icon: <Icon fontSize="small" className="fas fa-anchor" style={{ width: '1.6rem' }} />,
   },
   {
     id: '6',

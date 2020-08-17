@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 
 import { Skeleton } from '@material-ui/lab'
-import { makeStyles, Grid } from '@material-ui/core'
+import { makeStyles, Grid, Backdrop, CircularProgress } from '@material-ui/core'
 
 import axios from 'axios'
 
@@ -59,6 +59,10 @@ export default function ({ match, ...others }) {
     waitForSocketConnection(() => { })
   }
 
+  const handleUser = (name, value) => {
+    setModule({ ...module, [name]: value })
+  }
+
   const waitForSocketConnection = (callback) => {
     setTimeout(
       function () {
@@ -84,7 +88,6 @@ export default function ({ match, ...others }) {
   useEffect(() => {
     axios.get(`${host}/module/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
         if (res.data.state === 'building') {
           build_image(match.params.id)
         }
@@ -95,7 +98,6 @@ export default function ({ match, ...others }) {
         })
         elements["graph"] = graphs
         setModule({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
-        console.log({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
         setBuild(res.data.state === 'building')
         setLoading(false)
       }
@@ -109,28 +111,14 @@ export default function ({ match, ...others }) {
 
   return <>
     {
-      !build && !loading ? <Detail module={module} /> : null
+      !build && !loading ? <Detail module={module} handle={handleUser} /> : null
     }
     <div className={classes.root}>
       {
         loading ? <>
-          <Grid container justify="space-around" spacing={3}>
-            <Grid item>
-              <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
-              <Skeleton animation="wave" variant="text" height={10} width={40} />
-            </Grid>
-            <Grid item>
-              <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
-              <Skeleton animation="wave" variant="text" height={10} width={40} />
-            </Grid>
-            <Grid item>
-              <Skeleton animation="wave" className="mb-2" variant="circle" width={40} height={40} />
-              <Skeleton animation="wave" variant="text" height={10} width={40} />
-            </Grid>
-            <Grid item xs={12}>
-              <Skeleton className={classes.fullHeight} animation="wave" variant="text" />
-            </Grid>
-          </Grid>
+          <Backdrop className={classes.backdrop} open={loading}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </> : build ? <>
           <Build progress={progress} />
         </> : null

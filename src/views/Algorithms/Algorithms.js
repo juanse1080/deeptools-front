@@ -49,7 +49,9 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: 10,
     right: 10,
-    color: theme.palette.white
+    color: theme.palette.white,
+    fontSize: '0.9rem'
+
   },
   paper: {
     cursor: 'pointer',
@@ -81,7 +83,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center center',
-    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(https://developer.ibm.com/developer/articles/cc-machine-learning-deep-learning-architectures/nl/es/images/figure06.png)",
     paddingTop: '68.25%',
     height: 0,
     position: 'relative'
@@ -221,7 +222,7 @@ export default function List(props) {
                             <Paper className={classes.paper} onClick={show(item.image_name)}>
                               <Grid container>
                                 <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
-                                  <div className={classes.background}>
+                                  <div className={classes.background} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})` }}>
                                     {
                                       item.subscribers.includes(user.id) ? <Icon fontSize="small" className={clsx(classes.anchoIcon, "fas fa-anchor")} /> : null
                                     }

@@ -18,7 +18,7 @@ function FileUpload({ onChange, id, link, titleTooltip, accept, pattern, error, 
   const [image, setImage] = useState(
     {
       haveValue: haveValue,
-      nameFile: (haveValue && "Click para ver el archivo.") || "Elija el archivo...",
+      nameFile: (haveValue && "Click para ver el archivo.") || "Select an image...",
       undo: false, //Activacion del toogle cuando el formato no es el admitido
       errorText: "Error al cargar el archivo",
       undoError: false,
@@ -29,7 +29,7 @@ function FileUpload({ onChange, id, link, titleTooltip, accept, pattern, error, 
   const [success, setSuccess] = React.useState(false);
   const [danger, setDanger] = React.useState(false);
 
-  const button = "Seleccione"
+  const button = "Select"
   const classes = useStyles();
   const acceptInput = accept || "";
   const patternInput = pattern || "";
@@ -146,7 +146,7 @@ function FileUpload({ onChange, id, link, titleTooltip, accept, pattern, error, 
         {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
         <p className={classes.nameFile}>
           {(image.dragOver) ?
-            "Suelte el archivo aquí"
+            "Drop the file here"
             : image.nameFile}
         </p>
       </div>

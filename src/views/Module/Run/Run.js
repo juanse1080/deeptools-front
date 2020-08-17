@@ -335,7 +335,7 @@ export default function Run({ match, ...others }) {
             <CircularProgress color="inherit" />
           </Backdrop>
         </> : <>
-            <Grid container justify="center" direction="row" className="mb-3">
+            {/* <Grid container justify="center" direction="row" className="mb-3">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
                   <Link color="inherit" onClick={to(`/subscriptions`)}>Algorithms</Link>
@@ -343,7 +343,7 @@ export default function Run({ match, ...others }) {
                   <Typography color="textSecondary">Run</Typography>
                 </Breadcrumbs>
               </Grid>
-            </Grid>
+            </Grid> */}
             {content()}
             {
               sm ? <div className={classes.actions}>

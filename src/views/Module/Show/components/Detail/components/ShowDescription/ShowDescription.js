@@ -8,7 +8,7 @@ export default function Detail({ module }) {
   return <>
     <Typography >{module.description}</Typography>
     <Typography className="mt-3 mb-2 text-secondary">
-      <span className="mr-1">Owner:</span>
+      <span className="mr-1">Developer:</span>
       <Link>{title(`${module.user.first_name} ${module.user.last_name}`)}</Link>
     </Typography>
     

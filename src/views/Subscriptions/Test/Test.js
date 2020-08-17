@@ -106,7 +106,7 @@ export default function ({ match }) {
 
   const subscriptions = () => {
     dispatch(actions.startLoading())
-    history.push(`/subscriptions`)
+    history.push(`/algorithms`)
     dispatch(actions.finishLoading())
   }
 
@@ -319,7 +319,7 @@ export default function ({ match }) {
               </Breadcrumbs>
             </Grid>
           </Grid>
-          <Grid container className="mt-3" spacing={2}>
+          <Grid container spacing={2} className="mt-3">
             {
               experiments.length > 0 ? experiments.map((item, index) =>
                 <Grid item xl={4} lg={6} md={6} sm={12} xs={12} key={item.id}>
