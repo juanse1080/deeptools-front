@@ -88,6 +88,7 @@ export default function ({ match, ...others }) {
   useEffect(() => {
     axios.get(`${host}/module/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
+        console.log(res.data)
         if (res.data.state === 'building') {
           build_image(match.params.id)
         }

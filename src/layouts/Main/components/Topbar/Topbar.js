@@ -71,7 +71,7 @@ const Topbar = props => {
   const { className, onSidebarOpen, window, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const access = useSelector(state => state.user.id)
+  const user = useSelector(state => state.user)
 
   const trigger = useScrollTrigger({ target: window ? window() : undefined });
   const [anchorEl, setAnchorEl] = useState({ account: null, notifications: null });
@@ -126,6 +126,12 @@ const Topbar = props => {
     dispatch(actions.finishLoading())
   }
 
+  const profile = () => {
+    dispatch(actions.startLoading())
+    history.push('/account')
+    dispatch(actions.finishLoading())
+  }
+
   const addNotification = (data) => {
     setNotifications(notifications => ([...data.content, ...notifications]))
     if (data.action === 'append') {
@@ -160,7 +166,7 @@ const Topbar = props => {
   }
 
   const connect = () => {
-    const webSocket = new WebSocket(`${ws_host}/ws/notifications/${access}`)
+    const webSocket = new WebSocket(`${ws_host}/ws/notifications/${user.id}`)
     webSocket.onmessage = e => {
       const data = JSON.parse(e.data)
 
@@ -234,10 +240,10 @@ const Topbar = props => {
         </Menu>
 
         <IconButton className={classes.profileButton} onClick={handleMenu('account')}>
-          <Avatar alt="Remy Sharp" src="/images/avatars/avatar_1.png" />
+          <Avatar alt="Remy Sharp" src={`${host}${user.photo}`} />
         </IconButton>
         <Menu classes={{ list: classes.menuList }} id="menu-appbar" anchorEl={anchorEl.account} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={Boolean(anchorEl.account)} onClose={handleClose('account')} >
-          <MenuItem onClick={handleClose('account')}>
+          <MenuItem onClick={profile}>
             <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
               <AccountCircle fontSize="small" />
             </ListItemIcon>

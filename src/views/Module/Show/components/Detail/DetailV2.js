@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import { useDispatch, useSelector } from "react-redux";
 import { actions } from '_redux';
 
-import { Protocol, Structure, ModelDetail, ShowDescription, ShowExample } from './components'
+import { Protocol, Structure, ModelDetail, ShowDescription, ShowExample, ShowUsers } from './components'
 
 import { title, format_date } from 'utils'
 
@@ -93,6 +93,12 @@ export default function Detail({ module, handle }) {
     dispatch(actions.finishLoading())
   }
 
+  const viewOwner = id => () => {
+    dispatch(actions.startLoading())
+    history.push(`/account/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
   const algorithms = () => {
     dispatch(actions.startLoading())
     history.push('/algorithms')
@@ -103,20 +109,6 @@ export default function Detail({ module, handle }) {
     dispatch(actions.startLoading())
     history.push(`/subscriptions/${module.image_name}`)
     dispatch(actions.finishLoading())
-  }
-
-  const clone = () => {
-    axios.post(`${host}/accounts/experiment/clone/${module.image_name}`, {}, authHeaderJSON()).then(
-      function (res) {
-        dispatch(actions.startLoading())
-        history.push(`/module/run/${module.image_name}`)
-        dispatch(actions.finishLoading())
-      }
-    ).catch(
-      function (err) {
-        console.log(err)
-      }
-    )
   }
 
   const toggleSubscriber = () => {
@@ -142,7 +134,7 @@ export default function Detail({ module, handle }) {
   const steps = (module.owner || module.role === 'admin') ? [
     {
       label: 'Description',
-      content: <ShowDescription module={module} />
+      content: <ShowDescription module={module} viewOwner={viewOwner} />
     },
     {
       label: 'Protocol',
@@ -160,10 +152,14 @@ export default function Detail({ module, handle }) {
       label: 'Model detail',
       content: <ModelDetail value={module} />
     },
+    {
+      label: 'Users',
+      content: <ShowUsers value={module} />
+    },
   ] : [
       {
         label: 'Description',
-        content: <ShowDescription module={module} />
+        content: <ShowDescription module={module} viewOwner={viewOwner} />
       },
       {
         label: 'Protocol',
@@ -191,7 +187,7 @@ export default function Detail({ module, handle }) {
         </Grid>
       </Grid>
       <h5>{title(module.name)}</h5>
-      <Tooltip placement="left" className={classes.users} title={module.users > 1 ? `${module.users} users` : "One user"}>
+      <Tooltip placement="left" className={classes.users} title={module.subscribers.length !== 1 ? `${module.subscribers.length} users` : "One user"}>
         <Chip icon={<Face />} label={module.subscribers.length} size="small" />
       </Tooltip>
     </div>

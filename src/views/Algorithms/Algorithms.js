@@ -85,7 +85,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundPosition: 'center center',
     paddingTop: '68.25%',
     height: 0,
-    position: 'relative'
+    position: 'relative',
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
   },
   media: {
     height: 0,
@@ -243,8 +245,7 @@ export default function List(props) {
                                       <Typography variant="caption" noWrap >
                                         {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
                                         <span className="ml-1 mr-1">&#183;</span>
-                                        {item.image}
-                                        {item.image > 1 ? " users" : " user"}
+                                        {item.image !== '1' ? `${item.image} users` : "One user"}
                                       </Typography>
                                     </div>
 

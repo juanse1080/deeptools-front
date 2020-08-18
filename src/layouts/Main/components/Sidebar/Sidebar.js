@@ -16,6 +16,8 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 
 import { SidebarNav } from './components'
 
+import { history } from 'helpers'
+
 import { useDispatch, useSelector } from 'react-redux'
 import { actions } from '_redux'
 
@@ -109,12 +111,32 @@ const pages = [
     roles: ['admin', 'developer', 'user'],
     icon: <Icon fontSize="small" className="fas fa-running" style={{ width: '1.6rem' }} />
   },
+  {
+    id: '7',
+    title: 'Profile',
+    href: '/account',
+    roles: ['user', 'developer', 'admin'],
+    icon: <Icon fontSize="small" className="fas fa-user-circle" style={{ width: '1.6rem' }} />
+  },
+  {
+    id: '8',
+    title: 'Notifications',
+    href: '/notifications',
+    roles: ['user', 'developer', 'admin'],
+    icon: <Icon fontSize="small" className="fas fa-bell" style={{ width: '1.6rem' }} />
+  },
 ]
 
 const Sidebar = props => {
   const { open, variant, onClose, className, ...rest } = props
   const classes = useStyles()
   const dispatch = useDispatch()
+
+  const to = (href) => () => {
+    dispatch(actions.startLoading())
+    history.push(href)
+    dispatch(actions.finishLoading())
+  }
 
   return (
     <Drawer
@@ -142,11 +164,13 @@ const Sidebar = props => {
             pages={pages}
           />
         </div>
-        <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fas fa-sign-out-alt" />}>
-          <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
-            Logout
+        <div>          
+          <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fas fa-sign-out-alt" />}>
+            <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
+              Logout
           </Typography>
-        </Button>
+          </Button>
+        </div>
       </div>
     </Drawer>
   )

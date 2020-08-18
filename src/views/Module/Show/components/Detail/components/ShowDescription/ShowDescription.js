@@ -3,15 +3,15 @@ import { makeStyles, Icon, Chip, Tab, Tabs, Typography, Tooltip, Link } from '@m
 
 import { title, format_date } from 'utils'
 
-export default function Detail({ module }) {
+export default function Detail({ module, viewOwner }) {
 
   return <>
     <Typography >{module.description}</Typography>
     <Typography className="mt-3 mb-2 text-secondary">
       <span className="mr-1">Developer:</span>
-      <Link>{title(`${module.user.first_name} ${module.user.last_name}`)}</Link>
+      <Link onClick={viewOwner(module.user.id)}>{title(`${module.user.first_name} ${module.user.last_name}`)}</Link>
     </Typography>
-    
+
     <Typography></Typography>
     {
       module.extensions ? <>
