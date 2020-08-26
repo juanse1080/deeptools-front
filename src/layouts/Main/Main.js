@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles, useTheme } from '@material-ui/styles';
-import { useMediaQuery, LinearProgress } from '@material-ui/core';
+import { useMediaQuery, LinearProgress, Container } from '@material-ui/core';
 import { useSelector } from "react-redux";
 
 import { Sidebar, Topbar, Footer } from './components';
@@ -13,13 +13,15 @@ const useStyles = makeStyles(theme => ({
     height: '100%',
   },
   topbar: {
-    width: 'calc(100% - 240px)',
+    // width: 'calc(100% - 240px)',
+    width: '100%',
     [theme.breakpoints.down("md")]: {
       width: '100%'
     }
   },
   shiftContent: {
-    paddingLeft: 240
+    // paddingLeft: 240,
+    // paddingRight: 240
   },
   content: {
     height: '100%'
@@ -29,6 +31,7 @@ const useStyles = makeStyles(theme => ({
 const Main = props => {
   const { children } = props;
   const loading = useSelector(state => state.loading)
+  // const user = useSelector(user => state.user)
 
   const classes = useStyles();
   const theme = useTheme();
@@ -56,15 +59,17 @@ const Main = props => {
       })}
     >
       {
-        loading ? <LinearProgress color="primary" style={{height:'3px'}}/> : null
+        loading ? <LinearProgress color="primary" style={{ height: '3px' }} /> : null
       }
       <Topbar onSidebarOpen={handleSidebarOpen} className={classes.topbar} />
-      {children}
-      <Sidebar
+      <Container maxWidth="lg">
+        {children}
+      </Container>
+      {/* <Sidebar
         onClose={handleSidebarClose}
         open={shouldOpenSidebar}
         variant={isDesktop ? 'persistent' : 'temporary'}
-      />
+      /> */}
     </div>
   );
 };

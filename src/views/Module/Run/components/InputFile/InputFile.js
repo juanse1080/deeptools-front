@@ -80,10 +80,10 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
 
   const handleMedia = e => {
     let files = Array.from(e.target.files || e.dataTransfer.files)
-    
+    console.log(files[0].type)
     if (pattern) {
       let errors = []
-      files = files.filter(file => {
+      files = files.filter(file => {    
         if (!file.type.match(pattern || "")) {
           errors.push(file.name)
           return false

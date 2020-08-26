@@ -1,108 +1,56 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
+import React, { useState, useEffect } from 'react'
 
-import {
-  Budget,
-  TotalUsers,
-  TasksProgress,
-  TotalProfit,
-  LatestSales,
-  UsersByDevice,
-  LatestProducts,
-  LatestOrders
-} from './components';
+import clsx from 'clsx'
 
-const useStyles = makeStyles(theme => ({
+import { Alert, Skeleton, } from '@material-ui/lab'
+
+import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Breadcrumbs } from '@material-ui/core'
+import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
+
+import { isMobile } from 'react-device-detect'
+
+import { host, authHeaderJSON, history, ws } from 'helpers'
+
+import { title as ucWords, format_date as getDate, error } from 'utils'
+
+import { useDispatch } from "react-redux";
+import { actions } from '_redux';
+
+import axios from "axios"
+
+const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(4)
-  },
-}));
+    width: '100%',
+    padding: theme.spacing(4),
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(3),
+    }
+  },  
+}))
 
-const Dashboard = () => {
-  const classes = useStyles();
+export default function List(props) {
 
-  return (
+  const classes = useStyles()
+  const theme = useTheme()
+  const sm = useMediaQuery(theme.breakpoints.up('sm'))
+  const dispatch = useDispatch()
+
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    axios.get(`${host}/module`, authHeaderJSON()).then(function (res) {      
+      setLoading(false)
+    }).catch(function (err) {
+      error(err)
+    })
+  }, [])
+
+  return <>
     <div className={classes.root}>
-      <Grid
-        container
-        spacing={4}
-      >
-        <Grid
-          item
-          lg={3}
-          sm={6}
-          xl={3}
-          xs={12}
-        >
-          <Budget />
-        </Grid>
-        <Grid
-          item
-          lg={3}
-          sm={6}
-          xl={3}
-          xs={12}
-        >
-          <TotalUsers />
-        </Grid>
-        <Grid
-          item
-          lg={3}
-          sm={6}
-          xl={3}
-          xs={12}
-        >
-          <TasksProgress />
-        </Grid>
-        <Grid
-          item
-          lg={3}
-          sm={6}
-          xl={3}
-          xs={12}
-        >
-          <TotalProfit />
-        </Grid>
-        <Grid
-          item
-          lg={8}
-          md={12}
-          xl={9}
-          xs={12}
-        >
-          <LatestSales />
-        </Grid>
-        <Grid
-          item
-          lg={4}
-          md={6}
-          xl={3}
-          xs={12}
-        >
-          <UsersByDevice />
-        </Grid>
-        <Grid
-          item
-          lg={4}
-          md={6}
-          xl={3}
-          xs={12}
-        >
-          <LatestProducts />
-        </Grid>
-        <Grid
-          item
-          lg={8}
-          md={12}
-          xl={9}
-          xs={12}
-        >
-          <LatestOrders />
-        </Grid>
-      </Grid>
+      {
+        loading ?
+          null : null
+      }
     </div>
-  );
-};
-
-export default Dashboard;
+  </>
+}

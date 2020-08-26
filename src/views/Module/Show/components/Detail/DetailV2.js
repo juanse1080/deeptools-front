@@ -48,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
   users: {
     position: 'absolute',
     right: 10,
-    top: 20,
+    top: 10,
   },
   tabsRoot: {
     textTransform: 'none',
@@ -173,12 +173,7 @@ export default function Detail({ module, handle }) {
 
   return <div>
     <div className={classes.image} onClick={handleShowView} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${module.background})` }}>
-      <Grid container justify="center" direction="row" style={{
-        position: 'absolute',
-        top: 20,
-        left: 20,
-        width: 'auto'
-      }}>
+      <Grid container justify="center" direction="row" style={{ position: 'absolute', top: 10, left: 10, width: 'auto' }}>
         <Grid item xs={12}>
           <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
             <Link color="inherit" className="text-white" onClick={algorithms}>Algorithms</Link>

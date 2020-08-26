@@ -214,6 +214,19 @@ export default function List(props) {
     }
   }
 
+  const getIcon = (state) => {
+    switch (state) {
+      case "active":
+        return <Icon fontSize="default" className='fas fa-check-circle text-success' />
+      case "stopped":
+        return <Icon fontSize="default" className='fas fa-play-circle text-secondary' />
+      case "builded":
+        return <Icon fontSize="default" className=' mt-1 fas fa-rocket text-secondary' />
+      default:
+        return <Icon fontSize="default" className='fas fa-play-circle text-secondary' />
+    }
+  }
+
 
   const handleModuleFilter = (index, name, value) => {
     let aux = [...filter]
@@ -351,7 +364,7 @@ export default function List(props) {
                               <div className={clsx(classes.details, classes.alignItemsStart)}>
                                 <div className={classes.fatherTitle}>
                                   <Tooltip title={item.state} className="mr-2">
-                                    <Icon fontSize="default" className={clsx(`fas ${item.state === 'active' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-secondary'}`)} />
+                                    {getIcon(item.state)}
                                   </Tooltip>
                                   <div className={classes.title}>
                                     <Typography noWrap>

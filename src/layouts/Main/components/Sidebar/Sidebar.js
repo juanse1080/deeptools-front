@@ -99,7 +99,7 @@ const pages = [
   },
   {
     id: '5',
-    title: 'My algorithms',
+    title: 'Subscriptions',
     href: '/subscriptions',
     roles: ['user'],
     icon: <Icon fontSize="small" className="fas fa-anchor" style={{ width: '1.6rem' }} />,

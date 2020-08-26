@@ -190,7 +190,7 @@ const Topbar = props => {
   }, [])
 
   return <Slide appear={false} direction="down" in={!trigger}>
-    <AppBar {...rest} color="inherit" className={clsx(classes.root, className)}>
+    <AppBar {...rest} color="primary" className={clsx(classes.root, className)}>
       <Toolbar className={clsx(classes.flexGrow, "shadow")}>
         <Hidden lgUp>
           <IconButton size="small" color="inherit" className={classes.drawerIcon} onClick={onSidebarOpen}>

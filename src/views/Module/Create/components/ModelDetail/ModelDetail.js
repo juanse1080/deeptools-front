@@ -23,9 +23,10 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default function ({ value, change, errors, ...others }) {
+export default function ({ value, change, errors, input, ...others }) {
   const classes = useStyles()
   const [images, setImages] = useState([])
+  const [extensions, setExtensions] = useState('default')
 
   const getImages = () => {
     axios.get(`${host}/module/images`, authHeaderJSON()).then(
@@ -43,9 +44,9 @@ export default function ({ value, change, errors, ...others }) {
     change(e.target.name, e.target.value)
   }
 
-  // const setFile = (_, file) => {
-  //   change('proto', file)
-  // }
+  const handleType = () => {
+    setExtensions(extensions => extensions === 'default' ? 'custom' : 'default')
+  }
 
   const setPath = e => {
     const value = e.target.value.replace('\\', '/')
@@ -92,9 +93,26 @@ export default function ({ value, change, errors, ...others }) {
       </Grid>
       <Grid className="p-2" item sm={6} xs={12}>
         <TextField label="Classname" variant="outlined" fullWidth value={value.classname} size="small" name="classname" onChange={setValue} error={hasError('classname')} helperText={hasError('classname') ? errors.classname[0] : 'how is the class named?'} />
-      </Grid>      
+      </Grid>
       <Grid className="p-2" item sm={6} xs={12}>
-        <TextField label="Extensions" placeholder="mp4 avi web" variant="outlined" fullWidth value={value.extensions} size="small" name="extensions" onChange={setValue} error={hasError('extensions')} helperText={hasError('extensions') ? errors.extensions[0] : 'Allowed extensions separated by spaces'} />
+        <Grid container spacing={3}>
+          <Grid item sm={extensions === 'default' ? 12 : 6} xs={12}>
+            <FormControl fullWidth variant="outlined" size="small">
+              <InputLabel id="demo-simple-select-label">Extensions</InputLabel>
+              <Select name="type" label="Extensions" labelId="demo-simple-select-label" id="demo-simple-select" value={extensions} onChange={handleType}>
+                <MenuItem value="default">{input.value === "video" ? "Video extensions" : "Image extensions"}</MenuItem>
+                <MenuItem value="custom">Custom extensions</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          {
+            extensions === 'default' ? null : <Grid item sm={extensions === 'default' ? 12 : 6} xs={12}>
+              <TextField label="Extensions" placeholder="mp4 avi web" variant="outlined" fullWidth value={value.extensions} size="small" name="extensions" onChange={setValue} error={hasError('extensions')} helperText={hasError('extensions') ? errors.extensions[0] : 'Allowed extensions separated by spaces'} />
+            </Grid>
+          }
+        </Grid>
+
+        {/* <TextField label="Extensions" placeholder="mp4 avi web" variant="outlined" fullWidth value={value.extensions} size="small" name="extensions" onChange={setValue} error={hasError('extensions')} helperText={hasError('extensions') ? errors.extensions[0] : 'Allowed extensions separated by spaces'} /> */}
       </Grid>
       <Grid className="p-2" item sm={6} xs={12}>
         <InputFile onChange={change} id="background" titleTooltip="Select an image that represents your algorithm" accept="image/*" error={hasError('background') ? errors.background[0] : null} name="background" />

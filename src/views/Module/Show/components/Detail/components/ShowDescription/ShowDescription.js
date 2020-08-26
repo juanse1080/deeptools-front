@@ -21,7 +21,10 @@ export default function Detail({ module, viewOwner }) {
             <Chip key={extension} label={extension} className="m-1" />
           )
         }
-      </> : null
+      </> : <>
+          <Typography className="mt-3 mb-2 text-secondary">Extensions:</Typography>
+          <Chip label={`${title(module.elements.input.value)} extensions`} className="m-1" />
+        </>
     }
   </>
 }

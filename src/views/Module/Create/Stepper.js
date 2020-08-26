@@ -102,12 +102,6 @@ const rulesThree = {
       message: '^The classname field cannot be empty.'
     }
   },
-  extensions: {
-    presence: {
-      allowEmpty: false,
-      message: '^The extensions field cannot be empty.'
-    }
-  },
   background: {
     presence: {
       allowEmpty: false,
@@ -334,7 +328,7 @@ export default function Steppers() {
     },
     {
       label: 'Model detail',
-      content: <ModelDetail value={details} change={handleDetails} errors={form.errors} />
+      content: <ModelDetail value={details} change={handleDetails} errors={form.errors} input={elements.input}/>
     },
   ]
 

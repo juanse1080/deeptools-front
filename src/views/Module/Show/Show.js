@@ -88,7 +88,6 @@ export default function ({ match, ...others }) {
   useEffect(() => {
     axios.get(`${host}/module/${match.params.id}`, authHeaderJSON()).then(
       function (res) {
-        console.log(res.data)
         if (res.data.state === 'building') {
           build_image(match.params.id)
         }
@@ -99,6 +98,7 @@ export default function ({ match, ...others }) {
         })
         elements["graph"] = graphs
         setModule({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
+        console.log({...res.data, elements: elements, role, owner: access === res.data.user.id })
         setBuild(res.data.state === 'building')
         setLoading(false)
       }

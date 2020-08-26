@@ -283,7 +283,7 @@ export default function Run({ match, ...others }) {
     axios.post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON()).then(
       function (res) {
         if (!['active', 'builded'].includes(res.data.state)) history.goBack()
-        const obj = new showdown.Converter({tables: true})
+        const obj = new showdown.Converter({ tables: true })
 
         let type
         [...res.data.elements_type].some(item => {
@@ -309,7 +309,7 @@ export default function Run({ match, ...others }) {
         refs.forEach(ref => ref.ws.close())
       }
     }
-  }, [match.params.id, step])
+  }, [match.params.id])
 
   const content = () => {
     if (step === 0) {
@@ -317,7 +317,7 @@ export default function Run({ match, ...others }) {
         {ReactHtmlParser(module.html, options)}
       </div>
     } else if (step === 1) {
-      return <InputFile init={module.state === 'builded' ? true : false} enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} pattern={module.extensions ? new RegExp(`.*(${module.extensions.split(' ').join('|')})$`) : null} />
+      return <InputFile init={module.state === 'builded' ? true : false} enterMedia={enterMedia} cancelUpload={cancelUpload} leaveMedia={leaveMedia} media={media} addMedia={addMedia} deleteMedia={deleteMedia} pattern={module.extensions ? new RegExp(`^${module.type}/*(${module.extensions.split(' ').join('|')})$`) : new RegExp(`^${module.type}/.*$`)} />
     } else {
       return <Example change={setExample} examples={example} id={match.params.id} type={module.type} />
     }
