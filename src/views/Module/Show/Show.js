@@ -37,7 +37,7 @@ export default function ({ match, ...others }) {
 
   const ref = useRef(null)
   const [build, setBuild] = useState(false)
-  const [module, setModule] = useState({})
+  const [module, setModule] = useState()
   const [progress, setProgress] = useState([])
 
   const connect = (id) => {
@@ -60,7 +60,7 @@ export default function ({ match, ...others }) {
   }
 
   const handleUser = (name, value) => {
-    setModule({ ...module, [name]: value })
+    setModule(module => ({ ...module, [name]: value }))
   }
 
   const waitForSocketConnection = (callback) => {
@@ -98,7 +98,7 @@ export default function ({ match, ...others }) {
         })
         elements["graph"] = graphs
         setModule({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
-        console.log({...res.data, elements: elements, role, owner: access === res.data.user.id })
+        console.log({ ...res.data, elements: elements, role, owner: access === res.data.user.id })
         setBuild(res.data.state === 'building')
         setLoading(false)
       }

@@ -22,7 +22,7 @@ export default function ({ elements, change, updateView }) {
   const lg = useMediaQuery(theme => theme.breakpoints.up('lg'))
 
   return <>
-    <Paper className={classes.paper} elevation={3}>
+    <Paper className={classes.paper} elevation={3}  variant="outlined">
       <Grid container spacing={2}>
         <Grid item lg={7} md={12} sm={12} xs={12}>
           <Grid container spacing={2}>

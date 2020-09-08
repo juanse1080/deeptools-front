@@ -3,16 +3,7 @@ import { Link as RouterLink, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import validate from 'validate.js';
 import { makeStyles } from '@material-ui/styles';
-import {
-  Grid,
-  Button,
-  IconButton,
-  TextField,
-  Link,
-  FormHelperText,
-  Checkbox,
-  Typography
-} from '@material-ui/core';
+import { Grid, Button, IconButton, TextField, Link, FormHelperText, Checkbox, Typography, Box } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 const schema = {
@@ -52,6 +43,46 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.default,
     height: '100%'
   },
+  content: {
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    [theme.breakpoints.down('xs')]: {
+      alignItems: 'start',
+    }
+  },
+  form: {
+    paddingTop: theme.spacing(5),
+    padding: theme.spacing(7),
+    [theme.breakpoints.down('xs')]: {
+      paddingTop: theme.spacing(2),
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2)
+    }
+  },
+  signInButton: {
+    margin: theme.spacing(0, 0, 1, 0)
+  },
+  containerIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing(2)
+  },
+  img: {
+    height: theme.spacing(10),
+    align: 'center'
+  },
+  title: {
+    padding: theme.spacing(2, 0, 4, 0)
+  },
+  paper: {
+    width: '528px'
+  },
+  error: {
+    marginBottom: theme.spacing(2)
+  },
   grid: {
     height: '100%'
   },
@@ -59,6 +90,9 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('md')]: {
       display: 'none'
     }
+  },
+  textField: {
+    marginBottom: theme.spacing(2)
   },
   quote: {
     backgroundColor: theme.palette.neutral,
@@ -86,20 +120,6 @@ const useStyles = makeStyles(theme => ({
   bio: {
     color: theme.palette.white
   },
-  contentContainer: {},
-  content: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  contentHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    paddingTop: theme.spacing(5),
-    paddingBototm: theme.spacing(2),
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2)
-  },
   logoImage: {
     marginLeft: theme.spacing(4)
   },
@@ -110,22 +130,6 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('md')]: {
       justifyContent: 'center'
     }
-  },
-  form: {
-    paddingLeft: 100,
-    paddingRight: 100,
-    paddingBottom: 125,
-    flexBasis: 700,
-    [theme.breakpoints.down('sm')]: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2)
-    }
-  },
-  title: {
-    marginTop: theme.spacing(3)
-  },
-  textField: {
-    marginTop: theme.spacing(2)
   },
   policy: {
     marginTop: theme.spacing(1),
@@ -195,185 +199,137 @@ const SignUp = props => {
 
   return (
     <div className={classes.root}>
-      <Grid
-        className={classes.grid}
-        container
-      >
-        <Grid
-          className={classes.quoteContainer}
-          item
-          lg={5}
-        >
-          <div className={classes.quote}>
-            <div className={classes.quoteInner}>
+      <div className={classes.content}>
+        <Box className={classes.paper}>
+          <form
+            className={classes.form}
+            onSubmit={handleSignUp}
+          >
+            <Typography
+              className={classes.title}
+              variant="h2"
+            >
+              Create new account
+                </Typography>
+            <Typography
+              color="textSecondary"
+              gutterBottom
+            >
+              Use your email to create new account
+                </Typography>
+            <TextField
+              className={classes.textField}
+              error={hasError('firstName')}
+              fullWidth
+              helperText={
+                hasError('firstName') ? formState.errors.firstName[0] : null
+              }
+              label="First name"
+              name="firstName"
+              onChange={handleChange}
+              type="text"
+              value={formState.values.firstName || ''}
+              variant="outlined"
+            />
+            <TextField
+              className={classes.textField}
+              error={hasError('lastName')}
+              fullWidth
+              helperText={
+                hasError('lastName') ? formState.errors.lastName[0] : null
+              }
+              label="Last name"
+              name="lastName"
+              onChange={handleChange}
+              type="text"
+              value={formState.values.lastName || ''}
+              variant="outlined"
+            />
+            <TextField
+              className={classes.textField}
+              error={hasError('email')}
+              fullWidth
+              helperText={
+                hasError('email') ? formState.errors.email[0] : null
+              }
+              label="Email address"
+              name="email"
+              onChange={handleChange}
+              type="text"
+              value={formState.values.email || ''}
+              variant="outlined"
+            />
+            <TextField
+              className={classes.textField}
+              error={hasError('password')}
+              fullWidth
+              helperText={
+                hasError('password') ? formState.errors.password[0] : null
+              }
+              label="Password"
+              name="password"
+              onChange={handleChange}
+              type="password"
+              value={formState.values.password || ''}
+              variant="outlined"
+            />
+            <div className={classes.policy}>
+              <Checkbox
+                checked={formState.values.policy || false}
+                className={classes.policyCheckbox}
+                color="primary"
+                name="policy"
+                onChange={handleChange}
+              />
               <Typography
-                className={classes.quoteText}
-                variant="h1"
+                className={classes.policyText}
+                color="textSecondary"
+                variant="body1"
               >
-                Hella narwhal Cosby sweater McSweeney's, salvia kitsch before
-                they sold out High Life.
-              </Typography>
-              <div className={classes.person}>
-                <Typography
-                  className={classes.name}
-                  variant="body1"
-                >
-                  Takamaru Ayako
-                </Typography>
-                <Typography
-                  className={classes.bio}
-                  variant="body2"
-                >
-                  Manager at inVision
-                </Typography>
-              </div>
-            </div>
-          </div>
-        </Grid>
-        <Grid
-          className={classes.content}
-          item
-          lg={7}
-          xs={12}
-        >
-          <div className={classes.content}>
-            <div className={classes.contentHeader}>
-              <IconButton onClick={handleBack}>
-                <ArrowBackIcon />
-              </IconButton>
-            </div>
-            <div className={classes.contentBody}>
-              <form
-                className={classes.form}
-                onSubmit={handleSignUp}
-              >
-                <Typography
-                  className={classes.title}
-                  variant="h2"
-                >
-                  Create new account
-                </Typography>
-                <Typography
-                  color="textSecondary"
-                  gutterBottom
-                >
-                  Use your email to create new account
-                </Typography>
-                <TextField
-                  className={classes.textField}
-                  error={hasError('firstName')}
-                  fullWidth
-                  helperText={
-                    hasError('firstName') ? formState.errors.firstName[0] : null
-                  }
-                  label="First name"
-                  name="firstName"
-                  onChange={handleChange}
-                  type="text"
-                  value={formState.values.firstName || ''}
-                  variant="outlined"
-                />
-                <TextField
-                  className={classes.textField}
-                  error={hasError('lastName')}
-                  fullWidth
-                  helperText={
-                    hasError('lastName') ? formState.errors.lastName[0] : null
-                  }
-                  label="Last name"
-                  name="lastName"
-                  onChange={handleChange}
-                  type="text"
-                  value={formState.values.lastName || ''}
-                  variant="outlined"
-                />
-                <TextField
-                  className={classes.textField}
-                  error={hasError('email')}
-                  fullWidth
-                  helperText={
-                    hasError('email') ? formState.errors.email[0] : null
-                  }
-                  label="Email address"
-                  name="email"
-                  onChange={handleChange}
-                  type="text"
-                  value={formState.values.email || ''}
-                  variant="outlined"
-                />
-                <TextField
-                  className={classes.textField}
-                  error={hasError('password')}
-                  fullWidth
-                  helperText={
-                    hasError('password') ? formState.errors.password[0] : null
-                  }
-                  label="Password"
-                  name="password"
-                  onChange={handleChange}
-                  type="password"
-                  value={formState.values.password || ''}
-                  variant="outlined"
-                />
-                <div className={classes.policy}>
-                  <Checkbox
-                    checked={formState.values.policy || false}
-                    className={classes.policyCheckbox}
-                    color="primary"
-                    name="policy"
-                    onChange={handleChange}
-                  />
-                  <Typography
-                    className={classes.policyText}
-                    color="textSecondary"
-                    variant="body1"
-                  >
-                    I have read the{' '}
-                    <Link
-                      color="primary"
-                      component={RouterLink}
-                      to="#"
-                      underline="always"
-                      variant="h6"
-                    >
-                      Terms and Conditions
-                    </Link>
-                  </Typography>
-                </div>
-                {hasError('policy') && (
-                  <FormHelperText error>
-                    {formState.errors.policy[0]}
-                  </FormHelperText>
-                )}
-                <Button
-                  className={classes.signUpButton}
+                I have read the{' '}
+                <Link
                   color="primary"
-                  disabled={!formState.isValid}
-                  fullWidth
-                  size="large"
-                  type="submit"
-                  variant="contained"
+                  component={RouterLink}
+                  to="#"
+                  underline="always"
+                  variant="h6"
                 >
-                  Sign up now
-                </Button>
-                <Typography
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  Have an account?{' '}
-                  <Link
-                    component={RouterLink}
-                    to="/sign-in"
-                    variant="h6"
-                  >
-                    Sign in
-                  </Link>
-                </Typography>
-              </form>
+                  Terms and Conditions
+                    </Link>
+              </Typography>
             </div>
-          </div>
-        </Grid>
-      </Grid>
+            {hasError('policy') && (
+              <FormHelperText error>
+                {formState.errors.policy[0]}
+              </FormHelperText>
+            )}
+            <Button
+              className={classes.signUpButton}
+              color="primary"
+              disabled={!formState.isValid}
+              fullWidth
+              size="large"
+              type="submit"
+              variant="outlined"
+            >
+              Sign up now
+                </Button>
+            <Typography
+              color="textSecondary"
+              variant="body1"
+            >
+              Have an account?{' '}
+              <Link
+                component={RouterLink}
+                to="/sign-in"
+                variant="h6"
+              >
+                Sign in
+                  </Link>
+            </Typography>
+          </form>
+        </Box>
+      </div>
     </div>
   );
 };

@@ -114,18 +114,58 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     marginLeft: theme.spacing(1)
   },
-  fullWidth: {
-    width: '100%',
+  paper: {
     '&:hover div.actions': {
-      display: 'block !important',
+      display: 'flex !important',
     },
     '&:focus div.actions': {
-      display: 'block !important',
+      display: 'flex !important',
     },
     '&:active div.actions': {
-      display: 'block !important',
+      display: 'flex !important',
     },
-  }
+  },
+  details: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  alignItemsEnd: {
+    alignItems: 'center',
+    height: 31,
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  },
+  firstRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start'
+  },
+  paperContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: theme.spacing(1.5),
+    height: '100%',
+  },
+  background: {
+    backgroundSize: 'cover',
+    borderTopLeftRadius:theme.shape.borderRadius,
+    borderBottomLeftRadius:theme.shape.borderRadius,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center center',
+    paddingTop: '68.25%',
+    height: 0,
+    position: 'relative',
+    minHeight: '100%'
+
+  },
 }))
 
 const default_ = { name: '', owner: '' }
@@ -148,6 +188,19 @@ export default function List(props) {
   const changeExpanded = panel => () => {
     handleClose(panel)()
     setExpanded(expanded => expanded !== panel ? panel : false)
+  }
+
+  const getIcon = (state) => {
+    switch (state) {
+      case "active":
+        return <Icon fontSize="default" className='fal fa-check-circle text-success' />
+      case "stopped":
+        return <Icon fontSize="default" className='fal fa-play-circle text-secondary' />
+      case "builded":
+        return <Icon fontSize="default" className=' mt-1 fal fa-rocket text-secondary' />
+      default:
+        return <Icon fontSize="default" className='fal fa-play-circle text-secondary' />
+    }
   }
 
   const handleDialog = (value = !dialog) => () => {
@@ -192,6 +245,12 @@ export default function List(props) {
   const show = (id) => () => {
     dispatch(actions.startLoading())
     history.push(`/module/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
+  const showUser = (id) => () => {
+    dispatch(actions.startLoading())
+    history.push(`/account/${id}`)
     dispatch(actions.finishLoading())
   }
 
@@ -252,35 +311,37 @@ export default function List(props) {
             <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
               {
                 [1, 2, 3, 4, 5, 6].map(item =>
-                  <ExpansionPanel key={item} expanded={false} className={classes.fullWidth}>
-                    <ExpansionPanelSummary
-                      classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
-                      aria-controls="panel1bh-content"
-                    >
-                      <div className={classes.title}>
-                        <Typography className={classes.heading}>
-                          <Skeleton animation="wave" variant="text" height={20} width={200} />
+                  <Grid item xs={12} sm={12} md={6} lg={4} key={item} className="p-2">
+                    <ExpansionPanel expanded={false} className={classes.fullWidth} >
+                      <ExpansionPanelSummary
+                        classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
+                        aria-controls="panel1bh-content"
+                      >
+                        <div className={classes.title}>
+                          <Typography className={classes.heading}>
+                            <Skeleton animation="wave" variant="text" height={20} width={200} />
+                          </Typography>
+
+                          <Typography variant="caption" >
+                            <Skeleton animation="wave" variant="text" height={10} width={80} />
+                          </Typography>
+                        </div>
+
+                        <div className={classes.iconsHeading}>
+                          <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                          <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                          <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                          <Skeleton animation="wave" variant="circle" width={16} height={16} />
+                        </div>
+
+                      </ExpansionPanelSummary>
+                      <ExpansionPanelDetails classes={{ root: classes.expansionPanelDetails }}>
+                        <Typography>
+                          {item.description || "Description not supplied"}
                         </Typography>
-
-                        <Typography variant="caption" >
-                          <Skeleton animation="wave" variant="text" height={10} width={80} />
-                        </Typography>
-                      </div>
-
-                      <div className={classes.iconsHeading}>
-                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                        <Skeleton animation="wave" variant="circle" width={16} height={16} />
-                      </div>
-
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails classes={{ root: classes.expansionPanelDetails }}>
-                      <Typography>
-                        {item.description || "Description not supplied"}
-                      </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+                      </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                  </Grid>
                 )
               }
             </Grid>
@@ -289,10 +350,10 @@ export default function List(props) {
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Typography color="textSecondary">My algorithms</Typography>
+                  <Typography color="textSecondary">Subscriptions</Typography>
                 </Breadcrumbs>
               </Grid>
-            </Grid>            
+            </Grid>
             {
               modules.length === 0 ? (
                 <Grid container className="mt-3" justify="center" direction="row">
@@ -318,92 +379,81 @@ export default function List(props) {
                     <Grid container className="mt-3" style={{ maxWidth: '100%' }}>
                       {
                         filter.map((item, index) =>
-                          <ExpansionPanel key={item.image_name} expanded={expanded === index} className={classes.fullWidth}>
-                            <ExpansionPanelSummary
-                              classes={{ content: classes.expansionPanelContent, root: classes.expansionPanelRoot }}
-                            >
+                          <Grid item xs={12} sm={12} md={6} lg={6} xl={4} key={index} className="p-2">
+                            <Paper className={classes.paper}  variant="outlined">
+                              <Grid container>
+                                <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
+                                  <div className={classes.background} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})` }} />
+                                </Grid>
+                                <Grid item xs={7} sm={7} md={8} lg={8} l={8}>
+                                  <div className={classes.paperContent}>
 
-                              <div className={classes.title}>
-                                <Typography noWrap>
-                                  <Link onClick={show(item.image_name)}>
-                                    {ucWords(item.name)}
-                                  </Link>
-                                </Typography>
 
-                                <Typography variant="caption" style={{ whiteSpace: 'noWrap' }}>
-                                  <Link onClick={show(item.image_name)} component="button">{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
-                                </Typography>
-                              </div>
+                                    <div className={classes.firstRow}>
+                                      <Tooltip title={item.state === 'stopped' ? "This algorithm is under maintenance" : "You can use it"} className="mr-2 mt-1">
+                                        {getIcon(item.state)}
+                                      </Tooltip>
+                                      <div className={classes.header}>
+                                        <Typography noWrap>
+                                          <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
+                                        </Typography>
+                                        <Typography variant="caption" noWrap >
+                                          <Link onClick={showUser(item.user.id)}>{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
+                                        </Typography>
+                                      </div>
+                                    </div>
 
-                              <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
-                                {
-                                  sm ? <>
-                                    <Tooltip title={expanded !== index ? "More details" : "Less details"}>
-                                      <IconButton onClick={changeExpanded(index)} size="small">
+
+
+                                    <div className={clsx(classes.details, classes.alignItemsEnd)}>
+                                      <Typography noWrap variant="caption" color="textSecondary">
+                                        {item.description}
+                                      </Typography>
+                                      <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
                                         {
-                                          expanded !== index ? <ExpandMore /> : <ExpandLess />
-                                        }
-                                      </IconButton>
-                                    </Tooltip>
-                                    {
-                                      item.state === 'active' ? <Tooltip title="Test algorith">
-                                        <IconButton size="small" onClick={run(item.image_name)}>
-                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                        </IconButton>
-                                      </Tooltip> : <Tooltip title="This algorith is not active">
-                                          <IconButton size="small" disableFocusRipple disableRipple>
-                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial")} />
-                                          </IconButton>
-                                        </Tooltip>
-                                    }
-                                    <Tooltip title="All test">
-                                      <IconButton size="small" onClick={showTest(item.image_name)}>
-                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
-                                      </IconButton>
-                                    </Tooltip>                                    
-                                  </> : <>
-                                      <IconButton size="small" onClick={handleClick(index)}>
-                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
-                                      </IconButton>
-                                      <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
-                                        <MenuItem onClick={changeExpanded(index)}>
-                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                          sm ? <>
                                             {
-                                              expanded !== index ? <ExpandMore /> : <ExpandLess />
+                                              item.state === 'active' ? <Tooltip title="Test algorith">
+                                                <IconButton size="small" onClick={run(item.image_name)}>
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-vial")} />
+                                                </IconButton>
+                                              </Tooltip> : null
                                             }
-                                          </ListItemIcon>
-                                          <Typography variant="inherit">{expanded !== index ? "More details" : "Less details"}</Typography>
-                                        </MenuItem>
-                                        {
-                                          item.state === 'active' ?
-                                            <MenuItem onClick={run(item.image_name)}>
-                                              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                              </ListItemIcon>
-                                              <Typography variant="inherit">Test algorith</Typography>
-                                            </MenuItem> : null
+                                            <Tooltip title="All test">
+                                              <IconButton size="small" onClick={showTest(item.image_name)}>
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clipboard-list")} />
+                                              </IconButton>
+                                            </Tooltip>
+                                          </> : <>
+                                              <IconButton size="small" onClick={handleClick(index)}>
+                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-ellipsis-v")} />
+                                              </IconButton>
+                                              <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
+                                                {
+                                                  item.state === 'active' ?
+                                                    <MenuItem onClick={run(item.image_name)}>
+                                                      <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-vial")} />
+                                                      </ListItemIcon>
+                                                      <Typography variant="inherit">Test algorith</Typography>
+                                                    </MenuItem> : null
+                                                }
+                                                <MenuItem onClick={showTest(item.image_name)}>
+                                                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clipboard-list")} />
+                                                  </ListItemIcon>
+                                                  <Typography variant="inherit">All test</Typography>
+                                                </MenuItem>
+                                              </Menu>
+                                            </>
                                         }
-                                        <MenuItem onClick={showTest(item.image_name)}>
-                                          <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                            <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
-                                          </ListItemIcon>
-                                          <Typography variant="inherit">All test</Typography>
-                                        </MenuItem>                                        
-                                      </Menu>
-                                    </>
-                                }
-                              </div>
-
-                            </ExpansionPanelSummary>
-                            <ExpansionPanelDetails classes={{ root: classes.expansionPanelDetails }}>
-                              <Typography>
-                                {item.description || "Description not supplied"}
-                              </Typography>
-                              <IconButton size="small" className={classes.lessDetails} onClick={changeExpanded(index)}>
-                                <ExpandLess />
-                              </IconButton>
-                            </ExpansionPanelDetails>
-                          </ExpansionPanel>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Grid>
+                              </Grid>
+                            </Paper>
+                          </Grid>
                         )
                       }
                     </Grid>

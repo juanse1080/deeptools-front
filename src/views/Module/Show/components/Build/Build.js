@@ -49,14 +49,14 @@ const useStyles = makeStyles({
     fontSize: 12
   },
   error: {
-    backgroundColor: '#f44336'
+    backgroundColor: theme.palette.error.main
   },
   success: {
-    backgroundColor: '#689f38'
+    backgroundColor: theme.palette.success.main
   },
   inherit: {
-    backgroundColor: '#3f51b5'
-  }
+    backgroundColor: theme.palette.primary.main
+  },
 })
 
 export default function ({ progress, download }) {
@@ -141,7 +141,7 @@ export default function ({ progress, download }) {
             {
               download ? <Link href={host + download} target="_blank" download rel="noreferrer">
                 <Fab size="small" color="primary" aria-label="add" className={classes.download}>
-                  <Icon className="fas fa-link text-white" fontSize="small" />
+                  <Icon className="fal fa-link text-white" fontSize="small" />
                 </Fab>
               </Link> : null
             }

@@ -187,6 +187,7 @@ export default function FullScreenDialog({ open, toggle, element, change }) {
                     {
                       graph.options.series.map((chip, item) =>
                         <Chip
+                          variant="outlined"
                           key={item}
                           onClick={editSerie(key, item)}
                           className={classes.avatar}

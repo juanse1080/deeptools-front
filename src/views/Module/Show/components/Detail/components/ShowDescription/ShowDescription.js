@@ -18,12 +18,12 @@ export default function Detail({ module, viewOwner }) {
         <Typography className="mt-3 mb-2 text-secondary">Extensions:</Typography>
         {
           module.extensions.split(' ').map(extension =>
-            <Chip key={extension} label={extension} className="m-1" />
+            <Chip variant="outlined" key={extension} label={extension} className="m-1" />
           )
         }
       </> : <>
           <Typography className="mt-3 mb-2 text-secondary">Extensions:</Typography>
-          <Chip label={`${title(module.elements.input.value)} extensions`} className="m-1" />
+          <Chip variant="outlined" label={`${title(module.elements.input.value)} extensions`} className="m-1" />
         </>
     }
   </>

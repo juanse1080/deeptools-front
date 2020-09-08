@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSpring, animated } from 'react-spring'
-import { Card, CardMedia, FormHelperText, makeStyles, IconButton, Dialog, DialogTitle, DialogContent, Grid, TextField, FormControl, InputLabel, Select, MenuItem, DialogActions, Button } from '@material-ui/core'
+import { Card, CardMedia, FormHelperText, makeStyles, IconButton, Dialog, DialogTitle, DialogContent, Grid, TextField, FormControl, InputLabel, Select, MenuItem, DialogActions, Button, Icon } from '@material-ui/core'
 import { Settings } from '@material-ui/icons';
 
 import img from 'assets/img/default.jpg'
@@ -90,7 +90,7 @@ export default function ({ change, element }) {
         style={{ transform: props.scale.interpolate(scale) }}
         onClick={handleDialog(true)}
       >
-        <Settings />
+        <Icon fontSize="small" className="fal fa-cog" />
       </AnimatedIconButton>
     </div>
     <Dialog
@@ -136,7 +136,7 @@ export default function ({ change, element }) {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleDialog(false)} color="primary">
+        <Button variant="outlined" onClick={handleDialog(false)} color="primary">
           Close
         </Button>
       </DialogActions>

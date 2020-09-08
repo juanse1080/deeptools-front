@@ -84,6 +84,7 @@ export default function Run({ match, ...others }) {
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
   const access = useSelector(state => state.user.id)
+  const user = useSelector(state => state.user)
 
   const [loading, setLoading] = useState(true)
   const [step, setStep] = useState(0)
@@ -96,6 +97,12 @@ export default function Run({ match, ...others }) {
   const to = href => () => {
     dispatch(actions.startLoading())
     history.push(href)
+    dispatch(actions.finishLoading())
+  }
+
+  const algorithms = () => {
+    dispatch(actions.startLoading())
+    history.push(user.role === 'developer' ? '/module' : '/subscriptions')
     dispatch(actions.finishLoading())
   }
 
@@ -311,6 +318,22 @@ export default function Run({ match, ...others }) {
     }
   }, [match.params.id])
 
+  useEffect(() => {
+    if (step === 1) {
+      axios.post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON()).then(
+        function (res) {
+          setMedia(res.data.elements.map(item => ({ ...item, hover: false, progress: 100, uploaded: true })))
+        }
+      ).catch(
+        function (err) {
+          error(err)
+          console.error(err.response)
+        }
+      )
+    }
+    setExample([])
+  }, [step])
+
   const content = () => {
     if (step === 0) {
       return <div className="p-3" style={{ overflow: 'scroll' }}>
@@ -335,21 +358,25 @@ export default function Run({ match, ...others }) {
             <CircularProgress color="inherit" />
           </Backdrop>
         </> : <>
-            {/* <Grid container justify="center" direction="row" className="mb-3">
+            <Grid container justify="center" direction="row" className="mb-3">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Link color="inherit" onClick={to(`/subscriptions`)}>Algorithms</Link>
+                  <Link color="inherit" onClick={algorithms}>
+                    {
+                      user.role === 'developer' ? 'Algorithms' : 'Subscriptions'
+                    }
+                  </Link>
                   <Link color="inherit" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
                   <Typography color="textSecondary">Run</Typography>
                 </Breadcrumbs>
               </Grid>
-            </Grid> */}
+            </Grid>
             {content()}
             {
               sm ? <div className={classes.actions}>
                 <div className={classes.buttons}>
-                  <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-                  <Button disabled={step === 1 && media.length === 0} variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
+                  <Button variant="outlined" disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
+                  <Button className="ml-1" variant="outlined" disabled={step === 1 && media.length === 0} onClick={step === 0 ? handleStep(step + 1) : step == 1 ? execute : uploadExamples}>{step === 0 ? 'Next' : step == 1 ? 'execute' : 'save'}</Button>
                 </div>
                 {
                   step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
@@ -361,11 +388,11 @@ export default function Run({ match, ...others }) {
                     <IconButton disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>
                       <ArrowBack />
                     </IconButton>
-                    <IconButton disabled={step === 1 && media.length === 0} variant="contained" color="primary" onClick={step === 0 ? handleStep(step + 1) : step === 1 ? execute : uploadExamples}>{step === 0 ? <ArrowForward /> : step === 1 ? <PlayArrow /> : <Save />}</IconButton>
+                    <IconButton disabled={step === 1 && media.length === 0} onClick={step === 0 ? handleStep(step + 1) : step === 1 ? execute : uploadExamples}>{step === 0 ? <ArrowForward /> : step === 1 ? <PlayArrow /> : <Save />}</IconButton>
                   </div>
                   {
                     step === 1 ? module.state === 'builded' ? null : <Link component="button" onClick={handleStep(2)}>
-                      <Typography variant="h5" color="primary">Do you want to do a little test?</Typography>
+                      <Typography variant="h5">Do you want to do a little test?</Typography>
                     </Link> : null
                   }
                 </div>

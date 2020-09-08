@@ -87,7 +87,7 @@ export default function Detail({ module }) {
     {steps[step].content}
     <div className={classes.buttons}>
       <Button disabled={step === 0} onClick={handleStep(step - 1)} className={classes.backButton}>Back</Button>
-      <Button disabled={step === 2} variant="contained" color="primary" onClick={handleStep(step + 1)}>
+      <Button disabled={step === 2} variant="outlined" color="primary" onClick={handleStep(step + 1)}>
         Next
       </Button>
     </div>

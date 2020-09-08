@@ -4,13 +4,13 @@ import { Link as RouterLink } from 'react-router-dom';
 import clsx from 'clsx';
 import PropTypes, { element } from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
-import { AppBar, Toolbar, Badge, Hidden, IconButton, MenuList, Menu, Divider, LinearProgress, Link } from '@material-ui/core';
+import { AppBar, Toolbar, Badge, Hidden, IconButton, MenuList, Menu, Divider, LinearProgress, Link, Container, fade, InputBase, Icon, useMediaQuery, useTheme, Tooltip } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Info from '@material-ui/icons/Info';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import { Error, Warning, CheckCircle } from '@material-ui/icons';
+import { Error, Warning, CheckCircle, Search as SearchIcon } from '@material-ui/icons';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -32,8 +32,8 @@ const useStyles = makeStyles(theme => ({
   flexGrow: {
     flexGrow: 1
   },
-  Button: {
-    color: '#d1d3e2',
+  icon: {
+    color: '#fff',
   },
   drawerIcon: {
     color: theme.palette.primary.main
@@ -62,44 +62,124 @@ const useStyles = makeStyles(theme => ({
   disableEffectButton: {
     backgroundColor: 'inherit !important',
     cursor: 'default'
+  },
+  container: {
+    [theme.breakpoints.down("md")]: {
+      paddingLeft: 0,
+      paddingRight: 0,
+    }
+  },
+  inputRoot: {
+    color: 'inherit',
+  },
+  search: {
+    position: 'relative',
+    borderRadius: theme.shape.borderRadius,
+    border: '1px solid #fff',
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.15),
+    },
+    marginLeft: theme.spacing(1),
+    width: '100%',
+    marginLeft: 12,
+    marginRight: 12,
+    [theme.breakpoints.up('sm')]: {
+      width: 'auto',
+    },
+  },
+  searchIcon: {
+    paddingLeft: theme.spacing(1),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(4px + ${theme.spacing(4)}px)`,
+    transition: theme.transitions.create('width'),
+    [theme.breakpoints.up('sm')]: {
+      width: '14ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+  avatarFilter: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
   }
 }));
 
 
+const default_ = { word: '', dockers: [], users: [] }
 
 const Topbar = props => {
   const { className, onSidebarOpen, window, ...rest } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
+  const theme = useTheme()
+  const notMobile = useMediaQuery(theme.breakpoints.up('sm'))
+  const md = useMediaQuery(theme.breakpoints.up('md'))
   const user = useSelector(state => state.user)
 
   const trigger = useScrollTrigger({ target: window ? window() : undefined });
-  const [anchorEl, setAnchorEl] = useState({ account: null, notifications: null });
+  const [anchorEl, setAnchorEl] = useState({ account: null, notifications: null, options: null, search: false });
   const [ws, setWs] = useState(null);
+  const [filter, setFilter] = useState(default_);
   const [notifications, setNotifications] = useState([]);
 
   const getIcon = state => {
     switch (state) {
       case 'success':
-        return <CheckCircle fontSize="small" />
+        return <Icon fontSize="default" className="fal fa-check-circle text-success" />
 
       case 'warning':
         return <Warning fontSize="small" />
 
       case 'error':
-        return <Error fontSize="small" />
+        return <Icon fontSize="default" className="fal fa-exclamation-circle text-secondary" />
 
       default:
         break;
     }
   }
 
+  const handleFilter = e => {
+    e.persist()
+    setFilter(filter => ({ ...filter, word: e.target.value }))
+
+    if (e.target.value.length > 3) {
+      handleMenu('search')(e)
+
+      axios.put(`${host}/accounts/find`, { value: e.target.value }, authHeaderJSON()).then(
+        function (res) {
+          console.log(res.data)
+          setFilter(filter => ({ ...filter, users: res.data.users, dockers: res.data.dockers }))
+        }
+      ).catch(
+        function (err) {
+          console.log(err)
+        }
+      )
+    }
+  }
+
   const handleMenu = key => (event) => {
-    setAnchorEl(anchorEl => ({ ...anchorEl, [key]: event.currentTarget }));
+    event.persist()
+    const newAnchorEl = ({ ...anchorEl, [key]: event.currentTarget })
+    setAnchorEl(newAnchorEl)
   }
 
   const handleClose = key => () => {
-    setAnchorEl(anchorEl => ({ ...anchorEl, [key]: null }));
+    const newAnchorEl = ({ ...anchorEl, [key]: null })
+    setAnchorEl(newAnchorEl)
+  }
+
+  const closeFilter = () => {
+    handleClose('search')()
   }
 
   const to = (id, index, link) => () => {
@@ -129,6 +209,13 @@ const Topbar = props => {
   const profile = () => {
     dispatch(actions.startLoading())
     history.push('/account')
+    dispatch(actions.finishLoading())
+  }
+
+  const toView = url => () => {
+    dispatch(actions.startLoading())
+    setFilter(default_)
+    history.push(url)
     dispatch(actions.finishLoading())
   }
 
@@ -189,74 +276,202 @@ const Topbar = props => {
     }
   }, [])
 
+  useEffect(() => {
+    console.log(anchorEl)
+  }, [anchorEl]);
+
   return <Slide appear={false} direction="down" in={!trigger}>
     <AppBar {...rest} color="primary" className={clsx(classes.root, className)}>
-      <Toolbar className={clsx(classes.flexGrow, "shadow")}>
-        <Hidden lgUp>
-          <IconButton size="small" color="inherit" className={classes.drawerIcon} onClick={onSidebarOpen}>
-            <MenuIcon />
-          </IconButton>
-        </Hidden>
-        <div className={classes.flexGrow} />
-        <IconButton onClick={handleMenu('notifications')}>
-          <Badge badgeContent={notifications.length} max={9} overlap="circle" color='primary' children={<NotificationsIcon className={classes.Button} />} />
-        </IconButton>
-        <Menu classes={{ list: classes.menuList, paper: classes.menuPaper }} id="notification-appbar" anchorEl={anchorEl.notifications} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={Boolean(anchorEl.notifications)} onClose={handleClose('notifications')} >
-          <MenuItem style={{ cursor: 'default', pointerEvents: 'none', minHeight: 'auto' }}>
-            <Typography variant="caption">
-              Notifications
-              </Typography>
-          </MenuItem>
-          <Divider className={classes.divider} />
+      <Container maxWidth="lg">
+        <Toolbar className={clsx(classes.flexGrow, classes.container)}>
+          <RouterLink to="/" className="">
+            <img alt="Logo" src="/images/logos/logo--white.svg" />
+          </RouterLink>
+          <div className={classes.flexGrow} />
           {
-            notifications.length > 0 ? notifications.slice(0, notifications.length > 5 ? 5 : notifications.length).map((item, key) =>
-              <MenuItem key={key} onClick={to(item.id, key, item.link)} style={{ minHeight: 'auto' }}>
-                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                  {getIcon(item.kind)}
-                </ListItemIcon>
-
-                <div className={classes.description}>
-                  <Typography variant="inherit" noWrap>{item.title}</Typography>
-                  <Typography variant="caption" noWrap>{format_date(item.created_at)}</Typography>
+            notMobile && user.role !== 'developer' ? <>
+              <div className={classes.search}>
+                <div className={classes.searchIcon}>
+                  <Icon fontSize="small" className={clsx("fal fa-search")} />
                 </div>
-              </MenuItem>
-            ) : <MenuItem disabled style={{ minHeight: 'auto' }}>
-                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                  <Info fontSize="small" />
-                </ListItemIcon>
-                <Typography variant="caption">
-                  You have no active notifications
-                </Typography>
-              </MenuItem>
-          }
-          <Divider className={classes.divider} />
-          <MenuItem style={{ minHeight: 'auto' }} onClick={viewAll}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
-              <Typography variant="caption">
-                Show all
-              </Typography>
-            </div>
-          </MenuItem>
-        </Menu>
+                <InputBase
+                  placeholder="Search"
+                  classes={{
+                    root: classes.inputRoot,
+                    input: classes.inputInput,
+                  }}
+                  value={filter.word}
+                  inputProps={{ 'aria-label': 'search' }}
+                  onChange={handleFilter}
+                  onBlur={handleClose('search')}
+                />
+              </div>
+              <Menu classes={{ list: classes.menuList, paper: classes.menuPaper }} anchorEl={anchorEl.search} anchorOrigin={{ vertical: 55, horizontal: 'right', }} transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={Boolean(anchorEl.search) && Boolean(filter.word.length > 3)} onClose={closeFilter} autoFocus={false} disableAutoFocus disableEnforceFocus getContentAnchorEl={null}>
+                {
+                  filter.users.map(item => <MenuItem key={item.id} onClick={toView(`/account/${item.id}`)}>
+                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                      <Avatar src={host + item.photo} className={classes.avatarFilter} />
+                    </ListItemIcon>
+                    <Typography className="ml-2" variant="inherit" noWrap>{item.first_name} {item.last_name}</Typography>
+                  </MenuItem>
+                  )
+                }
 
-        <IconButton className={classes.profileButton} onClick={handleMenu('account')}>
-          <Avatar alt="Remy Sharp" src={`${host}${user.photo}`} />
-        </IconButton>
-        <Menu classes={{ list: classes.menuList }} id="menu-appbar" anchorEl={anchorEl.account} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right', }} open={Boolean(anchorEl.account)} onClose={handleClose('account')} >
-          <MenuItem onClick={profile}>
-            <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-              <AccountCircle fontSize="small" />
-            </ListItemIcon>
-            <Typography variant="inherit">Profile</Typography>
-          </MenuItem>
-          <MenuItem onClick={() => dispatch(actions.logout())}>
-            <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-              <ExitToApp fontSize="small" />
-            </ListItemIcon>
-            <Typography variant="inherit">Logout</Typography>
-          </MenuItem>
-        </Menu>
-      </Toolbar>
+                {
+                  filter.dockers.map(item => <MenuItem key={item.image_name} onClick={toView(`/module/${item.image_name}`)}>
+                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                      <Avatar src={host + item.background} className={classes.avatarFilter} />
+                    </ListItemIcon>
+                    <Typography className="ml-2" variant="inherit" noWrap>{item.name}</Typography>
+                  </MenuItem>
+                  )
+                }
+                <MenuItem onClick={toView(`/algorithms/${filter.word}`)}>
+                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                    <Icon fontSize="small" className={clsx("fal fa-search")} />
+                  </ListItemIcon>
+                  <Typography className="ml-2" variant="inherit" noWrap>Algorithms with: "{filter.word}"</Typography>
+                </MenuItem>
+              </Menu>
+            </> : null
+          }
+
+          {
+            md ? <>
+              <Tooltip title="Dashboard" placement="bottom">
+                <IconButton onClick={toView('/dashboard')}>
+                  <Icon fontSize="small" className={clsx("fal fa-tachometer-alt", classes.icon)} />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Algorithms" placement="bottom">
+                <IconButton onClick={toView(user.role === 'user' ? '/algorithms' : '/module')}>
+                  <Icon fontSize="small" className={clsx("fal fa-code", classes.icon)} />
+                </IconButton>
+              </Tooltip>
+
+              {
+                user.role === 'developer' ? <Tooltip title="New algorithm" placement="bottom">
+                  <IconButton onClick={toView('/module/create')}>
+                    <Icon fontSize="small" className={clsx("fal fa-plus", classes.icon)} />
+                  </IconButton>
+                </Tooltip> : <Tooltip title="Subscriptions" placement="bottom">
+                    <IconButton onClick={toView('/subscriptions')}>
+                      <Icon fontSize="small" className={clsx("fal fa-anchor", classes.icon)} />
+                    </IconButton>
+                  </Tooltip>
+              }
+
+              <Tooltip title="Running" placement="bottom">
+                <IconButton onClick={toView('/module/experiment')}>
+                  <Icon fontSize="small" className={clsx("fal fa-running", classes.icon)} />
+                </IconButton>
+              </Tooltip>
+            </> : <>
+                <Tooltip title="Options" placement="bottom">
+                  <IconButton onClick={handleMenu('options')}>
+                    <Icon fontSize="small" className={clsx("fal fa-ellipsis-v", classes.icon)} />
+                  </IconButton>
+                </Tooltip>
+                <Menu classes={{ list: classes.menuList }} anchorEl={anchorEl.options} anchorOrigin={{ vertical: 60, horizontal: 'right', }} transformOrigin={{ vertical: 'top', horizontal: 'right', }} getContentAnchorEl={null} open={Boolean(anchorEl.options)} onClose={handleClose('options')} >
+                  <MenuItem onClick={toView('/dashboard')}>
+                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                      <Icon fontSize="small" className={clsx("fal fa-tachometer-alt")} style={{ marginRight: 10, width: '1.6rem' }} />
+                    </ListItemIcon>
+                    <Typography variant="inherit">Dashboard</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={toView(user.role === 'user' ? '/algorithms' : '/module')}>
+                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                      <Icon fontSize="small" className={clsx("fal fa-code")} style={{ marginRight: 10, width: '1.6rem' }} />
+                    </ListItemIcon>
+                    <Typography variant="inherit">Algorithms</Typography>
+                  </MenuItem>
+                  {
+                    user.role === 'developer' ? <MenuItem onClick={toView('/module/create')}>
+                      <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                        <Icon fontSize="small" className={clsx("fal fa-plus")} style={{ marginRight: 10, width: '1.6rem' }} />
+                      </ListItemIcon>
+                      <Typography variant="inherit">New algorithm</Typography>
+                    </MenuItem> : <MenuItem onClick={toView('/subscriptions')}>
+                        <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                          <Icon fontSize="small" className={clsx("fal fa-anchor")} style={{ marginRight: 10, width: '1.6rem' }} />
+                        </ListItemIcon>
+                        <Typography variant="inherit">Subscriptions</Typography>
+                      </MenuItem>
+                  }
+                  <MenuItem onClick={toView('/module/experiment')}>
+                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                      <Icon fontSize="small" className={clsx("fal fa-running")} style={{ marginRight: 10, width: '1.6rem' }} />
+                    </ListItemIcon>
+                    <Typography variant="inherit">Running</Typography>
+                  </MenuItem>
+                </Menu>
+              </>
+          }
+          <IconButton onClick={handleMenu('notifications')}>
+            <Badge badgeContent={notifications.length} max={9} overlap="circle" color='secondary' children={
+              <Icon fontSize="small" className={clsx("fal fa-bell text-white")} />
+            } />
+          </IconButton>
+          <Menu classes={{ list: classes.menuList, paper: classes.menuPaper }} anchorEl={anchorEl.notifications} anchorOrigin={{ vertical: 60, horizontal: 'right', }} transformOrigin={{ vertical: 'top', horizontal: 'right', }} getContentAnchorEl={null} open={Boolean(anchorEl.notifications)} onClose={handleClose('notifications')} >
+            <MenuItem style={{ cursor: 'default', pointerEvents: 'none', minHeight: 'auto' }}>
+              <Typography variant="caption">
+                Notifications
+              </Typography>
+            </MenuItem>
+            <Divider className={classes.divider} />
+            {
+              notifications.length > 0 ? notifications.slice(0, notifications.length > 5 ? 5 : notifications.length).map((item, key) =>
+                <MenuItem key={key} onClick={to(item.id, key, item.link)} style={{ minHeight: 'auto' }}>
+                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                    {getIcon(item.kind)}
+                  </ListItemIcon>
+
+                  <div className={classes.description}>
+                    <Typography variant="inherit" noWrap>{item.title}</Typography>
+                    <Typography variant="caption" noWrap>{format_date(item.created_at)}</Typography>
+                  </div>
+                </MenuItem>
+              ) : <MenuItem disabled style={{ minHeight: 'auto' }}>
+                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                    <Icon fontSize="small" className={clsx("fal fa-info-circle")} />
+                  </ListItemIcon>
+                  <Typography variant="caption">
+                    You have no active notifications
+                </Typography>
+                </MenuItem>
+            }
+            <Divider className={classes.divider} />
+            <MenuItem style={{ minHeight: 'auto' }} onClick={viewAll}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
+                <Typography variant="caption">
+                  Show all
+              </Typography>
+              </div>
+            </MenuItem>
+          </Menu>
+
+          <IconButton onClick={handleMenu('account')} style={{ paddingLeft: 12, paddingRight: 12 }}>
+            <Avatar alt="Remy Sharp" src={`${host}${user.photo}`} />
+          </IconButton>
+          <Menu classes={{ list: classes.menuList }} anchorEl={anchorEl.account} anchorOrigin={{ vertical: 70, horizontal: 'right', }} transformOrigin={{ vertical: 'top', horizontal: 'right', }} getContentAnchorEl={null} open={Boolean(anchorEl.account)} onClose={handleClose('account')} >
+            <MenuItem onClick={profile}>
+              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                <Icon fontSize="small" className={clsx("fal fa-user-circle")} />
+                {/* <AccountCircle fontSize="small" /> */}
+              </ListItemIcon>
+              <Typography variant="inherit">Profile</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => dispatch(actions.logout())}>
+              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                <Icon fontSize="small" className={clsx("fal fa-sign-out-alt")} />
+                {/* <ExitToApp fontSize="small" /> */}
+              </ListItemIcon>
+              <Typography variant="inherit">Logout</Typography>
+            </MenuItem>
+          </Menu>
+        </Toolbar>
+      </Container>
     </AppBar>
   </Slide>
 }

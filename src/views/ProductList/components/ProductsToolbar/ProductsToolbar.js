@@ -44,7 +44,7 @@ const ProductsToolbar = props => {
         <Button className={classes.exportButton}>Export</Button>
         <Button
           color="primary"
-          variant="contained"
+          variant="outlined"
         >
           Add product
         </Button>

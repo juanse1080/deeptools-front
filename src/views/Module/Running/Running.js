@@ -24,6 +24,12 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(2),
     }
   },
+  alerts: {
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+  },
   owner: {
     fontSize: 11,
   },
@@ -34,13 +40,13 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   error: {
-    backgroundColor: '#f44336'
+    backgroundColor: theme.palette.error.main
   },
   success: {
-    backgroundColor: '#689f38'
+    backgroundColor: theme.palette.success.main
   },
   inherit: {
-    backgroundColor: '#3f51b5'
+    backgroundColor: theme.palette.primary.main
   },
   stepper: {
     backgroundColor: 'transparent',
@@ -77,6 +83,9 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
+    '&:hover': {
+      borderColor: '#b0b0b0',
+    },
   },
   content: {
     display: 'flex',
@@ -94,6 +103,16 @@ const useStyles = makeStyles((theme) => ({
   },
   date: {
     whiteSpace: 'noWrap'
+  },
+  floatButton: {
+    position: 'absolute',
+    borderRadius: '50%',
+    zIndex: 1,
+    bottom: 'calc(50% - 13px)',
+    transition: 'all .3s ease-in-out',
+    '&:hover': {
+      borderColor: '#b0b0b0',
+    },
   },
 }))
 
@@ -224,7 +243,7 @@ export default function () {
               <Grid item lg={6} md={6} sm={6} xs={12} key={index} className={classes.group}>
                 {
                   item.index === 0 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 2, borderRadius: '50%', zIndex: 1, bottom: 53 }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', left: 2 }} className={clsx("actions", classes.floatButton)}>
                       <IconButton size="small" onClick={handleExperiments(index, item.index - 1)} disabled={item.index === 0}>
                         <ArrowBack fontSize="small" />
                       </IconButton>
@@ -235,16 +254,14 @@ export default function () {
                   {
                     item.items.map(exp => <div key={exp.id} className="mb-2 m-3">
                       <LinearProgress color="primary" variant="determinate" value={exp.states.length > 0 ? parseInt(exp.states[exp.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(exp.states), root: classes.linearProgressRoot }} />
-                      <Paper className={classes.file} elevation={3}>
+                      <Paper className={classes.file} variant="outlined">
                         <div className={classes.content}>
                           <Typography noWrap className="mr-2">
-                            <Link onClick={showModule(exp.docker.image_name)}>{ucWords(exp.docker.name)}</Link>
+                            {ucWords(exp.docker.name)}
                           </Typography>
-                          <Tooltip title={real_date(exp.created_at)} className={classes.date}>
-                            <Typography variant="caption" color="textSecondary">
-                              {getDate(exp.created_at)}
-                            </Typography>
-                          </Tooltip>
+                          <Typography variant="caption" color="textSecondary" style={{ whiteSpace: 'nowrap' }}>
+                            {getDate(exp.created_at)}
+                          </Typography>
                         </div>
                         <div className={classes.content}>
                           <Tooltip title={exp.states.length > 0 ? exp.states[exp.states.length - 1].description : 'Starting process...'} style={{ marginTop: 6, marginBottom: 7 }}>
@@ -258,12 +275,12 @@ export default function () {
                           <div className={clsx("actions")} style={{ display: isMobile ? 'flex' : 'none' }}>
                             <Tooltip className="mr-1" title="Show test">
                               <IconButton size="small" onClick={show(exp.id)}>
-                                <Visibility fontSize="small" className="text-info" />
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="All test">
                               <IconButton size="small" onClick={showTest(exp.docker.image_name)}>
-                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clipboard-list text-info")} />
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clipboard-list")} />
                               </IconButton>
                             </Tooltip>
                           </div>
@@ -275,7 +292,7 @@ export default function () {
                 </SwipeableViews>
                 {
                   item.index === item.items.length - 1 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 2, borderRadius: '50%', zIndex: 1, bottom: 53 }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', right: 2 }} className={clsx("actions", classes.floatButton)}>
                       <IconButton size="small" onClick={handleExperiments(index, item.index + 1)} disabled={item.index === item.items.length - 1}>
                         <ArrowForward fontSize="small" />
                       </IconButton>

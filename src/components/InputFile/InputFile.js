@@ -134,7 +134,7 @@ function FileUpload({ onChange, id, link, titleTooltip, accept, pattern, error, 
         <Tooltip title={titleTooltip} placement="top">
           <Button
             size="small"
-            variant="contained"
+            variant="outlined"
             color="primary"
             className={buttonClassname}
             disabled={loading}

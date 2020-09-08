@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton } from '@material-ui/lab'
 
-import { IconButton, Typography, makeStyles, Grid, Paper, InputBase, Icon, Breadcrumbs, useMediaQuery, useTheme, Card, CardMedia } from '@material-ui/core'
+import { IconButton, Typography, makeStyles, Grid, Paper, InputBase, Icon, Breadcrumbs, useMediaQuery, useTheme, Card, CardMedia, Link } from '@material-ui/core'
 import { Search } from '@material-ui/icons'
 
 import { useDispatch, useSelector } from "react-redux"
@@ -45,11 +45,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '0.9rem'
   },
   paper: {
-    cursor: 'pointer',
-    transition: 'transform 300ms ease-in-out',
-    '&:hover': {
-      transform: 'scale(1.03)'
-    }
   },
   header: {
     display: 'flex',
@@ -72,13 +67,14 @@ const useStyles = makeStyles((theme) => ({
   },
   background: {
     backgroundSize: 'cover',
+    borderTopLeftRadius:theme.shape.borderRadius,
+    borderBottomLeftRadius:theme.shape.borderRadius,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center center',
     paddingTop: '68.25%',
     height: 0,
     position: 'relative',
-    borderTopLeftRadius: 6,
-    borderBottomLeftRadius: 6,
+    minHeight: '100%'
   },
   media: {
     height: 0,
@@ -126,6 +122,12 @@ export default function List(props) {
   const show = (id) => () => {
     dispatch(actions.startLoading())
     history.push(`/module/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
+  const showUser = id => () => {
+    dispatch(actions.startLoading())
+    history.push(`/account/${id}`)
     dispatch(actions.finishLoading())
   }
 
@@ -187,7 +189,7 @@ export default function List(props) {
               <Grid item lg={3} md={3} sm={4} xs={12} className="pr-3 pb-3">
                 <Grid container>
                   <Grid item xs={4} sm={12}>
-                    <Card className="rounded-pill">
+                    <Card className="rounded-pill" variant="outlined" >
                       <CardMedia className={classes.mediaProfile} image={`${host}${module.photo}`} title={module.first_name} />
                     </Card>
                   </Grid>
@@ -222,7 +224,7 @@ export default function List(props) {
                   {
                     module.algorithms.map((item, index) =>
                       <Grid item xs={12} sm={12} md={6} key={index} className="p-2">
-                        <Paper className={classes.paper} onClick={show(item.image_name)}>
+                        <Paper className={classes.paper} onClick={show(item.image_name)}  variant="outlined">
                           <Grid container>
                             <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
                               <div className={classes.background} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})` }}>
@@ -234,10 +236,7 @@ export default function List(props) {
                                 <div className={classes.header}>
                                   <div className={classes.firstRow}>
                                     <Typography noWrap>
-                                      {ucWords(item.name)}
-                                    </Typography>
-                                    <Typography variant="caption" color="textSecondary" style={{ whiteSpace: 'nowrap' }} className="ml-1">
-                                      {getDate(item.created_at)}
+                                      <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
                                     </Typography>
                                   </div>
                                   <Typography variant="caption" noWrap >
@@ -245,13 +244,11 @@ export default function List(props) {
                                       module.role === 'developer' ? <>
                                         {item.image !== '1' ? `${item.image} users` : "One user"}
                                       </> : <>
-                                          {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
+                                          <Link onClick={showUser(item.user.id)}>{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
                                           <span className="ml-1 mr-1">&#183;</span>
                                           {item.image !== '1' ? `${item.image} users` : "One user"}
                                         </>
                                     }
-
-
                                   </Typography>
                                 </div>
 

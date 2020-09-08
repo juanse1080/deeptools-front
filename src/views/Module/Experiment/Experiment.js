@@ -38,6 +38,7 @@ export default function ({ match, ...others }) {
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
   const access = useSelector(state => state.user.id)
+  const user = useSelector(state => state.user)
 
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
@@ -58,6 +59,12 @@ export default function ({ match, ...others }) {
         setDialog(false)
       }
     )
+  }
+
+  const algorithms = () => {
+    dispatch(actions.startLoading())
+    history.push(user.role === 'developer' || !module.subscribe ? '/module' : '/subscriptions')
+    dispatch(actions.finishLoading())
   }
 
   const triedDelete = () => {
@@ -161,7 +168,7 @@ export default function ({ match, ...others }) {
         })
 
         setExecute(res.data.state === 'executed' ? false : true)
-        setModule({ ...res.data.docker, owner: res.data.owner, experiments: res.data.experiments, elements_type: types, index: res.data.experiments.indexOf(match.params.id) + 1 })
+        setModule({ ...res.data.docker, owner: res.data.owner, subscribe: res.data.subscribe, experiments: res.data.experiments, elements_type: types, index: res.data.experiments.indexOf(match.params.id) + 1 })
         setLoading(false)
       }
     ).catch(
@@ -188,10 +195,15 @@ export default function ({ match, ...others }) {
             <Grid container justify="center" direction="row">
               <Grid item xs={12}>
                 <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                  <Link color="inherit" onClick={to(`/algorithms`)}>Algorithms</Link>
+                  <Link color="inherit" onClick={algorithms}>
+                    {
+                      user.role === 'developer' || !module.subscribe ? 'Algorithms' : 'Subscriptions'
+                    }
+                  </Link>
                   <Link color="inherit" onClick={to(`/module/${module.image_name}`)}>{ucWords(module.name)}</Link>
+                  {console.log(module.owner && module.subscribe)}
                   {
-                    module.owner ? <Link color="inherit" onClick={to(`/subscriptions/${module.image_name}`)}>Test</Link> : <Typography color="textSecondary">Test</Typography>
+                    module.owner && module.subscribe ? <Link color="inherit" onClick={to(`/subscriptions/${module.image_name}`)}>Test</Link> : <Typography color="textSecondary">Test</Typography>
                   }
                   <Typography color="textSecondary">{module.index}</Typography>
                 </Breadcrumbs>
@@ -204,7 +216,7 @@ export default function ({ match, ...others }) {
 
             }
             {
-              module.owner ? <>
+              module.owner && module.subscribe ? <>
                 <Grid container spacing={3} direction="row" justify="space-around" className="mt-3">
                   {
                     sm ? <Grid item>
@@ -212,21 +224,21 @@ export default function ({ match, ...others }) {
                         experiment.state === 'executed' ? <>
                           {
                             module.state !== 'active' ?
-                              <Button disabled size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial" />} className="mr-2"> New </Button> : <Tooltip title="Test algorith">
-                                <Button onClick={newTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial text-success" />} className="mr-2"> New </Button>
+                              <Button disabled size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-vial" />} className="mr-2"> New </Button> : <Tooltip title="Test algorith">
+                                <Button onClick={newTest} size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-vial " />} className="mr-2"> New </Button>
                               </Tooltip>
                           }
                           {
                             module.state !== 'active' ?
-                              <Button disabled size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-clone" />} className="mr-2" > Clone </Button> : <Tooltip title="Clone test with same data">
-                                <Button onClick={clone} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-clone text-secondary" />} className="mr-2" > Clone </Button>
+                              <Button disabled size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-clone" />} className="mr-2" > Clone </Button> : <Tooltip title="Clone test with same data">
+                                <Button onClick={clone} size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-clone " />} className="mr-2" > Clone </Button>
                               </Tooltip>
                           }
                           <Tooltip title={execute ? "Less info" : "More info"}>
-                            <Button onClick={handleExecute} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-info-circle text-info" />} className="mr-2"> {execute ? "less" : "more"} </Button>
+                            <Button onClick={handleExecute} size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-info-circle " />} className="mr-2"> {execute ? "less" : "more"} </Button>
                           </Tooltip>
                           <Tooltip className="mr-1" title="Delete test">
-                            <Button onClick={triedDelete} size="small" variant="contained" color="default" startIcon={<Delete className="text-danger" />}>
+                            <Button onClick={triedDelete} size="small" variant="outlined" color="default" startIcon={<Icon fontSize="small" className="fal fa-trash-alt text-danger" />}>
                               Delete
                         </Button>
                           </Tooltip>
@@ -238,27 +250,27 @@ export default function ({ match, ...others }) {
                             {
                               module.state !== 'active' ? null :
                                 <Tooltip title="Test algorith">
-                                  <IconButton onClick={newTest} variant="contained" color="default" className="mr-2">
-                                    <Icon fontSize="small" className="fas fa-vial text-success" />
+                                  <IconButton onClick={newTest} variant="outlined" color="default" className="mr-2">
+                                    <Icon fontSize="small" className="fal fa-vial " />
                                   </IconButton>
                                 </Tooltip>
                             }
                             {
                               module.state !== 'active' ?
                                 null : <Tooltip title="Clone test with same data">
-                                  <IconButton onClick={clone} variant="contained" color="default" className="mr-2" >
-                                    <Icon fontSize="small" className="fas fa-clone text-secondary" />
+                                  <IconButton onClick={clone} variant="outlined" color="default" className="mr-2" >
+                                    <Icon fontSize="small" className="fal fa-clone " />
                                   </IconButton>
                                 </Tooltip>
                             }
                             <Tooltip title={execute ? "Less info" : "More info"}>
-                              <IconButton onClick={handleExecute} variant="contained" color="default" className="mr-2">
+                              <IconButton onClick={handleExecute} variant="outlined" color="default" className="mr-2">
                                 {execute ? <ExpandLess /> : <ExpandMore />}
                               </IconButton>
                             </Tooltip>
                             <Tooltip className="mr-1" title="Delete test">
-                              <IconButton onClick={triedDelete} variant="contained" color="default">
-                                <Delete className="text-danger" />
+                              <IconButton onClick={triedDelete} variant="outlined" color="default">
+                                <Delete className="" />
                               </IconButton>
                             </Tooltip>
                           </> : null
@@ -266,7 +278,7 @@ export default function ({ match, ...others }) {
                       </Grid>
                   }
                   <Grid item>
-                    <Pagination size="small" count={module.experiments.length} page={module.index} color="primary" onChange={handlePage} />
+                    <Pagination variant="outlined" size="small" count={module.experiments.length} page={module.index} onChange={handlePage} />
                   </Grid>
                 </Grid>
                 <Dialog open={dialog !== false} keepMounted onClose={cancelDelete} maxWidth="xs" fullWidth>

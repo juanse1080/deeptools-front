@@ -187,7 +187,7 @@ const AccountDetails = props => {
         <CardActions>
           <Button
             color="primary"
-            variant="contained"
+            variant="outlined"
           >
             Save details
           </Button>

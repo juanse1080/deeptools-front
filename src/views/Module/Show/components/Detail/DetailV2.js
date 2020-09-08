@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { makeStyles, Icon, Chip, Tab, Tabs, Tooltip, Dialog, IconButton, Slide, useMediaQuery, Grid, Button, useTheme, Breadcrumbs, Link, Typography } from '@material-ui/core'
+import { makeStyles, Icon, Chip, Tab, Tabs, Tooltip, Dialog, IconButton, Slide, useMediaQuery, Grid, Button, useTheme, Breadcrumbs, Link, Typography, DialogActions, DialogContent, DialogContentText, TextField, DialogTitle, Avatar } from '@material-ui/core'
 import { Face, Close } from '@material-ui/icons'
+import { Autocomplete } from '@material-ui/lab'
 
 import clsx from 'clsx'
 
@@ -10,6 +11,7 @@ import { actions } from '_redux';
 import { Protocol, Structure, ModelDetail, ShowDescription, ShowExample, ShowUsers } from './components'
 
 import { title, format_date } from 'utils'
+import { NegationIcon } from 'components'
 
 import axios from 'axios'
 
@@ -45,6 +47,9 @@ const useStyles = makeStyles((theme) => ({
       left: 20,
     }
   },
+  outlinedChip: {
+    border: '1px solid rgb(255 255 255)'
+  },
   users: {
     position: 'absolute',
     right: 10,
@@ -73,6 +78,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const default_ = { name: '', id: null, index: null }
+
 export default function Detail({ module, handle }) {
   const classes = useStyles()
   const theme = useTheme()
@@ -81,10 +88,82 @@ export default function Detail({ module, handle }) {
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
 
   const [step, setStep] = useState(0)
+  const [dialog, setDialog] = useState({ delete: false, create: false })
+  const [deleting, setDeleting] = useState(default_)
   const [image, setImage] = useState(false)
 
   const handleStep = (e, newStep) => {
     setStep(newStep)
+  }
+
+  const tryDeleting = index => () => {
+    const tempUser = module.users[index]
+    setDeleting({ name: title(`${tempUser.first_name} ${tempUser.last_name}`), id: tempUser.id, index: index })
+    setDialog(dialog => ({ ...dialog, delete: true }))
+  }
+
+  const addUser = () => {
+    setDialog(dialog => ({ ...dialog, create: true }))
+  }
+
+  const cancelAdd = () => {
+    setDialog(dialog => ({ ...dialog, create: false }))
+  }
+
+  const cancelDelete = () => {
+    setDialog(dialog => ({ ...dialog, delete: false }))
+    setDeleting(default_)
+  }
+
+  const addedUser = (e, value) => {
+    axios.put(`${host}/module/subscribers/${module.image_name}`, { id: value.id }, authHeaderJSON()).then(
+      function (res) {
+        let currentUsers = [...module['no_subscribers']]
+        let index
+        currentUsers.some((element, key) => {
+          if (element.id === value.id) {
+            index = key
+            return true
+          }
+        })
+        handle('users', [...module.users, module['no_subscribers'][index]])
+        handle('no_subscribers', (() => {
+          currentUsers.splice(index, 1)
+          return currentUsers
+        })())
+        setDialog(dialog => ({ ...dialog, delete: false }))
+        setDeleting(default_)
+        cancelAdd()
+      }
+    ).catch(
+      function (err) {
+        console.log(err)
+        setDialog(dialog => ({ ...dialog, delete: false }))
+        setDeleting(default_)
+      }
+    )
+  }
+
+  const deleted = () => {
+    axios.put(`${host}/module/subscribers/${module.image_name}`, { id: deleting.id }, authHeaderJSON()).then(
+      function (res) {
+        console.log(module.users[deleting.index], [...module['no_subscribers'], module.users[deleting.index]])
+        handle('no_subscribers', [...module['no_subscribers'], module.users[deleting.index]])
+        handle('users', (() => {
+          let currentUsers = [...module.users]
+          currentUsers.splice(deleting.index, 1)
+          return currentUsers
+        })())
+        setDialog(dialog => ({ ...dialog, delete: false }))
+        setDeleting(default_)
+      }
+    ).catch(
+      function (err) {
+        console.log(err)
+        setDialog(dialog => ({ ...dialog, delete: false }))
+        setDeleting(default_)
+      }
+    )
   }
 
   const newTest = () => {
@@ -101,7 +180,7 @@ export default function Detail({ module, handle }) {
 
   const algorithms = () => {
     dispatch(actions.startLoading())
-    history.push('/algorithms')
+    history.push(user.role === 'developer' || module.subscribers.includes(user.id) ? '/module' : '/subscriptions')
     dispatch(actions.finishLoading())
   }
 
@@ -112,7 +191,7 @@ export default function Detail({ module, handle }) {
   }
 
   const toggleSubscriber = () => {
-    axios.put(`${host}/module/subscribers/${module.image_name}`, {}, authHeaderJSON()).then(
+    axios.put(`${host}/module/subscriptions/${module.image_name}`, {}, authHeaderJSON()).then(
       function (res) {
         console.log(res.data)
         if (res.data === "add") {
@@ -154,7 +233,7 @@ export default function Detail({ module, handle }) {
     },
     {
       label: 'Users',
-      content: <ShowUsers value={module} />
+      content: <ShowUsers value={module} onDeleting={tryDeleting} onCreating={addUser} />
     },
   ] : [
       {
@@ -176,14 +255,18 @@ export default function Detail({ module, handle }) {
       <Grid container justify="center" direction="row" style={{ position: 'absolute', top: 10, left: 10, width: 'auto' }}>
         <Grid item xs={12}>
           <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-            <Link color="inherit" className="text-white" onClick={algorithms}>Algorithms</Link>
+            <Link color="inherit" className="text-white" onClick={algorithms}>
+              {
+                user.role === 'developer' || !module.subscribers.includes(user.id) ? 'Algorithms' : 'Subscriptions'
+              }
+            </Link>
             <Typography color="textSecondary" className="text-white" >{title(module.name)}</Typography>
           </Breadcrumbs>
         </Grid>
       </Grid>
       <h5>{title(module.name)}</h5>
-      <Tooltip placement="left" className={classes.users} title={module.subscribers.length !== 1 ? `${module.subscribers.length} users` : "One user"}>
-        <Chip icon={<Face />} label={module.subscribers.length} size="small" />
+      <Tooltip placement="left" className={clsx("", classes.users)} title={module.subscribers.length !== 1 ? `${module.subscribers.length} users` : "One user"}>
+        <Chip variant="outlined" icon={<Icon fontSize="small" className={clsx("fal fa-user-circle")} />} label={module.subscribers.length} size="small" classes={{ outlined: classes.outlinedChip }} />
       </Tooltip>
     </div>
     <Tabs value={step} onChange={handleStep} indicatorColor="primary" textColor="primary" variant="scrollable" scrollButtons="auto" indicatorColor="primary" aria-label="scrollable auto tabs example">
@@ -192,61 +275,64 @@ export default function Detail({ module, handle }) {
           aria-controls={`scrollable-auto-tabpanel-${index}`} />)
       }
     </Tabs>
+
     <div className={classes.root}>
       {steps[step].content}
-      {
-        module.owner ? null : <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end" >
-          {
-            sm ? <Grid item>
+      <Grid container className="mt-3" spacing={3} direction="row" justify="flex-end" >
+        {
+          sm ? <Grid item>
+            {
+              module.subscribers.includes(user.id) || module.owner ? <>
+                {
+                  module.state !== 'active' ?
+                    <Button variant="outlined" disabled size="small" color="default" startIcon={<Icon fontSize="small" className="fal fa-vial" />} className="mr-2"> New </Button> : <Tooltip title="Test algorith">
+                      <Button variant="outlined" onClick={newTest} size="small" color="default" startIcon={<Icon fontSize="small" className="fal fa-vial" />} className="mr-2"> New </Button>
+                    </Tooltip>
+                }
+                <Tooltip title="All test">
+                  <Button variant="outlined" onClick={allTest} size="small" color="default" startIcon={<Icon fontSize="small" className="fal fa-clipboard-list" />} className="mr-2"> All </Button>
+                </Tooltip>
+                {
+                  module.owner ? null : <Tooltip title="Unsubscribe">
+                    <Button variant="outlined" onClick={toggleSubscriber} size="small" color="default" className="mr-2" >Unsubscribe</Button>
+                  </Tooltip>
+                }
+              </> : module.owner ? null : <Tooltip title="Subscribe">
+                <Button variant="outlined" onClick={toggleSubscriber} size="small" color="primary" className="mr-2">Subscribe</Button>
+              </Tooltip>
+            }
+          </Grid> : <Grid item>
               {
-                module.subscribers.includes(user.id) ? <>
+                module.subscribers.includes(user.id) || module.owner ? <>
                   {
-                    module.state !== 'active' ?
-                      <Button disabled size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial" />} className="mr-2"> New </Button> : <Tooltip title="Test algorith">
-                        <Button onClick={newTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-vial text-success" />} className="mr-2"> New </Button>
+                    module.state !== 'active' ? null :
+                      <Tooltip title="Test algorith">
+                        <IconButton onClick={newTest} color="default" className="mr-2">
+                          <Icon fontSize="small" className="fal fa-vial" />
+                        </IconButton>
                       </Tooltip>
                   }
                   <Tooltip title="All test">
-                    <Button onClick={allTest} size="small" variant="contained" color="default" startIcon={<Icon fontSize="small" className="fas fa-clipboard-list text-info" />} className="mr-2"> All </Button>
+                    <IconButton onClick={allTest} color="default" className="mr-2">
+                      <Icon fontSize="small" className="fal fa-clipboard-list" />
+                    </IconButton>
                   </Tooltip>
-                  <Tooltip title="Unsubscribe">
-                    <Button onClick={toggleSubscriber} size="small" variant="contained" color="default" className="mr-2 bg-danger text-white">Unsubscribe</Button>
-                  </Tooltip>
-                </> : <Tooltip title="Subscribe">
-                    <Button onClick={toggleSubscriber} size="small" variant="contained" color="primary" className="mr-2">Subscribe</Button>
-                  </Tooltip>
+                  {
+                    module.owner ? null : <Tooltip title="Unsubscribe">
+                      <IconButton onClick={toggleSubscriber} color="default" className="mr-2">
+                        <Icon fontSize="small" className="fal fa-anchor" color="primary" />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                </> : module.owner ? null : <Tooltip title="Subscribe">
+                  <IconButton onClick={toggleSubscriber} color="primary" className="mr-2">
+                    <Icon fontSize="small" className="fal fa-anchor" />
+                  </IconButton>
+                </Tooltip>
               }
-            </Grid> : <Grid item>
-                {
-                  module.subscribers.includes(user.id) ? <>
-                    {
-                      module.state !== 'active' ? null :
-                        <Tooltip title="Test algorith">
-                          <IconButton onClick={newTest} variant="contained" color="default" className="mr-2">
-                            <Icon fontSize="small" className="fas fa-vial text-success" />
-                          </IconButton>
-                        </Tooltip>
-                    }
-                    <Tooltip title="All test">
-                      <IconButton onClick={allTest} variant="contained" color="default" className="mr-2">
-                        <Icon fontSize="small" className="fas fa-clipboard-list text-info" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Unsubscribe">
-                      <IconButton onClick={toggleSubscriber} variant="contained" color="default" className="mr-2">
-                        <Icon fontSize="small" className="fas fa-anchor text-danger" color="primary" />
-                      </IconButton>
-                    </Tooltip>
-                  </> : <Tooltip title="Subscribe">
-                      <IconButton onClick={toggleSubscriber} variant="contained" color="primary" className="mr-2">
-                        <Icon fontSize="small" className="fas fa-anchor" />
-                      </IconButton>
-                    </Tooltip>
-                }
-              </Grid>
-          }
-        </Grid>
-      }
+            </Grid>
+        }
+      </Grid>
     </div >
     <Dialog
       classes={{ root: classes.rootDialog, paperScrollBody: classes.paperScrollBody }}
@@ -260,6 +346,36 @@ export default function Detail({ module, handle }) {
         <Close />
       </IconButton>
       <img className={classes.viewPreview} src={`${host}${module.background}`} alt="Imagen preview" />
+    </Dialog>
+    <Dialog open={dialog.delete} keepMounted onClose={cancelDelete} maxWidth="sm" fullWidth>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-slide-description">
+          {`¿Do want to delete the user ${deleting.name}?`}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={cancelDelete} variant="outlined">Cancel</Button>
+        <Button onClick={deleted} variant="outlined">Confirm</Button>
+      </DialogActions>
+    </Dialog>
+    <Dialog open={dialog.create} keepMounted onClose={cancelAdd} maxWidth="sm" fullWidth>
+      <DialogTitle id="alert-dialog-slide-title">Add users</DialogTitle>
+      <DialogContent>
+        <Autocomplete fullWidth size="small"
+          options={module['no_subscribers']}
+          onChange={addedUser}
+          value={null}
+          getOptionLabel={(option) =>
+            `${option.first_name} ${option.last_name}`
+          }
+          renderInput={
+            (params) => <TextField {...params} label="Images" variant="outlined" />
+          }
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={cancelAdd} variant="outlined">Cancel</Button>
+      </DialogActions>
     </Dialog>
   </div>
 }

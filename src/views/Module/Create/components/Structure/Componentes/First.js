@@ -21,7 +21,7 @@ export default function ({ elements, change }) {
   const classes = useStyles()
 
   return <>
-    <Paper className={classes.paper}>
+    <Paper className={classes.paper}  variant="outlined">
       <Grid container spacing={2}>
         <Grid item lg={12} md={12} sm={12} xs={12}>
           <Grid container spacing={2}>

@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     cursor: 'pointer',
   },
   paperContent: {
-    borderWidth: 2,
+    borderWidth: 1,
     borderStyle: 'dashed',
     width: '100%',
     paddingBottom: '20%',
@@ -83,7 +83,7 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
     console.log(files[0].type)
     if (pattern) {
       let errors = []
-      files = files.filter(file => {    
+      files = files.filter(file => {
         if (!file.type.match(pattern || "")) {
           errors.push(file.name)
           return false
@@ -91,7 +91,7 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
           return true
         }
       })
-    
+
       if (errors.length > 0) {
         setMessage(message => `${errors.join(', ')} files do not correspond to the allowed format`)
         setError(true)
@@ -112,10 +112,10 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
         <Typography>To activate your algorithm you must provide a base dataset for simple tests.</Typography>
       </Box> : null
     }
-    <Paper className={classes.paper}>
+    <Paper className={classes.paper} variant="outlined" >
       <label htmlFor="input" className={classes.label} onDragEnter={onDragEnter} onDragLeave={onDragLeave} onDragOver={onDragOver} onDrop={onDrop}>
         <div className={classes.paperContent} style={{ borderColor: over ? '#007bff' : '#6a6a6a', color: over ? '#007bff' : '#6a6a6a' }}>
-          <Icon className={clsx(classes.iconButton, "mb-3 fas fa-file-upload")} />
+          <Icon className={clsx(classes.iconButton, "mb-3 fal fa-file-upload")} />
           <span>
             {
               over ? <>
@@ -137,7 +137,7 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
       {
         media.map((item, key, media_array) =>
           <Grid key={key} item xs={12} sm={6} md={6} lg={4} xl={3}>
-            <Paper className={classes.file} onMouseEnter={enterMedia(key)} onMouseLeave={leaveMedia} onMouseOver={enterMedia(key)}>
+            <Paper  variant="outlined" className={classes.file} onMouseEnter={enterMedia(key)} onMouseLeave={leaveMedia} onMouseOver={enterMedia(key)}>
               <Tooltip title={item.name}>
                 <Typography noWrap align="left" className="mr-2"> {item.name} </Typography>
               </Tooltip>
@@ -146,7 +146,7 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
                   item.hover ?
                     <Tooltip title={item.uploaded ? "Delete" : "Cancel"}>
                       {
-                        item.uploaded ? item.deleting ? <CircularProgress variant="indeterminate" value={item.progress} size={24} /> : <Delete className={classes.deleteFile} onClick={deleteMedia(key)} /> : <Cancel className={classes.deleteFile} onClick={cancelUpload(key)} />
+                        item.uploaded ? item.deleting ? <CircularProgress variant="indeterminate" value={item.progress} size={24} /> : <Icon fontSize="small" onClick={deleteMedia(key)} className={clsx(classes.deleteFile, "fal fa-trash-alt text-danger")} /> : <Cancel className={classes.deleteFile} onClick={cancelUpload(key)} />
                       }
                     </Tooltip> : item.uploaded ? null : <CircularProgress variant="determinate" value={item.progress} size={24} />
                 }
@@ -156,8 +156,8 @@ export default function InputFile({ media, init, addMedia, deleteMedia, cancelUp
         )
       }
     </Grid>
-    <Snackbar anchorOrigin={{ vertical: "top", horizontal: "right" }} open={error} autoHideDuration={3000} onClose={handleError}>
-      <Alert onClose={handleError} severity="error">
+    <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "right" }} open={error} autoHideDuration={3000} onClose={handleError}>
+      <Alert onClose={handleError} severity="error" variant="outlined">
         {message}
       </Alert>
     </Snackbar>

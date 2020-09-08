@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { Grid, makeStyles, Card, CardMedia, Paper, IconButton, MobileStepper, Chip, Dialog, Slide } from '@material-ui/core'
+import { Grid, makeStyles, Card, CardMedia, Paper, IconButton, MobileStepper, Chip, Dialog, Slide, Icon } from '@material-ui/core'
 import { ArrowForward, ArrowBack, Visibility, Close } from '@material-ui/icons'
 
 import ReactPlayer from 'react-player'
 import { isMobile } from 'react-device-detect'
+
+import clsx from 'clsx'
 
 import { host } from 'helpers'
 
@@ -74,6 +76,11 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     color: theme.palette.grey[500],
   },
+  iconButton: {
+    fontSize: 15,
+    margin: 5,
+    width: 'auto'
+  },
 }))
 
 export default function ({ type, values, ...others }) {
@@ -94,7 +101,7 @@ export default function ({ type, values, ...others }) {
         {
           values.length < 2 ? <Card className={classes.group}>
             <CardMedia className={classes.media} image={`${host}${values[0]}`} />
-            <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, bottom: 10 }} className="actions">
+            <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, bottom: 10 }} className="actions">
               <IconButton size="small" onClick={handleShowView}  >
                 <Visibility fontSize="small" />
               </IconButton>
@@ -113,7 +120,7 @@ export default function ({ type, values, ...others }) {
               <Card className={classes.group}>
                 {
                   index === 0 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
                       <IconButton size="small" onClick={changeMedia(index - 1)} >
                         <ArrowBack fontSize="small" />
                       </IconButton>
@@ -122,16 +129,16 @@ export default function ({ type, values, ...others }) {
                 <CardMedia className={classes.media} image={`${host}${values[index]}`} />
                 {
                   index === values.length - 1 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
                       <IconButton size="small" onClick={changeMedia(index + 1)} >
                         <ArrowForward fontSize="small" />
                       </IconButton>
                     </Paper>
                 }
-                <Chip label={`${index + 1}/${values.length}`} className="actions" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', top: 10, right: 10 }} />
-                <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, bottom: 10 }} className="actions">
+                <Chip variant="outlined" label={`${index + 1}/${values.length}`} className="actions" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', top: 10, right: 10 }} />
+                <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, bottom: 10 }} className="actions">
                   <IconButton size="small" onClick={handleShowView}  >
-                    <Visibility fontSize="small" />
+                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                   </IconButton>
                 </Paper>
               </Card>
@@ -146,7 +153,7 @@ export default function ({ type, values, ...others }) {
               >
                 {
                   index === 0 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
                       <IconButton size="small" onClick={changeMedia(index - 1)} >
                         <ArrowBack fontSize="small" />
                       </IconButton>
@@ -155,20 +162,20 @@ export default function ({ type, values, ...others }) {
                 <img className={classes.viewPreview} src={`${host}${values[index]}`} />
                 {
                   index === values.length - 1 ? null :
-                    <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+                    <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
                       <IconButton size="small" onClick={changeMedia(index + 1)} >
                         <ArrowForward fontSize="small" />
                       </IconButton>
                     </Paper>
                 }
-                {/* <Chip label={`${index + 1}/${values.length}`} className="actions" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', top: 10, right: 10 }} /> */}
+                {/* <Chip variant="outlined" label={`${index + 1}/${values.length}`} className="actions" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', top: 10, right: 10 }} /> */}
               </Dialog>
             </>
         }
       </> : values.length < 2 ? <ReactPlayer url={`${host}${values[0]}`} className='react-player' controls playing muted loop width='100%' height='100%' /> : <div className={classes.group}>
         {
           index === 0 ? null :
-            <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+            <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', left: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
               <IconButton size="small" onClick={changeMedia(index - 1)} >
                 <ArrowBack fontSize="small" />
               </IconButton>
@@ -177,7 +184,7 @@ export default function ({ type, values, ...others }) {
         <ReactPlayer url={`${host}${values[index]}`} className="react-player" controls loop width='100%' height='100%' />
         {
           index === values.length - 1 ? null :
-            <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
+            <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 5, borderRadius: '50%', zIndex: 1, bottom: 'calc(50% - 13px)' }} className="actions">
               <IconButton size="small" onClick={changeMedia(index + 1)} >
                 <ArrowForward fontSize="small" />
               </IconButton>

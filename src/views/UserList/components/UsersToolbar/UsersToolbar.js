@@ -44,7 +44,7 @@ const UsersToolbar = props => {
         <Button className={classes.exportButton}>Export</Button>
         <Button
           color="primary"
-          variant="contained"
+          variant="outlined"
         >
           Add user
         </Button>

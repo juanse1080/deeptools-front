@@ -8,6 +8,9 @@ const theme = createMuiTheme({
   palette,
   typography,
   overrides,
+  shape: {
+    borderRadius: 4
+  },
   zIndex: {
     appBar: 1200,
     drawer: 1100

@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton, } from '@material-ui/lab'
 
-import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Breadcrumbs } from '@material-ui/core'
+import { Card, Link, CardContent, IconButton, Typography, makeStyles, Grid, Paper, InputBase, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, LinearProgress, Icon, Tooltip, useMediaQuery, useTheme, Menu, MenuItem, ListItemIcon, Breadcrumbs, Fab } from '@material-ui/core'
 import { Search, Edit, Delete, Visibility } from '@material-ui/icons'
 
 import { isMobile } from 'react-device-detect'
@@ -13,7 +13,7 @@ import { host, authHeaderJSON, history, ws } from 'helpers'
 
 import { title as ucWords, format_date as getDate, error } from 'utils'
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { actions } from '_redux';
 
 import axios from "axios"
@@ -77,7 +77,9 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column'
   },
   paper: {
-    // margin: theme.spacing(0, 1, 2, 1),
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     padding: theme.spacing(2),
     '&:hover div.actions': {
       display: 'flex !important'
@@ -103,7 +105,19 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-  }
+
+  },
+  background: {
+    backgroundSize: 'cover',
+    borderTopLeftRadius:theme.shape.borderRadius,
+    borderBottomLeftRadius:theme.shape.borderRadius,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center center',
+    paddingTop: '68.25%',
+    height: 0,
+    position: 'relative',
+    minHeight: '100%'
+  },
 }))
 
 const default_ = { name: '', owner: '' }
@@ -114,6 +128,7 @@ export default function List(props) {
   const theme = useTheme()
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
+  const user = useSelector(state => state.user)
 
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
@@ -126,18 +141,24 @@ export default function List(props) {
   }
 
   const handleModule = (index, name, value) => {
-    let aux = [...filter]
-    aux[index] = { ...aux[index], [name]: value }
-    setModules(modules.map(item => item.id === aux[index].id ? { ...item, [name]: value } : item))
-    setFilter(aux)
+    setModules(_modules => _modules.map(item => {
+      return item.id === filter[index].id ? { ...item, [name]: value } : item
+    }))
+    setFilter(filter => {
+      let aux = [...filter]
+      aux[index] = { ...aux[index], [name]: value }
+      return aux
+    })
   }
 
   const triedDelete = index => () => {
+    handleClose(index)()
     setDeleting({ ...filter[index], index: index })
     handleDialog(true)()
   }
 
   const cancelDelete = () => {
+    setDeleting(default_)
     handleDialog(false)()
   }
 
@@ -166,6 +187,12 @@ export default function List(props) {
     dispatch(actions.finishLoading())
   }
 
+  const newModule = () => {
+    dispatch(actions.startLoading())
+    history.push(`/module/create`)
+    dispatch(actions.finishLoading())
+  }
+
   const run = id => () => {
     dispatch(actions.startLoading())
     history.push(`/module/run/${id}`)
@@ -173,6 +200,7 @@ export default function List(props) {
   }
 
   const start = (index, id) => () => {
+    handleClose(index)()
     handleModule(index, 'loading', true)
     axios.put(`${host}/module/start/${id}`, {}, authHeaderJSON()).then(
       function (res) {
@@ -188,6 +216,7 @@ export default function List(props) {
   }
 
   const stop = (index, id) => () => {
+    handleClose(index)()
     handleModule(index, 'loading', true)
     axios.put(`${host}/module/stop/${id}`, {}, authHeaderJSON()).then(
       function (res) {
@@ -217,13 +246,13 @@ export default function List(props) {
   const getIcon = (state) => {
     switch (state) {
       case "active":
-        return <Icon fontSize="default" className='fas fa-check-circle text-success' />
+        return <Icon fontSize="default" className='fal fa-check-circle text-success' />
       case "stopped":
-        return <Icon fontSize="default" className='fas fa-play-circle text-secondary' />
+        return <Icon fontSize="default" className='fal fa-play-circle text-secondary' />
       case "builded":
-        return <Icon fontSize="default" className=' mt-1 fas fa-rocket text-secondary' />
+        return <Icon fontSize="default" className=' mt-1 fal fa-rocket text-secondary' />
       default:
-        return <Icon fontSize="default" className='fas fa-play-circle text-secondary' />
+        return <Icon fontSize="default" className='fal fa-play-circle text-secondary' />
     }
   }
 
@@ -253,6 +282,10 @@ export default function List(props) {
       error(err)
     })
   }, [])
+
+  useEffect(() => {
+    console.log('filter', filter)
+  }, [dialog, deleting, modules, filter])
 
   return <>
     <div className={classes.root}>
@@ -320,14 +353,14 @@ export default function List(props) {
                 </Breadcrumbs>
               </Grid>
               <Grid item xs={12} sm={10} md={8} xl={6}>
-                <Paper className={classes.alerts}>
+                <Paper  variant="outlined" className={classes.alerts}>
                   <IconButton size="small" color="primary" className={classes.iconButton} aria-label="search">
-                    <Search />
+                    <Icon fontSize="small" className={clsx("fal fa-search")} />
                   </IconButton>
                   <InputBase
                     onChange={filterModules}
                     className={classes.input}
-                    placeholder="Find modules"
+                    placeholder="Find algorithms"
                     inputProps={{ 'aria-label': 'search' }}
                   />
                 </Paper>
@@ -355,132 +388,156 @@ export default function List(props) {
                         </Grid>
                       ) : null
                     }
-                    <Grid container className="mt-3" spacing={1}>
+                    <Grid container className="mt-3" spacing={2}>
                       {
                         filter.map((item, index) =>
-                          <Grid item lg={6} md={6} sm={6} xs={12} key={item.id} >
+                          <Grid item lg={6} md={6} sm={12} xs={12} key={item.id} >
                             {item.loading ? <LinearProgress classes={{ root: classes.linearProgressRoot }} /> : null}
-                            <Paper className={classes.paper} >
-                              <div className={clsx(classes.details, classes.alignItemsStart)}>
-                                <div className={classes.fatherTitle}>
-                                  <Tooltip title={item.state} className="mr-2">
-                                    {getIcon(item.state)}
-                                  </Tooltip>
-                                  <div className={classes.title}>
-                                    <Typography noWrap>
-                                      <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
-                                    </Typography>
-                                    <Typography variant="caption" color="textSecondary">
-                                      {item.image}
-                                    </Typography>
-                                  </div>
-                                </div>
-
-                                <span className={classes.owner}>
-                                  <Typography noWrap variant="caption" color="textSecondary">
-                                    {getDate(item.created_at)}
-                                  </Typography>
-                                </span>
-                              </div>
-                              <div className={clsx(classes.details, classes.alignItemsEnd)}>
-                                <Typography noWrap variant="caption" >
-                                  {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
-                                </Typography>
-                                <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
-                                  {
-                                    sm ? <>
-                                      {
-                                        item.state === 'active' ? <>
-                                          <Tooltip title="Test">
-                                            <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
-                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                            </IconButton>
-                                          </Tooltip>
-                                          <Tooltip title="Stop">
-                                            <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
-                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </> : null
-                                      }
-                                      {
-                                        item.state === 'stopped' ? <>
-                                          <Tooltip title="Start">
-                                            <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
-                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </> : null
-                                      }
-                                      {
-                                        item.state === 'builded' ? <>
-                                          <Tooltip title="Active">
-                                            <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
-                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-rocket text-success")} />
-                                            </IconButton>
-                                          </Tooltip>
-                                        </> : null
-                                      }
-                                      <Tooltip title="Delete">
-                                        <IconButton size="small" onClick={triedDelete(index)}>
-                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
-                                        </IconButton>
+                            <Paper  variant="outlined" >
+                              <Grid container>
+                                <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
+                                  <div className={classes.background} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})` }} />
+                                </Grid>
+                                <Grid item xs={7} sm={7} md={8} lg={8} l={8} className={classes.paper}>
+                                  <div className={clsx(classes.details, classes.alignItemsStart)}>
+                                    <div className={classes.fatherTitle}>
+                                      <Tooltip title={item.state} className="mr-2 mt-1">
+                                        {getIcon(item.state)}
                                       </Tooltip>
-                                    </> : <>
-                                        <IconButton size="small" onClick={handleClick(index)}>
-                                          <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
-                                        </IconButton>
-                                        <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
+                                      <div className={classes.title}>
+                                        <Typography noWrap>
+                                          <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
+                                        </Typography>
+                                        <div>
+                                          <Typography variant="caption" color="textSecondary">
+                                            {item.image}
+                                          </Typography>
+                                          <span className="ml-1 mr-1">&#183;</span>
+                                          <Typography noWrap variant="caption" color="textSecondary">
+                                            {getDate(item.created_at)}
+                                          </Typography>
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className={clsx(classes.details, classes.alignItemsEnd)}>
+                                    {
+                                      user.id === item.user.id ? <Typography noWrap variant="caption" >
+                                        {item.description}
+                                      </Typography> : <Typography noWrap variant="caption" >
+                                          {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
+                                        </Typography>
+                                    }
+                                    <div style={{ display: isMobile ? 'flex' : 'none' }} className="actions">
+                                      {
+                                        sm ? <>
                                           {
-                                            item.state === 'active' ? <div>
-                                              <MenuItem onClick={run(item.image_name)}>
-                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-vial text-success")} />
-                                                </ListItemIcon>
-                                                <Typography variant="inherit">Test</Typography>
-                                              </MenuItem>
-                                              <MenuItem onClick={stop(index, item.image_name)}>
-                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-stop-circle text-secondary")} />
-                                                </ListItemIcon>
-                                                <Typography variant="inherit">Stop</Typography>
-                                              </MenuItem>
-                                            </div> : null
+                                            item.state === 'active' ? <>
+                                              <Tooltip title="Test">
+                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-vial")} />
+                                                </IconButton>
+                                              </Tooltip>
+                                              <Tooltip title="Stop">
+                                                <IconButton size="small" onClick={stop(index, item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-stop-circle")} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </> : null
                                           }
                                           {
-                                            item.state === 'stopped' ? <MenuItem onClick={start(index, item.image_name)}>
-                                              <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-play-circle text-primary")} />
-                                              </ListItemIcon>
-                                              <Typography variant="inherit">Start</Typography>
-                                            </MenuItem> : null
+                                            item.state === 'stopped' ? <>
+                                              <Tooltip title="Start">
+                                                <IconButton size="small" onClick={start(index, item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-play-circle")} />
+                                                </IconButton>
+                                              </Tooltip>
+                                            </> : null
                                           }
                                           {
                                             item.state === 'builded' ? <>
-                                              <MenuItem onClick={run(item.image_name)}>
-                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-rocket text-success")} />
-                                                </ListItemIcon>
-                                                <Typography variant="inherit">Active</Typography>
-                                              </MenuItem>
+                                              <Tooltip title="Active">
+                                                <IconButton size="small" onClick={run(item.image_name)} className="mr-2">
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-rocket")} />
+                                                </IconButton>
+                                              </Tooltip>
                                             </> : null
                                           }
-                                          <MenuItem onClick={triedDelete(index)}>
-                                            <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-trash text-danger")} />
-                                            </ListItemIcon>
-                                            <Typography variant="inherit">Delete</Typography>
-                                          </MenuItem>
-                                        </Menu>
-                                      </>
-                                  }
-                                </div>
-                              </div>
+                                          <Tooltip title="Delete">
+                                            <IconButton size="small" onClick={triedDelete(index)}>
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-trash-alt text-danger")} />
+                                            </IconButton>
+                                          </Tooltip>
+                                        </> : <>
+                                            <IconButton size="small" onClick={handleClick(index)}>
+                                              <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-ellipsis-v")} />
+                                            </IconButton>
+                                            <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
+                                              {
+                                                item.state === 'active' ? <div>
+                                                  <MenuItem onClick={run(item.image_name)}>
+                                                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-vial")} />
+                                                    </ListItemIcon>
+                                                    <Typography variant="inherit">Test</Typography>
+                                                  </MenuItem>
+                                                  <MenuItem onClick={stop(index, item.image_name)}>
+                                                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-stop-circle")} />
+                                                    </ListItemIcon>
+                                                    <Typography variant="inherit">Stop</Typography>
+                                                  </MenuItem>
+                                                </div> : null
+                                              }
+                                              {
+                                                item.state === 'stopped' ? <MenuItem onClick={start(index, item.image_name)}>
+                                                  <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-play-circle")} />
+                                                  </ListItemIcon>
+                                                  <Typography variant="inherit">Start</Typography>
+                                                </MenuItem> : null
+                                              }
+                                              {
+                                                item.state === 'builded' ? <div>
+                                                  <MenuItem onClick={run(item.image_name)}>
+                                                    <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-rocket")} />
+                                                    </ListItemIcon>
+                                                    <Typography variant="inherit">Active</Typography>
+                                                  </MenuItem>
+                                                </div> : null
+                                              }
+                                              <MenuItem onClick={triedDelete(index)}>
+                                                <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
+                                                  <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-trash-alt text-danger")} />
+                                                </ListItemIcon>
+                                                <Typography variant="inherit">Delete</Typography>
+                                              </MenuItem>
+                                            </Menu>
+                                          </>
+                                      }
+                                    </div>
+                                  </div>
+                                </Grid>
+                              </Grid>
+
                             </Paper>
                           </Grid>
                         )
                       }
+
                     </Grid>
+                    <Grid container justify="flex-end" className="mt-3">
+                      <Grid item>
+                        <Tooltip title="Test algorith">
+                          <Fab size="small" color="primary" aria-label="New algorith" onClick={newModule}>
+                            <Icon fontSize="small" className="fal fa-plus text-white" />
+                          </Fab>
+                        </Tooltip>
+                      </Grid>
+                    </Grid>
+
                     <Dialog open={dialog} keepMounted onClose={cancelDelete} aria-labelledby="alert-dialog-slide-title" aria-describedby="alert-dialog-slide-description">
                       <DialogTitle id="alert-dialog-slide-title" classes={{ root: classes.rootTitleDialog }}>{`Module ${deleting.name}`}</DialogTitle>
                       <DialogContent>

@@ -366,8 +366,8 @@ export default function Steppers() {
           </Stepper>
           {steps[step].content}
           <div className={classes.buttons}>
-            <Button disabled={step === 0} onClick={handleBack} className={classes.backButton}>Back</Button>
-            <Button variant="contained" color="primary" onClick={step >= steps.length - 1 ? sendData : handleNext}>
+            <Button variant="outlined" disabled={step === 0} onClick={handleBack} className={classes.backButton}>Back</Button>
+            <Button variant="outlined" onClick={step >= steps.length - 1 ? sendData : handleNext}>
               {step >= steps.length - 1 ? 'Send' : 'Next'}
             </Button>
           </div>

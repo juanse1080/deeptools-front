@@ -3,7 +3,7 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import { useSpring, animated } from 'react-spring'
 
-import { IconButton, Tooltip } from '@material-ui/core';
+import { IconButton, Tooltip, Icon } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { Settings } from '@material-ui/icons';
 
@@ -50,7 +50,7 @@ export default function ({ element, change }) {
         style={{ transform: props.scale.interpolate(scale) }}
         onClick={toggleDialog(true)}
       >
-        <Settings />
+        <Icon fontSize="small" className="fal fa-cog" />
       </AnimatedIconButton>
     </div>
     <Dialog toggle={toggleDialog} open={dialog} element={element} change={change} />

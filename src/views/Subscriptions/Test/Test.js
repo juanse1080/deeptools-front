@@ -29,13 +29,13 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'noWrap'
   },
   error: {
-    backgroundColor: '#f44336'
+    backgroundColor: theme.palette.error.main
   },
   success: {
-    backgroundColor: '#689f38'
+    backgroundColor: theme.palette.success.main
   },
   inherit: {
-    backgroundColor: '#3f51b5'
+    backgroundColor: theme.palette.primary.main
   },
   card: {
     margin: theme.spacing(1)
@@ -72,7 +72,8 @@ const useStyles = makeStyles((theme) => ({
   },
   iconButton: {
     fontSize: 15,
-    margin: 5
+    margin: 5,
+    width: 'auto'
   },
 }))
 
@@ -82,6 +83,7 @@ export default function ({ match }) {
   const sm = useMediaQuery(theme.breakpoints.up('sm'))
   const dispatch = useDispatch()
   const access = useSelector(state => state.user.id)
+  const user = useSelector(state => state.user)
 
   const [loading, setLoading] = useState(true)
   const [dialog, setDialog] = useState(false)
@@ -104,9 +106,9 @@ export default function ({ match }) {
     }
   }
 
-  const subscriptions = () => {
+  const algorithms = () => {
     dispatch(actions.startLoading())
-    history.push(`/algorithms`)
+    history.push(user.role === 'developer' ? '/module' : '/subscriptions')
     dispatch(actions.finishLoading())
   }
 
@@ -313,7 +315,11 @@ export default function ({ match }) {
           <Grid container justify="center" direction="row">
             <Grid item xs={12}>
               <Breadcrumbs aria-label="breadcrumb" maxItems={sm ? 8 : 2}>
-                <Link color="inherit" onClick={subscriptions}>Algorithms</Link>
+                <Link color="inherit" onClick={algorithms}>
+                  {
+                    user.role === 'developer' ? 'Algorithms' : 'Subscriptions'
+                  }
+                </Link>
                 <Link color="inherit" onClick={showModule}>{ucWords(module.name)}</Link>
                 <Typography color="textSecondary">Test</Typography>
               </Breadcrumbs>
@@ -324,22 +330,22 @@ export default function ({ match }) {
               experiments.length > 0 ? experiments.map((item, index) =>
                 <Grid item xl={4} lg={6} md={6} sm={12} xs={12} key={item.id}>
                   <LinearProgress color="primary" variant="determinate" value={item.states.length > 0 ? parseInt(item.states[item.states.length - 1].progress) : 0} classes={{ barColorPrimary: getClass(item.states), root: classes.linearProgressRoot }} />
-                  <Paper className={classes.file}>
+                  <Paper className={classes.file}  variant="outlined">
                     <div className={classes.content} style={{ minWidth: 0 }}>
                       <div className={clsx(classes.content, "actions")} style={{ display: isMobile ? 'flex' : 'none' }}>
                         {
                           sm ? <>
                             <Tooltip className="mr-1" title="Show test">
                               <IconButton size="small" onClick={show(item.id)}>
-                                <Visibility fontSize="small" className="text-info" />
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                               </IconButton>
                             </Tooltip>
                             {
                               module.state !== 'active' ? <IconButton size="small" disabled={true} >
-                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clone")} />
                               </IconButton> : <Tooltip title="Clone test with same data">
                                   <IconButton size="small" onClick={clone(index)}>
-                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clone")} />
                                   </IconButton>
                                 </Tooltip>
                             }
@@ -347,26 +353,26 @@ export default function ({ match }) {
                               item.state === 'executed' ? <>
                                 <Tooltip className="mr-1" title="Delete test">
                                   <IconButton size="small" onClick={triedDelete(index)}>
-                                    <Delete fontSize="small" className="text-danger" />
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-trash-alt text-danger")} />
                                   </IconButton>
                                 </Tooltip>
                               </> : null
                             }
                           </> : <>
                               <IconButton size="small" onClick={handleClick(index)}>
-                                <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-ellipsis-v")} />
+                                <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-ellipsis-v")} />
                               </IconButton>
                               <Menu anchorEl={item.anchor} anchorOrigin={{ vertical: 'top', horizontal: 'right', }} keepMounted transformOrigin={{ vertical: 'top', horizontal: 'right' }} open={Boolean(item.anchor)} onClose={handleClose(index)}>
                                 <MenuItem onClick={show(item.id)}>
                                   <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                    <Visibility fontSize="small" className="text-info" />
+                                    <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                                   </ListItemIcon>
                                   <Typography variant="inherit">Show test</Typography>
                                 </MenuItem>
                                 {
                                   module.state !== 'active' ? null : <MenuItem onClick={clone(index)}>
                                     <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fas fa-clone")} />
+                                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-clone")} />
                                     </ListItemIcon>
                                     <Typography variant="inherit">Clone test with same data</Typography>
                                   </MenuItem>
@@ -375,7 +381,7 @@ export default function ({ match }) {
                                   item.state === 'executed' ?
                                     <MenuItem onClick={triedDelete(index)}>
                                       <ListItemIcon classes={{ root: classes.listItemIconRoot }}>
-                                        <Delete fontSize="small" className="text-danger" />
+                                        <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-trash-alt text-danger")} />
                                       </ListItemIcon>
                                       <Typography variant="inherit">Delete test</Typography>
                                     </MenuItem> : null
@@ -417,10 +423,10 @@ export default function ({ match }) {
             <Grid item>
               {
                 module.state !== 'active' ? <Fab disabled={true} size="small" color="primary" aria-label="Test algorith">
-                  <Icon fontSize="small" className="fas fa-vial text-white" />
+                  <Icon fontSize="small" className="fal fa-vial text-white" />
                 </Fab> : <Tooltip title="Test algorith">
                     <Fab disabled={module.state !== 'active'} size="small" color="primary" aria-label="Test algorith" onClick={newTest}>
-                      <Icon fontSize="small" className="fas fa-vial text-white" />
+                      <Icon fontSize="small" className="fal fa-vial text-white" />
                     </Fab>
                   </Tooltip>
               }

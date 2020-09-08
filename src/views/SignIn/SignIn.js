@@ -147,7 +147,7 @@ const SignIn = props => {
               {
                 error ? <Alert severity="error" className={classes.error}>{error}</Alert> : null
               }
-            <Button className={classes.signInButton} color="primary" disabled={!formState.isValid} fullWidth size="large" type="submit" variant="contained"> Sign in now </Button>
+            <Button className={classes.signInButton} color="primary" disabled={!formState.isValid} fullWidth size="large" type="submit" variant="outlined"> Sign in now </Button>
             <Typography color="textSecondary" variant="body1">
               Don't have an account?{' '}
               <Link component={RouterLink} to="/sign-up" variant="h6">

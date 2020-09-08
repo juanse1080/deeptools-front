@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 
-const RouteWithLayout = ({ layout: Layout, component: Component, ...rest }) => {
+const RouteWithLayout = ({ layout: Layout, component: Component, fluid, ...rest }) => {
 
   const classes = useStyles()
   const dispatch = useDispatch()
@@ -34,7 +34,7 @@ const RouteWithLayout = ({ layout: Layout, component: Component, ...rest }) => {
     <Route
       {...rest}
       render={matchProps => (
-        <Layout>
+        <Layout fluid={fluid}>
           <div className={classes.root}>
             <Component {...matchProps} />
             <Footer />

@@ -5,6 +5,7 @@ import MuiTableCell from './MuiTableCell';
 import MuiTableHead from './MuiTableHead';
 import MuiTypography from './MuiTypography';
 import MuiLink from './MuiLink';
+import MuiAlert from './MuiAlert';
 
 export default {
   MuiLink,
@@ -13,5 +14,18 @@ export default {
   MuiPaper,
   MuiTableCell,
   MuiTableHead,
-  MuiTypography
+  MuiTypography,
+  MuiAlert,
+  MuiIcon: {
+    root: {
+      minWidth: '1rem',
+      width: 'auto'
+    }
+  },
+  MuiChip: {
+    outlined: {
+      border: '1px solid #d0d0d0',
+      backgroundColor: '#fff'
+    }
+  }
 };

@@ -176,7 +176,7 @@ export default function List(props) {
     )
   }
 
-  
+
 
   const run = id => () => {
     dispatch(actions.startLoading())
@@ -334,11 +334,11 @@ export default function List(props) {
                       {
                         notifications.map((item, index) =>
                           <Grid item lg={6} md={6} sm={6} xs={12} key={item.id} >
-                            <Paper className={classes.paper} >
+                            <Paper className={classes.paper}  variant="outlined" >
                               <div className={clsx(classes.details, classes.alignItemsStart)}>
                                 <div className={classes.fatherTitle}>
                                   <Tooltip title={item.kind} className="mr-2">
-                                    <Icon fontSize="default" className={clsx(`fas ${item.kind === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-secondary'}`)} />
+                                    <Icon fontSize="default" className={clsx(`fal ${item.kind === 'success' ? 'fa-check-circle text-success' : 'fa-exclamation-circle text-secondary'}`)} />
                                   </Tooltip>
                                   <Typography noWrap>
                                     <Link onClick={to(item.id, item.link)}>{ucWords(item.title)}</Link>

@@ -1,14 +1,18 @@
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect, useLocation } from 'react-router-dom';
 
 import { RouteWithLayout, RoutePublicLayout, RouteCrud } from './components';
 import { Main as MainLayout, Minimal as MinimalLayout } from './layouts';
+import { useSelector } from "react-redux";
+
 
 import {
   Dashboard as DashboardView, ProductList as ProductListView, UserList as UserListView, Typography as TypographyView, Icons as IconsView, Account as AccountView, Settings as SettingsView, SignUp as SignUpView, SignIn as SignInView, NotFound as NotFoundView, Module, Subscriptions, Algorithms, Notifications, Profile
 } from './views';
 
 const Routes = () => {
+  const user = useSelector(state => state.user)
+  let location = useLocation()
   return (
     <Switch>
       <RoutePublicLayout component={SignUpView} exact path="/sign-up" />
@@ -16,7 +20,12 @@ const Routes = () => {
       <RoutePublicLayout component={NotFoundView} exact path="/not-found" />
       <RouteCrud component={Module} exact layout={MainLayout} path="/module/:action?/:id?" />
       <RouteCrud component={Subscriptions} exact layout={MainLayout} path="/subscriptions/:action?/:id?" />
-      <RouteWithLayout component={Algorithms} exact layout={MainLayout} path="/algorithms" />
+      {
+        user ? user.role === 'user' ? <RouteWithLayout component={Algorithms} exact layout={MainLayout} path="/algorithms/:filter?" /> : null : null
+      }
+      {
+        user ? user.role === 'developer' && location.pathname === '/algorithms' ? <Redirect to="/module" /> : null : null
+      }
       <RouteWithLayout component={Notifications} exact layout={MainLayout} path="/notifications" />
       <RouteCrud component={Profile} exact layout={MainLayout} path="/account/:action?/:id?" />
       <RouteWithLayout component={DashboardView} exact layout={MainLayout} path="/dashboard" />

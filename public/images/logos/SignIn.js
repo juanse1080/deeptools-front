@@ -164,7 +164,7 @@ const SignIn = props => {
               <Typography className={classes.title} variant="h2" align="center">Sign in</Typography>
               <TextField className={classes.textField} error={hasError('email')} fullWidth helperText={hasError('email') ? formState.errors.email[0] : null} label="Email address" name="email" onChange={handleChange} type="text" value={formState.values.email || ''} variant="outlined" />
               <TextField className={classes.textField} error={hasError('password')} fullWidth label="Password" name="password" onChange={handleChange} type="password" value={formState.values.password || ''} variant="outlined" helperText={hasError('password') ? formState.errors.password[0] : null} />
-              <Button className={classes.signInButton} color="primary" disabled={!formState.isValid} fullWidth size="large" type="submit" variant="contained"> Sign in now </Button>
+              <Button className={classes.signInButton} color="primary" disabled={!formState.isValid} fullWidth size="large" type="submit" variant="outlined"> Sign in now </Button>
               <Typography color="textSecondary" variant="body1">
                 Don't have an account?{' '}
                 <Link component={RouterLink} to="/sign-up" variant="h6">

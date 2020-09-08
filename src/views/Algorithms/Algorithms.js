@@ -4,7 +4,7 @@ import clsx from 'clsx'
 
 import { Alert, Skeleton } from '@material-ui/lab'
 
-import { IconButton, Typography, makeStyles, Grid, Paper, InputBase, Icon, Breadcrumbs, useMediaQuery, useTheme } from '@material-ui/core'
+import { IconButton, Typography, makeStyles, Grid, Paper, InputBase, Icon, Breadcrumbs, useMediaQuery, useTheme, Link, Tooltip } from '@material-ui/core'
 import { Search } from '@material-ui/icons'
 
 import { useDispatch, useSelector } from "react-redux"
@@ -54,11 +54,10 @@ const useStyles = makeStyles((theme) => ({
 
   },
   paper: {
-    cursor: 'pointer',
-    transition: 'transform 300ms ease-in-out',
-    '&:hover': {
-      transform: 'scale(1.03)'
-    }
+    // transition: 'transform .3s ease-in-out',
+    // '&:hover': {
+    //   transform: 'translateY(-5px)',
+    // }
   },
   header: {
     display: 'flex',
@@ -81,13 +80,14 @@ const useStyles = makeStyles((theme) => ({
   },
   background: {
     backgroundSize: 'cover',
+    borderTopLeftRadius: theme.shape.borderRadius,
+    borderBottomLeftRadius: theme.shape.borderRadius,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center center',
     paddingTop: '68.25%',
     height: 0,
     position: 'relative',
-    borderTopLeftRadius: 6,
-    borderBottomLeftRadius: 6,
+    minHeight: '100%'
   },
   media: {
     height: 0,
@@ -122,6 +122,7 @@ export default function List(props) {
   const [loading, setLoading] = useState(true)
   const [modules, setModules] = useState([])
   const [filter, setFilter] = useState([])
+  const [word, setWord] = useState('')
 
   const show = (id) => () => {
     dispatch(actions.startLoading())
@@ -129,9 +130,16 @@ export default function List(props) {
     dispatch(actions.finishLoading())
   }
 
+  const showUser = (id) => () => {
+    dispatch(actions.startLoading())
+    history.push(`/account/${id}`)
+    dispatch(actions.finishLoading())
+  }
+
   // Filtrar contenedores
   const filterModules = (e) => {
     const val = e.target.value
+    setWord(val)
     if (val) {
       const query = modules.filter(module => module.name.toLowerCase().indexOf(val.toLowerCase()) > -1 || module.image.toLowerCase().indexOf(val.toLowerCase()) > -1 || `${module.user.first_name} ${module.user.last_name}`.toLowerCase().indexOf(val.toLowerCase()) > -1)
       console.log(query)
@@ -143,14 +151,24 @@ export default function List(props) {
 
   useEffect(() => {
     axios.get(`${host}/accounts/algorithms`, authHeaderJSON()).then(function (res) {
-      console.log(res.data)
-      setModules(res.data.map(item => ({ ...item, anchor: null })))
-      setFilter(res.data.map(item => ({ ...item, anchor: null })))
+      console.log(res.data, props)
+      setModules(res.data.map(item => ({ ...item, subscriber: item.subscribers.includes(user.id), anchor: null })).sort((current, next) => next.subscriber - current.subscriber))
+      setFilter(res.data.map(item => ({ ...item, subscriber: item.subscribers.includes(user.id), anchor: null })).sort((current, next) => next.subscriber - current.subscriber))
+      if (props.match.params.filter) {
+        filterModules({ target: { value: props.match.params.filter } })
+      }
       setLoading(false)
     }).catch(function (err) {
       error(err)
     })
   }, [])
+
+  useEffect(() => {
+    if (props.match.params.filter) {
+      filterModules({ target: { value: props.match.params.filter } })
+    }
+  }, [props.match.params.filter])
+
 
   return <>
     <div className={classes.root}>
@@ -182,14 +200,15 @@ export default function List(props) {
             </Grid>
             <Grid container className="mt-3" justify="center" direction="row">
               <Grid item xs={12} sm={10} md={8} xl={6}>
-                <Paper className={classes.alerts}>
+                <Paper className={classes.alerts} variant="outlined">
                   <IconButton size="small" color="primary" className={classes.iconButton} aria-label="search">
-                    <Search />
+                    <Icon fontSize="small" className="fal fa-search" />
                   </IconButton>
                   <InputBase
                     onChange={filterModules}
                     className={classes.input}
-                    placeholder="Find modules"
+                    value={word}
+                    placeholder="Find algorithms"
                     inputProps={{ 'aria-label': 'search' }}
                   />
                 </Paper>
@@ -221,12 +240,12 @@ export default function List(props) {
                       {
                         filter.map((item, index) =>
                           <Grid item xs={12} sm={12} md={6} lg={6} xl={4} key={index} className="p-2">
-                            <Paper className={classes.paper} onClick={show(item.image_name)}>
+                            <Paper className={classes.paper} variant="outlined">
                               <Grid container>
                                 <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
                                   <div className={classes.background} style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})` }}>
                                     {
-                                      item.subscribers.includes(user.id) ? <Icon fontSize="small" className={clsx(classes.anchoIcon, "fas fa-anchor")} /> : null
+                                      item.subscribers.includes(user.id) ? <Tooltip title="you are subscribed"><Icon fontSize="small" className={clsx(classes.anchoIcon, "fal fa-anchor")} /></Tooltip> : null
                                     }
                                   </div>
                                 </Grid>
@@ -236,14 +255,15 @@ export default function List(props) {
                                     <div className={classes.header}>
                                       <div className={classes.firstRow}>
                                         <Typography noWrap>
-                                          {ucWords(item.name)}
+                                          <Link onClick={show(item.image_name)}>{ucWords(item.name)}</Link>
                                         </Typography>
                                         <Typography variant="caption" color="textSecondary" style={{ whiteSpace: 'nowrap' }} className="ml-1">
                                           {getDate(item.created_at)}
                                         </Typography>
                                       </div>
                                       <Typography variant="caption" noWrap >
-                                        {ucWords(`${item.user.first_name} ${item.user.last_name}`)}
+                                        <Link onClick={showUser(item.user.id)}>{ucWords(`${item.user.first_name} ${item.user.last_name}`)}</Link>
+
                                         <span className="ml-1 mr-1">&#183;</span>
                                         {item.image !== '1' ? `${item.image} users` : "One user"}
                                       </Typography>

@@ -66,34 +66,34 @@ const pages = [
     title: 'Algorithms',
     href: '/algorithms',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
+    icon: <Icon fontSize="small" className="fal fa-code"  />,
   },
   {
     id: '1',
     title: 'Algorithms',
     roles: ['admin', 'developer'],
-    icon: <Icon fontSize="small" className="fas fa-code" style={{ width: '1.6rem' }} />,
+    icon: <Icon fontSize="small" className="fal fa-code"  />,
     children: [
       {
         id: '2',
         title: 'List',
         href: '/module',
         roles: ['admin', 'developer'],
-        icon: <Icon fontSize="small" className="fas fa-clipboard-list" />
+        icon: <Icon fontSize="small" className="fal fa-clipboard-list" />
       },
       {
         id: '3',
         title: 'Create',
         href: '/module/create',
         roles: ['admin', 'developer'],
-        icon: <Icon fontSize="small" className="fas fa-plus-circle" />
+        icon: <Icon fontSize="small" className="fal fa-plus-circle" />
       },
       // {
       //   id: '4',
       //   title: 'Trash',
       //   href: '/module/trash',
       //   roles: ['admin', 'developer'],
-      //   icon: <Icon fontSize="small" className="fas fa-trash" />
+      //   icon: <Icon fontSize="small" className="fal fa-trash-alt text-danger" />
       // },
     ]
   },
@@ -102,28 +102,28 @@ const pages = [
     title: 'Subscriptions',
     href: '/subscriptions',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fas fa-anchor" style={{ width: '1.6rem' }} />,
+    icon: <Icon fontSize="small" className="fal fa-anchor"  />,
   },
   {
     id: '6',
     title: 'Running',
     href: '/module/experiment',
     roles: ['admin', 'developer', 'user'],
-    icon: <Icon fontSize="small" className="fas fa-running" style={{ width: '1.6rem' }} />
+    icon: <Icon fontSize="small" className="fal fa-running"  />
   },
   {
     id: '7',
     title: 'Profile',
     href: '/account',
     roles: ['user', 'developer', 'admin'],
-    icon: <Icon fontSize="small" className="fas fa-user-circle" style={{ width: '1.6rem' }} />
+    icon: <Icon fontSize="small" className="fal fa-user-circle"  />
   },
   {
     id: '8',
     title: 'Notifications',
     href: '/notifications',
     roles: ['user', 'developer', 'admin'],
-    icon: <Icon fontSize="small" className="fas fa-bell" style={{ width: '1.6rem' }} />
+    icon: <Icon fontSize="small" className="fal fa-bell"  />
   },
 ]
 
@@ -165,7 +165,7 @@ const Sidebar = props => {
           />
         </div>
         <div>          
-          <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fas fa-sign-out-alt" />}>
+          <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fal fa-sign-out-alt" />}>
             <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
               Logout
           </Typography>

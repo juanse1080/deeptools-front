@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Grid, makeStyles, Card, CardMedia, Link, Breadcrumbs, TextField, Typography, Paper, IconButton } from '@material-ui/core'
+import { Grid, makeStyles, Card, CardMedia, Link, Breadcrumbs, TextField, Typography, Paper, IconButton, Icon } from '@material-ui/core'
 import { Autocomplete } from '@material-ui/lab'
 import { Visibility } from '@material-ui/icons'
 import clsx from 'clsx'
@@ -47,7 +47,12 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: 10,
     right: 10,
-  }
+  },
+  iconButton: {
+    fontSize: 15,
+    margin: 5,
+    width: 'auto'
+  },
 }))
 
 export default function Detail({ module }) {
@@ -68,17 +73,17 @@ export default function Detail({ module }) {
             {
               module.elements.input.value === 'image' ? <Card>
                 <CardMedia className={classes.media} image={`${host}${item.state}`} title={item.state}>
-                  <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, top: 10 }} className="actions">
+                  <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, top: 10 }} className="actions">
                     <IconButton size="small" onClick={show(item.id)}  >
-                      <Visibility fontSize="small" />
+                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                     </IconButton>
                   </Paper>
                 </CardMedia>
               </Card> : <div className={classes.video}>
                   <ReactPlayer url={`${host}${item.state}`} className={clsx('react-player')} controls playing muted loop width='100%' height='100%' />
-                  <Paper elevation={3} style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, top: 10 }} className="actions">
+                  <Paper variant="outlined" style={{ display: isMobile ? 'flex' : 'none', position: 'absolute', right: 10, borderRadius: '50%', zIndex: 1, top: 10 }} className="actions">
                     <IconButton size="small" onClick={show(item.id)}  >
-                      <Visibility fontSize="small" />
+                      <Icon fontSize="small" className={clsx(classes.iconButton, "fal fa-eye")} />
                     </IconButton>
                   </Paper>
                 </div>

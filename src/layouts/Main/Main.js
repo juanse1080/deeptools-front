@@ -19,6 +19,12 @@ const useStyles = makeStyles(theme => ({
       width: '100%'
     }
   },
+  container: {
+    [theme.breakpoints.down("sm")]: {
+      paddingLeft: 0,
+      paddingRight: 0,
+    }
+  },
   shiftContent: {
     // paddingLeft: 240,
     // paddingRight: 240
@@ -29,7 +35,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Main = props => {
-  const { children } = props;
+  const { children, fluid } = props;
   const loading = useSelector(state => state.loading)
   // const user = useSelector(user => state.user)
 
@@ -59,12 +65,14 @@ const Main = props => {
       })}
     >
       {
-        loading ? <LinearProgress color="primary" style={{ height: '3px' }} /> : null
+        loading ? <LinearProgress color="secondary" style={{ height: '3px' }} /> : null
       }
       <Topbar onSidebarOpen={handleSidebarOpen} className={classes.topbar} />
-      <Container maxWidth="lg">
-        {children}
-      </Container>
+      {
+        fluid ? children : <Container maxWidth="lg" className={classes.container}>
+          {children}
+        </Container>
+      }
       {/* <Sidebar
         onClose={handleSidebarClose}
         open={shouldOpenSidebar}
