@@ -1,11 +1,10 @@
+import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import ReactHtmlParser, { convertNodeToElement } from 'react-html-parser';
-import showdown from 'showdown'
-import { Paper, makeStyles } from '@material-ui/core'
-import "./bootstrap4.4.min.css"
+import showdown from 'showdown';
+import './bootstrap4.4.min.css';
 
 const transform = (node, index) => {
-
   // return null to block certain elements
   // don't allow <span> elements
   if (node.type === 'tag' && node.name === 'span') {
@@ -16,12 +15,12 @@ const transform = (node, index) => {
   // A node can be modified and passed to the convertNodeToElement function which will continue to render it and it's children
   if (node.type === 'tag' && node.name === 'ul') {
     node.name = 'ol';
-    node.attribs.class = "ml-4"
+    node.attribs.class = 'ml-4';
     return convertNodeToElement(node, index, transform);
   }
 
   if (node.type === 'tag' && node.name === 'ol') {
-    node.attribs.class = "ml-4"
+    node.attribs.class = 'ml-4';
     return convertNodeToElement(node, index, transform);
   }
   // return an <i> element for every <b>
@@ -35,8 +34,7 @@ const transform = (node, index) => {
     node.attribs.target = '_blank';
     return convertNodeToElement(node, index, transform);
   }
-
-}
+};
 
 const options = {
   decodeEntities: true,
@@ -50,22 +48,18 @@ const useStyles = makeStyles(theme => ({
       padding: 0,
       boxShadow: 'none',
       backgroundColor: 'inherit'
-    },
-  },
-}))
+    }
+  }
+}));
 
-export default function ({ value }) {
-  const classes = useStyles()
-  const [html, setHtml] = useState(null)
+export default function({ value }) {
+  const classes = useStyles();
+  const [html, setHtml] = useState(null);
 
   useEffect(() => {
-    const obj = new showdown.Converter({tables: true})
-    setHtml(obj.makeHtml(value))
-  }, [value])
+    const obj = new showdown.Converter({ tables: true });
+    setHtml(obj.makeHtml(value));
+  }, [value]);
 
-  return <div className={classes.paper}>
-    {
-      ReactHtmlParser(html, options)
-    }
-  </div>
+  return <div className={classes.paper}>{ReactHtmlParser(html, options)}</div>;
 }

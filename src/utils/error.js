@@ -1,17 +1,20 @@
-import { history } from 'helpers'
+import { history } from 'helpers';
 
-export default function error({response}){
+export default function error({ response }) {
   switch (response.status) {
     case 404:
-      history.push('/not-found')
-      break
+      history.push('/not-found');
+      break;
 
     case 401:
-      history.goBack()
-      break
-      
+      history.goBack();
+      break;
+
     case 403:
-      history.goBack()
-      break
+      history.goBack();
+      break;
+
+    default:
+      break;
   }
 }

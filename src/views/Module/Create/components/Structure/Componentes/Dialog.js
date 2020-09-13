@@ -245,7 +245,7 @@ export default function FullScreenDialog({ open, toggle, element, change }) {
                     </Grid>
                   </DialogContent>
                   <DialogActions>
-                    <Button onClick={cancelEdit(key)} color="primary">
+                    <Button onClick={cancelEdit(key)}>
                       Close
                       </Button>
                   </DialogActions>
@@ -266,7 +266,7 @@ export default function FullScreenDialog({ open, toggle, element, change }) {
           <Grid item xs={12}>
             <Fab variant="extended" color="primary" className={classes.margin} onClick={addGraph}>
               <Add className="mr-1" />
-                graph
+                Graph
               </Fab>
           </Grid>
         </Grid>

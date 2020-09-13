@@ -1,23 +1,17 @@
-/* eslint-disable react/no-multi-comp */
-/* eslint-disable react/display-name */
-import React, { forwardRef } from 'react';
-import { NavLink as RouterLink } from 'react-router-dom';
-import clsx from 'clsx';
-import PropTypes from 'prop-types';
+import { Button, Typography } from '@material-ui/core';
+import { TreeItem, TreeView } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
-import { List, ListItem, Button, colors, Typography, Link } from '@material-ui/core'
-import { TreeItem, TreeView } from '@material-ui/lab'
-
-import { useSelector } from 'react-redux'
-
-import { history } from 'helpers'
+import { history } from 'helpers';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
   root: {},
   item: {
     display: 'flex',
     paddingTop: 0,
-    paddingBottom: 0,
+    paddingBottom: 0
   },
   button: {
     color: 'rgba(255,255,255,.6)',
@@ -28,7 +22,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     fontWeight: theme.typography.fontWeightMedium,
     '&:hover': {
-      color: theme.palette.white,
+      color: theme.palette.white
     }
   },
   icon: {
@@ -37,7 +31,7 @@ const useStyles = makeStyles(theme => ({
     height: 24,
     display: 'flex',
     alignItems: 'center',
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
   labelRoot: {
     display: 'flex',
@@ -46,13 +40,13 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'none',
     width: '100%',
     '&:hover': {
-      color: theme.palette.white,
+      color: theme.palette.white
     }
   },
   labelText: {
     marginLeft: theme.spacing(1),
     fontWeight: 'inherit',
-    flexGrow: 1,
+    flexGrow: 1
   },
   content: {
     display: 'inherit',
@@ -68,34 +62,38 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const CustomRouterLink = forwardRef((props, ref) => (
-  <div
-    ref={ref}
-    style={{ flexGrow: 1 }}
-  >
-    <RouterLink {...props} />
-  </div>
-));
-
 const SidebarNav = props => {
-  const { pages, className, ...rest } = props;
+  const { pages } = props;
 
   const classes = useStyles();
-  const state = useSelector(state => state)
+  const state = useSelector(state => state);
 
-  const renderTree = (nodes) => (
-    <TreeItem classes={{ content: classes.content, label: classes.label }} key={nodes.id} nodeId={nodes.id} label={
-      <Button className={classes.labelRoot} onClick={() => {
-        if (nodes.href) history.push(nodes.href)
-      }} startIcon={nodes.icon ? nodes.icon : null}>
-        <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
-          {nodes.title}
-        </Typography>
-      </Button>
-    }>
-      {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
+  const renderTree = nodes => (
+    <TreeItem
+      classes={{ content: classes.content, label: classes.label }}
+      key={nodes.id}
+      nodeId={nodes.id}
+      label={
+        <Button
+          className={classes.labelRoot}
+          onClick={() => {
+            if (nodes.href) history.push(nodes.href);
+          }}
+          startIcon={nodes.icon ? nodes.icon : null}>
+          <Typography
+            variant="subtitle1"
+            align="left"
+            className={classes.labelText}
+            color="inherit">
+            {nodes.title}
+          </Typography>
+        </Button>
+      }>
+      {Array.isArray(nodes.children)
+        ? nodes.children.map(node => renderTree(node))
+        : null}
     </TreeItem>
-  )
+  );
 
   // return <List {...rest} className={clsx(classes.root, className)}>
   //   {
@@ -121,16 +119,17 @@ const SidebarNav = props => {
   // </List>
 
   return (
-    <TreeView
-      className={classes.root}
-      defaultExpanded={['root']}
-    >
-      {
-        pages.map(page => state.user ? page.roles.includes(state.user.role) ? renderTree(page) : null : null)
-      }
+    <TreeView className={classes.root} defaultExpanded={['root']}>
+      {pages.map(page =>
+        state.user
+          ? page.roles.includes(state.user.role)
+            ? renderTree(page)
+            : null
+          : null
+      )}
     </TreeView>
   );
-}
+};
 
 SidebarNav.propTypes = {
   className: PropTypes.string,

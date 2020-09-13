@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Link as RouterLink, withRouter } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import validate from 'validate.js';
+import {
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { Grid, Button, IconButton, TextField, Link, FormHelperText, Checkbox, Typography, Box } from '@material-ui/core';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link as RouterLink, withRouter } from 'react-router-dom';
+import validate from 'validate.js';
+import { actions } from '_redux';
 
 const schema = {
   firstName: {
@@ -30,11 +42,14 @@ const schema = {
     presence: { allowEmpty: false, message: 'is required' },
     length: {
       maximum: 128
+    },
+    equality: {
+      attribute: 'otherPassword',
+      message: 'Passwords do not match',
+      comparator: function(v1, v2) {
+        return JSON.stringify(v1) === JSON.stringify(v2);
+      }
     }
-  },
-  policy: {
-    presence: { allowEmpty: false, message: 'is required' },
-    checked: true
   }
 };
 
@@ -49,7 +64,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
     [theme.breakpoints.down('xs')]: {
-      alignItems: 'start',
+      alignItems: 'start'
     }
   },
   form: {
@@ -68,17 +83,18 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(3),
+    marginTop: theme.spacing(3)
   },
   img: {
-    height: theme.spacing(10),
-    align: 'center'
+    height: theme.spacing(8)
   },
   title: {
-    padding: theme.spacing(2, 0, 4, 0)
+    padding: theme.spacing(0, 0, 4, 0),
+    fontWeight: 600
   },
   paper: {
-    width: '528px'
+    width: '450px'
   },
   error: {
     marginBottom: theme.spacing(2)
@@ -140,13 +156,13 @@ const useStyles = makeStyles(theme => ({
     marginLeft: '-14px'
   },
   signUpButton: {
-    margin: theme.spacing(2, 0)
+    margin: theme.spacing(0, 0, 1, 0)
   }
 }));
 
 const SignUp = props => {
-  const { history } = props;
-
+  const dispatch = useDispatch();
+  const error = useSelector(state => state.error);
   const classes = useStyles();
 
   const [formState, setFormState] = useState({
@@ -165,6 +181,18 @@ const SignUp = props => {
       errors: errors || {}
     }));
   }, [formState.values]);
+
+  useEffect(() => {
+    setFormState(formState => {
+      const form = {
+        ...formState,
+        errors: error || {},
+        isValid: error ? false : true
+      };
+      console.log(form);
+      return form;
+    });
+  }, [error]);
 
   const handleChange = event => {
     event.persist();
@@ -185,13 +213,34 @@ const SignUp = props => {
     }));
   };
 
-  const handleBack = () => {
-    history.goBack();
-  };
-
   const handleSignUp = event => {
     event.preventDefault();
-    history.push('/');
+    if (!formState.isValid) return;
+    console.log(
+      'firstName:',
+      formState.values.firstName,
+      'lastName:',
+      formState.values.lastName,
+      'role:',
+      formState.values.role,
+      'email:',
+      formState.values.email,
+      'password:',
+      formState.values.password,
+      'otherPassword:',
+      formState.values.otherPassword
+    );
+    dispatch(actions.startLoading());
+    dispatch(
+      actions.authSignup(
+        formState.values.firstName,
+        formState.values.lastName,
+        formState.values.role,
+        formState.values.email,
+        formState.values.password,
+        formState.values.otherPassword
+      )
+    );
   };
 
   const hasError = field =>
@@ -201,23 +250,23 @@ const SignUp = props => {
     <div className={classes.root}>
       <div className={classes.content}>
         <Box className={classes.paper}>
-          <form
-            className={classes.form}
-            onSubmit={handleSignUp}
-          >
+          <form className={classes.form} onSubmit={handleSignUp}>
+            <div className={classes.containerIcon}>
+              <img
+                alt="Logo"
+                src="/images/logos/color.svg"
+                className={classes.img}
+              />
+            </div>
             <Typography
               className={classes.title}
               variant="h2"
-            >
-              Create new account
-                </Typography>
-            <Typography
-              color="textSecondary"
-              gutterBottom
-            >
-              Use your email to create new account
-                </Typography>
+              align="center"
+              color="primary">
+              Create Account
+            </Typography>
             <TextField
+              size="small"
               className={classes.textField}
               error={hasError('firstName')}
               fullWidth
@@ -232,6 +281,7 @@ const SignUp = props => {
               variant="outlined"
             />
             <TextField
+              size="small"
               className={classes.textField}
               error={hasError('lastName')}
               fullWidth
@@ -245,13 +295,29 @@ const SignUp = props => {
               value={formState.values.lastName || ''}
               variant="outlined"
             />
+            <FormControl
+              fullWidth
+              variant="outlined"
+              size="small"
+              className={classes.textField}>
+              <InputLabel id="demo-simple-select-label">Role</InputLabel>
+              <Select
+                name="role"
+                label="Role"
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={formState.values.role || 'user'}
+                onChange={handleChange}>
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="developer">Developer</MenuItem>
+              </Select>
+            </FormControl>
             <TextField
+              size="small"
               className={classes.textField}
               error={hasError('email')}
               fullWidth
-              helperText={
-                hasError('email') ? formState.errors.email[0] : null
-              }
+              helperText={hasError('email') ? formState.errors.email[0] : null}
               label="Email address"
               name="email"
               onChange={handleChange}
@@ -260,6 +326,7 @@ const SignUp = props => {
               variant="outlined"
             />
             <TextField
+              size="small"
               className={classes.textField}
               error={hasError('password')}
               fullWidth
@@ -273,60 +340,44 @@ const SignUp = props => {
               value={formState.values.password || ''}
               variant="outlined"
             />
-            <div className={classes.policy}>
-              <Checkbox
-                checked={formState.values.policy || false}
-                className={classes.policyCheckbox}
-                color="primary"
-                name="policy"
-                onChange={handleChange}
-              />
-              <Typography
-                className={classes.policyText}
-                color="textSecondary"
-                variant="body1"
-              >
-                I have read the{' '}
-                <Link
-                  color="primary"
-                  component={RouterLink}
-                  to="#"
-                  underline="always"
-                  variant="h6"
-                >
-                  Terms and Conditions
-                    </Link>
-              </Typography>
-            </div>
-            {hasError('policy') && (
-              <FormHelperText error>
-                {formState.errors.policy[0]}
-              </FormHelperText>
-            )}
-            <Button
-              className={classes.signUpButton}
-              color="primary"
-              disabled={!formState.isValid}
+            <TextField
+              size="small"
+              className={classes.textField}
+              error={hasError('password')}
               fullWidth
-              size="large"
-              type="submit"
+              helperText={
+                hasError('password') ? formState.errors.password[0] : null
+              }
+              label="Confirm password"
+              name="otherPassword"
+              onChange={handleChange}
+              type="password"
+              value={formState.values.otherPassword || ''}
               variant="outlined"
-            >
-              Sign up now
+            />
+            <Grid
+              container
+              justify="space-between"
+              alignItems="center"
+              direction="row-reverse">
+              <Grid item>
+                <Button
+                  color="primary"
+                  disabled={!formState.isValid}
+                  size="small"
+                  type="submit"
+                  variant="contained">
+                  Create account
                 </Button>
-            <Typography
-              color="textSecondary"
-              variant="body1"
-            >
-              Have an account?{' '}
-              <Link
-                component={RouterLink}
-                to="/sign-in"
-                variant="h6"
-              >
-                Sign in
+              </Grid>
+              <Grid item>
+                <Typography color="textSecondary" variant="body1">
+                  <Link component={RouterLink} to="/sign-in" variant="h6">
+                    Sign in
                   </Link>
-            </Typography>
+                </Typography>
+              </Grid>
+            </Grid>
           </form>
         </Box>
       </div>

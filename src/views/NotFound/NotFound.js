@@ -1,6 +1,6 @@
-import React from 'react';
+import { Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { Grid, Typography, Button } from '@material-ui/core';
+import React from 'react';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     display: 'inline-block',
     maxWidth: '100%',
     width: 560
-  },
+  }
 }));
 
 const NotFound = () => {

@@ -1,25 +1,17 @@
 export default class PushNotification {
-
   constructor(options = {}) {
-
     let defaults = {
-      title: "Titulo Padrão",
-      body: "Mensagem Padrão",
-      icon: "https://pbs.twimg.com/profile_images/686359431664238592/VEc23RGt.png",
+      title: 'Titulo Padrão',
+      body: 'Mensagem Padrão',
+      icon:
+        'https://pbs.twimg.com/profile_images/686359431664238592/VEc23RGt.png',
       status: 1,
-      action: ""
-    }
+      action: ''
+    };
 
     let settings = Object.assign({}, defaults, options);
-
     this.settings = settings;
-
-    // console.log(this.settings)
-
-
-    // this.defineStatus(settings.status);
     this.requestPermission();
-
   }
 
   getAttr() {
@@ -27,24 +19,29 @@ export default class PushNotification {
   }
 
   defineStatus(status) {
-    if (this.settings.icon === "") {
+    if (this.settings.icon === '') {
       switch (status) {
         case 1:
-          this.settings.icon = "/static/admin/plugins/notificacao/images/ICON_CHECK.png";
+          this.settings.icon =
+            '/static/admin/plugins/notificacao/images/ICON_CHECK.png';
           break;
         case 2:
-          this.settings.icon = "/static/admin/plugins/notificacao/images/ICON_ERROR.png";
+          this.settings.icon =
+            '/static/admin/plugins/notificacao/images/ICON_ERROR.png';
+          break;
         default:
-          this.settings.icon = "/static/admin/plugins/notificacao/images/ICON_CHECK.png";
+          this.settings.icon =
+            '/static/admin/plugins/notificacao/images/ICON_CHECK.png';
+          break;
       }
     }
   }
 
   requestPermission() {
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then(function (result) {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission().then(function(result) {
         console.log(result);
-      })
+      });
     }
   }
 
@@ -55,10 +52,10 @@ export default class PushNotification {
       return false;
     }
 
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then(function (result) {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission().then(function(result) {
         console.log(result);
-      })
+      });
       return false;
     } else {
       return true;
@@ -66,23 +63,23 @@ export default class PushNotification {
   }
 
   callAction(notification, action) {
-    console.log(notification, action)
+    console.log(notification, action);
     if (action) {
-      notification.onclick = function () {
+      notification.onclick = function() {
         window.open(action);
-      }
+      };
     }
   }
 
-  notify(body = "", icon = "") {
+  notify(body = '', icon = '') {
     if (this.checkPermission()) {
       let notification = new Notification(this.settings.title, {
-        icon: (icon ? icon : this.settings.icon),
-        body: (body ? body : this.settings.body),
+        icon: icon ? icon : this.settings.icon,
+        body: body ? body : this.settings.body
       });
       this.callAction(notification, this.settings.action);
     } else {
-      console.log('Permission denied')
+      console.log('Permission denied');
     }
   }
 }

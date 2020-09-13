@@ -27,7 +27,7 @@ const Minimal = props => {
     <div className={classes.root}>
 
       {
-        loading ? <LinearProgress color="primary" style={{height:'3px'}}/> : null
+        loading ? <LinearProgress color="secondary" style={{height:'3px'}}/> : null
       }
       <main className={classes.content}>{children}</main>
     </div>

@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
-import { Route } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import Footer from '../Footer';
-import { useDispatch } from "react-redux";
-import { actions } from '_redux'
-
 import { makeStyles } from '@material-ui/styles';
+import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { Route } from 'react-router-dom';
+import { actions } from '_redux';
 
 const useStyles = makeStyles(() => ({
   root: {
-    // paddingTop: 64,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -20,15 +17,18 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-
-const RouteWithLayout = ({ layout: Layout, component: Component, fluid, ...rest }) => {
-
-  const classes = useStyles()
-  const dispatch = useDispatch()
+const RouteWithLayout = ({
+  layout: Layout,
+  component: Component,
+  fluid,
+  ...rest
+}) => {
+  const classes = useStyles();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(actions.authCheckState())
-  })
+    dispatch(actions.authCheckState());
+  });
 
   return (
     <Route
@@ -37,8 +37,8 @@ const RouteWithLayout = ({ layout: Layout, component: Component, fluid, ...rest 
         <Layout fluid={fluid}>
           <div className={classes.root}>
             <Component {...matchProps} />
-            <Footer />
           </div>
+          {/* <Footer /> */}
         </Layout>
       )}
     />

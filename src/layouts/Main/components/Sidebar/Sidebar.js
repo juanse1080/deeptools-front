@@ -1,29 +1,16 @@
-import React from 'react'
-import clsx from 'clsx'
-import PropTypes from 'prop-types'
-import { Link as RouterLink } from 'react-router-dom'
-import { makeStyles } from '@material-ui/styles'
-import { Drawer, Icon, Button, Typography } from '@material-ui/core'
-import DashboardIcon from '@material-ui/icons/Dashboard'
-import PeopleIcon from '@material-ui/icons/People'
-import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket'
-import TextFieldsIcon from '@material-ui/icons/TextFields'
-import ImageIcon from '@material-ui/icons/Image'
-import AccountBoxIcon from '@material-ui/icons/AccountBox'
-import SettingsIcon from '@material-ui/icons/Settings'
-import LockOpenIcon from '@material-ui/icons/LockOpen'
-import AddCircleIcon from '@material-ui/icons/AddCircle'
-
-import { SidebarNav } from './components'
-
-import { history } from 'helpers'
-
-import { useDispatch, useSelector } from 'react-redux'
-import { actions } from '_redux'
+import { Button, Drawer, Icon, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
+import clsx from 'clsx';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { Link as RouterLink } from 'react-router-dom';
+import { actions } from '_redux';
+import { SidebarNav } from './components';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
-    width: 240,
+    width: 240
   },
   root: {
     backgroundColor: theme.palette.primary.main,
@@ -47,18 +34,18 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'none',
     width: '100%',
     '&:hover': {
-      color: theme.palette.white,
+      color: theme.palette.white
     }
   },
   labelText: {
     marginLeft: theme.spacing(1),
     fontWeight: 'inherit',
-    flexGrow: 1,
+    flexGrow: 1
   },
   paperAnchorLeft: {
     borderRight: 0
   }
-}))
+}));
 
 const pages = [
   {
@@ -66,13 +53,13 @@ const pages = [
     title: 'Algorithms',
     href: '/algorithms',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fal fa-code"  />,
+    icon: <Icon fontSize="small" className="fal fa-code" />
   },
   {
     id: '1',
     title: 'Algorithms',
     roles: ['admin', 'developer'],
-    icon: <Icon fontSize="small" className="fal fa-code"  />,
+    icon: <Icon fontSize="small" className="fal fa-code" />,
     children: [
       {
         id: '2',
@@ -87,14 +74,7 @@ const pages = [
         href: '/module/create',
         roles: ['admin', 'developer'],
         icon: <Icon fontSize="small" className="fal fa-plus-circle" />
-      },
-      // {
-      //   id: '4',
-      //   title: 'Trash',
-      //   href: '/module/trash',
-      //   roles: ['admin', 'developer'],
-      //   icon: <Icon fontSize="small" className="fal fa-trash-alt text-danger" />
-      // },
+      }
     ]
   },
   {
@@ -102,54 +82,47 @@ const pages = [
     title: 'Subscriptions',
     href: '/subscriptions',
     roles: ['user'],
-    icon: <Icon fontSize="small" className="fal fa-anchor"  />,
+    icon: <Icon fontSize="small" className="fal fa-anchor" />
   },
   {
     id: '6',
     title: 'Running',
     href: '/module/experiment',
     roles: ['admin', 'developer', 'user'],
-    icon: <Icon fontSize="small" className="fal fa-running"  />
+    icon: <Icon fontSize="small" className="fal fa-running" />
   },
   {
     id: '7',
     title: 'Profile',
     href: '/account',
     roles: ['user', 'developer', 'admin'],
-    icon: <Icon fontSize="small" className="fal fa-user-circle"  />
+    icon: <Icon fontSize="small" className="fal fa-user-circle" />
   },
   {
     id: '8',
     title: 'Notifications',
     href: '/notifications',
     roles: ['user', 'developer', 'admin'],
-    icon: <Icon fontSize="small" className="fal fa-bell"  />
-  },
-]
+    icon: <Icon fontSize="small" className="fal fa-bell" />
+  }
+];
 
 const Sidebar = props => {
-  const { open, variant, onClose, className, ...rest } = props
-  const classes = useStyles()
-  const dispatch = useDispatch()
-
-  const to = (href) => () => {
-    dispatch(actions.startLoading())
-    history.push(href)
-    dispatch(actions.finishLoading())
-  }
+  const { open, variant, onClose, className, ...rest } = props;
+  const classes = useStyles();
+  const dispatch = useDispatch();
 
   return (
     <Drawer
       anchor="left"
-      classes={{ paper: classes.drawer, paperAnchorLeft: classes.paperAnchorLeft }}
+      classes={{
+        paper: classes.drawer,
+        paperAnchorLeft: classes.paperAnchorLeft
+      }}
       onClose={onClose}
       open={open}
-      variant={variant}
-    >
-      <div
-        {...rest}
-        className={clsx(classes.root, className)}
-      >
+      variant={variant}>
+      <div {...rest} className={clsx(classes.root, className)}>
         <div>
           <RouterLink to="/">
             <img
@@ -159,28 +132,34 @@ const Sidebar = props => {
             />
           </RouterLink>
           <div className={classes.divider} />
-          <SidebarNav
-            className={classes.nav}
-            pages={pages}
-          />
+          <SidebarNav className={classes.nav} pages={pages} />
         </div>
-        <div>          
-          <Button className={classes.labelRoot} onClick={() => dispatch(actions.logout())} startIcon={<Icon fontSize="small" className="fal fa-sign-out-alt" />}>
-            <Typography variant="subtitle1" align="left" className={classes.labelText} color="inherit">
+        <div>
+          <Button
+            className={classes.labelRoot}
+            onClick={() => dispatch(actions.logout())}
+            startIcon={
+              <Icon fontSize="small" className="fal fa-sign-out-alt" />
+            }>
+            <Typography
+              variant="subtitle1"
+              align="left"
+              className={classes.labelText}
+              color="inherit">
               Logout
-          </Typography>
+            </Typography>
           </Button>
         </div>
       </div>
     </Drawer>
-  )
-}
+  );
+};
 
 Sidebar.propTypes = {
   className: PropTypes.string,
   onClose: PropTypes.func,
   open: PropTypes.bool.isRequired,
   variant: PropTypes.string.isRequired
-}
+};
 
-export default Sidebar
+export default Sidebar;

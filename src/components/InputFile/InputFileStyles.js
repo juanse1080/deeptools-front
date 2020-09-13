@@ -20,9 +20,11 @@ const useStyles = makeStyles((theme) => ({
   wrapper: {
     position: "relative",
     borderRadius: "4px",
-    backgroundColor: "#ededed",
+    // backgroundColor: "#ededed",
+    border: '1px solid #0000003b',
     width: "100%",
-    padding: "5px",
+    height: '37.66px',
+    // padding: "5px",
     margin: 0,
     display: "flex",
     maxWidth: "100%",
@@ -35,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     minWidth: "104.5px",
+    marginLeft: 2
   },
   buttonSuccess: {
     backgroundColor: green[500],

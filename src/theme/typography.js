@@ -1,6 +1,7 @@
 import palette from './palette';
 
 export default {
+  fontFamily: "'Raleway', sans-serif",
   h1: {
     color: palette.text.primary,
     fontWeight: 500,
@@ -64,7 +65,7 @@ export default {
   },
   body2: {
     color: palette.text.secondary,
-    fontSize: '12px',
+    fontSize: '10px',
     letterSpacing: '-0.04px',
     lineHeight: '18px'
   },
