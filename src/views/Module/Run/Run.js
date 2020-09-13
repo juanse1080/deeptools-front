@@ -140,7 +140,7 @@ export default function Run({ match, ...others }) {
       cancels.push(source);
 
       axios
-        .post(`${host}/module/upload/${match.params.id}`, form, config)
+        .post(`${host}/modules/upload/${match.params.id}`, form, config)
         .then(function(res) {
           console.log(res.data);
           handleMedia(len + index, 'uploaded', true);
@@ -178,7 +178,7 @@ export default function Run({ match, ...others }) {
     console.log(media, index);
     axios
       .delete(
-        `${host}/module/upload/remove/${media[index].id}`,
+        `${host}/modules/upload/remove/${media[index].id}`,
         authHeaderJSON()
       )
       .then(function(res) {
@@ -195,7 +195,7 @@ export default function Run({ match, ...others }) {
   const uploadExamples = () => {
     axios
       .post(
-        `${host}/module/upload/${match.params.id}/examples`,
+        `${host}/modules/upload/${match.params.id}/examples`,
         { examples: example.map(item => item.id) },
         authHeaderJSON()
       )
@@ -303,7 +303,7 @@ export default function Run({ match, ...others }) {
 
   useEffect(() => {
     axios
-      .post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON())
+      .post(`${host}/modules/run/${match.params.id}`, {}, authHeaderJSON())
       .then(function(res) {
         if (!['active', 'builded'].includes(res.data.state)) history.goBack();
         const obj = new showdown.Converter({ tables: true });
@@ -346,7 +346,7 @@ export default function Run({ match, ...others }) {
   useEffect(() => {
     if (step === 1) {
       axios
-        .post(`${host}/module/run/${match.params.id}`, {}, authHeaderJSON())
+        .post(`${host}/modules/run/${match.params.id}`, {}, authHeaderJSON())
         .then(function(res) {
           setMedia(
             res.data.elements.map(item => ({

@@ -251,7 +251,7 @@ export default function List(props) {
     handleDialog(false)();
     handleModule(deleting.index, 'loading', true);
     axios
-      .delete(`${host}/module/delete/${deleting.image_name}`, authHeaderJSON())
+      .delete(`${host}/modules/delete/${deleting.image_name}`, authHeaderJSON())
       .then(function(res) {
         handleModule(deleting.index, 'loading', false);
         setModules(modules =>

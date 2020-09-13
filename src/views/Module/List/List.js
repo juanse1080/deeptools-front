@@ -182,7 +182,7 @@ export default function List(props) {
     handleDialog(false)();
     handleModule(deleting.index, 'loading', true);
     axios
-      .delete(`${host}/module/delete/${deleting.image_name}`, authHeaderJSON())
+      .delete(`${host}/modules/delete/${deleting.image_name}`, authHeaderJSON())
       .then(function(res) {
         handleModule(deleting.index, 'loading', false);
         setModules(modules =>
@@ -222,7 +222,7 @@ export default function List(props) {
     handleClose(index)();
     handleModule(index, 'loading', true);
     axios
-      .put(`${host}/module/start/${id}`, {}, authHeaderJSON())
+      .put(`${host}/modules/start/${id}`, {}, authHeaderJSON())
       .then(function(res) {
         handleModule(index, 'loading', false);
         handleModule(index, 'state', 'active');
@@ -237,7 +237,7 @@ export default function List(props) {
     handleClose(index)();
     handleModule(index, 'loading', true);
     axios
-      .put(`${host}/module/stop/${id}`, {}, authHeaderJSON())
+      .put(`${host}/modules/stop/${id}`, {}, authHeaderJSON())
       .then(function(res) {
         handleModule(index, 'loading', false);
         handleModule(index, 'state', 'stopped');
@@ -316,7 +316,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/module`, authHeaderJSON())
+      .get(`${host}/modules`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         const data = res.data.map(item => ({ ...item, anchor: null }));

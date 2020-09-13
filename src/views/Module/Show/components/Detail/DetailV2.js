@@ -151,7 +151,7 @@ export default function Detail({ module, handle }) {
   const addedUser = (e, value) => {
     axios
       .put(
-        `${host}/module/subscribers/${module.image_name}`,
+        `${host}/modules/subscribers/${module.image_name}`,
         { id: value.id },
         authHeaderJSON()
       )
@@ -188,7 +188,7 @@ export default function Detail({ module, handle }) {
   const deleted = () => {
     axios
       .put(
-        `${host}/module/subscribers/${module.image_name}`,
+        `${host}/modules/subscribers/${module.image_name}`,
         { id: deleting.id },
         authHeaderJSON()
       )
@@ -250,7 +250,7 @@ export default function Detail({ module, handle }) {
   const toggleSubscriber = () => {
     axios
       .put(
-        `${host}/module/subscriptions/${module.image_name}`,
+        `${host}/modules/subscriptions/${module.image_name}`,
         {},
         authHeaderJSON()
       )

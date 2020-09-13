@@ -28,7 +28,7 @@ export default function({ id, change, examples, type, ...others }) {
 
   useEffect(() => {
     axios
-      .get(`${host}/module/run/${id}/examples`, authHeaderJSON())
+      .get(`${host}/modules/run/${id}/examples`, authHeaderJSON())
       .then(function(res) {
         setData([...res.data]);
       })

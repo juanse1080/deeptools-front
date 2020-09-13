@@ -155,7 +155,7 @@ export default function({ match, ...others }) {
 
   const getData = () => {
     axios
-      .get(`${host}/module/experiment/${match.params.id}`, authHeaderJSON())
+      .get(`${host}/modules/experiment/${match.params.id}`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         setExperiment({ ...res.data });
@@ -172,7 +172,7 @@ export default function({ match, ...others }) {
 
   useEffect(() => {
     axios
-      .get(`${host}/module/experiment/${match.params.id}`, authHeaderJSON())
+      .get(`${host}/modules/experiment/${match.params.id}`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         if (res.data.state === 'executing') {
