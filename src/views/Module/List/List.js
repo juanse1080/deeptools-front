@@ -542,7 +542,12 @@ export default function List(props) {
                                       {ucWords(item.name)}
                                     </Link>
                                   </Typography>
-                                  <div className={classes.title}>
+                                  <div
+                                    style={{
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      alignItems: 'center'
+                                    }}>
                                     <Typography
                                       variant="caption"
                                       color="textSecondary">
