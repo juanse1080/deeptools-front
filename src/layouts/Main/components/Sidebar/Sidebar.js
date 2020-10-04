@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import { actions } from '_redux';
 import { SidebarNav } from './components';
+import logo from "assets/img/logo--white.svg"
 
 const useStyles = makeStyles(theme => ({
   drawer: {
@@ -127,8 +128,7 @@ const Sidebar = props => {
           <RouterLink to="/">
             <img
               alt="Logo"
-              // width="200"
-              src="/images/logos/logo--white.svg"
+              src={logo}
             />
           </RouterLink>
           <div className={classes.divider} />

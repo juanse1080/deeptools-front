@@ -303,7 +303,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/subscriptions`, authHeaderJSON())
+      .get(`${host}/accounts/subscriptions/`, authHeaderJSON())
       .then(function(res) {
         setModules(res.data.map(item => ({ ...item, anchor: null })));
         setFilter(res.data.map(item => ({ ...item, anchor: null })));
@@ -427,7 +427,7 @@ export default function List(props) {
                     severity="info"
                     variant="outlined"
                     className={clsx('mt-3', classes.alerts)}>
-                    There are no records
+                    You don't have subscriptions yet
                   </Alert>
                 </Grid>
               </Grid>

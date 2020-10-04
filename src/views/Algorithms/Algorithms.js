@@ -164,7 +164,7 @@ export default function Algorithms(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/algorithms`, authHeaderJSON())
+      .get(`${host}/accounts/algorithms/`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data, props);
         setModules(
@@ -262,7 +262,7 @@ export default function Algorithms(props) {
                     severity="info"
                     variant="outlined"
                     className={clsx('mt-3', classes.alerts)}>
-                    There are no records
+                    No algorithms registered
                   </Alert>
                 </Grid>
               </Grid>

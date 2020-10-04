@@ -585,7 +585,7 @@ export default function({ match }) {
                     severity="info"
                     variant="outlined"
                     className={clsx('mt-3', classes.alerts)}>
-                    There are no records
+                    You don't have subscriptions yet
                   </Alert>
                 </Grid>
               </Grid>

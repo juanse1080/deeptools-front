@@ -268,7 +268,7 @@ export default function Edit(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/profile`, authHeaderJSON())
+      .get(`${host}/accounts/profile/`, authHeaderJSON())
       .then(function(res) {
         setFormState({ ...formState, values: { ...res.data } });
         setLoading(false);

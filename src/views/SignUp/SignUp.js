@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import validate from 'validate.js';
 import { actions } from '_redux';
+import logo from 'assets/img/color.svg';
 
 const schema = {
   firstName: {
@@ -252,11 +253,7 @@ const SignUp = props => {
         <Box className={classes.paper}>
           <form className={classes.form} onSubmit={handleSignUp}>
             <div className={classes.containerIcon}>
-              <img
-                alt="Logo"
-                src="/images/logos/color.svg"
-                className={classes.img}
-              />
+              <img alt="Logo" src={logo} className={classes.img} />
             </div>
             <Typography
               className={classes.title}

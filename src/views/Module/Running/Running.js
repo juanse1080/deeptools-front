@@ -195,7 +195,7 @@ export default function() {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/running`, authHeaderJSON())
+      .get(`${host}/accounts/running/`, authHeaderJSON())
       .then(function(res) {
         setExperiments(
           res.data.map((item, key) => ({

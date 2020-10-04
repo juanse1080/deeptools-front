@@ -20,7 +20,7 @@ export default function({ value, change, errors, input, ...others }) {
 
   const getImages = () => {
     axios
-      .get(`${host}/modules/images`, authHeaderJSON())
+      .get(`${host}/modules/images/`, authHeaderJSON())
       .then(function(res) {
         setImages(res.data);
       })

@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import validate from 'validate.js';
 import { actions } from '_redux';
+import logo from 'assets/img/color.svg';
 
 const schema = {
   email: {
@@ -83,6 +84,9 @@ const useStyles = makeStyles(theme => ({
   },
   error: {
     marginBottom: theme.spacing(2)
+  },
+  fontFamily: {
+    fontFamily: '"Raleway", sans-serif'
   }
 }));
 
@@ -150,13 +154,10 @@ const SignIn = props => {
         <Box className={classes.paper}>
           <form className={classes.form} onSubmit={handleSignIn}>
             <div className={classes.containerIcon}>
-              <img
-                alt="Logo"
-                src="/images/logos/color.svg"
-                className={classes.img}
-              />
+              <img alt="Logo" src={logo} className={classes.img} />
             </div>
             <Typography
+              classes={{ root: classes.fontFamily }}
               className={classes.title}
               variant="h2"
               align="center"
@@ -165,6 +166,7 @@ const SignIn = props => {
             </Typography>
             <TextField
               size="small"
+              color="primary"
               id="email"
               className={classes.textField}
               error={hasError('email') || error ? true : null}
@@ -179,6 +181,7 @@ const SignIn = props => {
             />
             <TextField
               size="small"
+              color="primary"
               className={classes.textField}
               error={hasError('password') || error ? true : null}
               fullWidth

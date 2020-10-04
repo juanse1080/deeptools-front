@@ -10,7 +10,7 @@ import {
   Typography
 } from '@material-ui/core';
 import { ArrowBack, ArrowForward } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton, Alert } from '@material-ui/lab';
 import axios from 'axios';
 import clsx from 'clsx';
 import { authHeaderJSON, history, host, ws } from 'helpers';
@@ -19,7 +19,7 @@ import { isMobile } from 'react-device-detect';
 import { useDispatch, useSelector } from 'react-redux';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick-theme.css';
-import 'slick-carousel/slick/slick.css';
+import './slick.css';
 import { error, format_date as getDate, title as ucWords } from 'utils';
 import { actions } from '_redux';
 
@@ -151,6 +151,12 @@ const useStyles = makeStyles(theme => ({
     height: 0,
     position: 'relative',
     minHeight: '100%'
+  },
+  alerts: {
+    padding: '2px 4px',
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%'
   }
 }));
 
@@ -320,9 +326,21 @@ export default function List(props) {
     dispatch(actions.finishLoading());
   };
 
+  const subscriptions = () => {
+    dispatch(actions.startLoading());
+    history.push('/subscriptions/');
+    dispatch(actions.finishLoading());
+  };
+
   const myAlgorithms = () => {
     dispatch(actions.startLoading());
     history.push('/module/');
+    dispatch(actions.finishLoading());
+  };
+
+  const deploy = () => {
+    dispatch(actions.startLoading());
+    history.push('/module/create/');
     dispatch(actions.finishLoading());
   };
 
@@ -346,7 +364,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/dashboard`, authHeaderJSON())
+      .get(`${host}/accounts/dashboard/`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         setRunning(_ => {
@@ -403,130 +421,64 @@ export default function List(props) {
           </>
         ) : (
           <>
+            <Grid
+              container
+              justify="space-between"
+              direction="row"
+              alignItems="flex-end">
+              <Grid item>
+                <Typography color="textSecondary" className="mb-2">
+                  Running
+                  <Chip
+                    variant="outlined"
+                    component="span"
+                    className="ml-2"
+                    size="small"
+                    label={`${Object.keys(running).length}`}
+                  />
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Chip
+                  variant="outlined"
+                  style={{ cursor: 'pointer' }}
+                  component="span"
+                  className="mb-2"
+                  size="small"
+                  label="show all"
+                  onClick={allRunning}
+                />
+              </Grid>
+            </Grid>
             {Object.keys(running).length > 0 ? (
-              <>
-                <Grid
-                  container
-                  justify="space-between"
-                  direction="row"
-                  alignItems="flex-end">
-                  <Grid item>
-                    <Typography color="textSecondary" className="mb-2">
-                      Running
-                      {/* <Chip variant="outlined" component="span" className="ml-2" size="small" label={`${index.running + 1}/${Object.keys(running).length}`} /> */}
-                      <Chip
-                        variant="outlined"
-                        component="span"
-                        className="ml-2"
-                        size="small"
-                        label={`${Object.keys(running).length}`}
-                      />
-                    </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Chip
-                      variant="outlined"
-                      style={{ cursor: 'pointer' }}
-                      component="span"
-                      className="mb-2"
-                      size="small"
-                      label="show all"
-                      onClick={allRunning}
-                    />
-                  </Grid>
-                </Grid>
-                <Slider {...getSettings('running')}>
-                  {Object.values(running)
-                    .sort((first, next) => next.id - first.id)
-                    .map(item => (
-                      <div
-                        key={item.id}
-                        className={clsx(classes.father, 'item')}
-                        onClick={show(item.id)}>
-                        {console.log(
-                          messages[item.id],
-                          messages[item.id] ? true : false
-                        )}
-                        <LinearProgress
-                          color="primary"
-                          variant="determinate"
-                          value={
-                            messages[item.id] && messages[item.id].length > 0
-                              ? parseInt(
-                                  messages[item.id][
-                                    messages[item.id].length - 1
-                                  ].progress
-                                )
-                              : 0
-                          }
-                          classes={{
-                            barColorPrimary: getClass(messages[item.id]),
-                            root: classes.linearProgressRoot
-                          }}
-                        />
-                        <Paper
-                          className={classes.file}
-                          variant="outlined"
-                          classes={{ outlined: classes.paperOutline }}>
-                          <div className={classes.header}>
-                            <Typography noWrap className="mr-2">
-                              {ucWords(item.docker.name)}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="textSecondary"
-                              className={classes.date}>
-                              {getDate(item.updated_at)}
-                            </Typography>
-                          </div>
-                          <div
-                            className={classes.content}
-                            style={{ minWidth: 0 }}>
-                            <Typography noWrap align="left" variant="body2">
-                              {messages[item.id] && messages[item.id].length > 0
-                                ? messages[item.id][
-                                    messages[item.id].length - 1
-                                  ].description
-                                : 'Starting process...'}
-                            </Typography>
-                          </div>
-                        </Paper>
-                      </div>
-                    ))}
-                </Slider>
-                {/* <MobileStepper classes={{ root: classes.stepper }} variant="progress" steps={Object.keys(running).length} position="static" activeStep={index.running} LinearProgressProps={{ classes: { root: classes.linearProgressRootSteeps } }} /> */}
-              </>
-            ) : null}
-            {last.length > 0 ? (
-              <>
-                <Grid
-                  container
-                  justify="space-between"
-                  direction="row"
-                  alignItems="flex-end">
-                  <Grid item>
-                    <Typography color="textSecondary" className="mb-2">
-                      Completed
-                      {/* <Chip variant="outlined" component="span" className="ml-2" size="small" label={`${index.last + 1}/${last.length}`} /> */}
-                      <Chip
-                        variant="outlined"
-                        component="span"
-                        className="ml-2"
-                        size="small"
-                        label={`${last.length}`}
-                      />
-                    </Typography>
-                  </Grid>
-                  <Grid item>
-                    {/* <Chip variant="outlined" component="span" className="mb-2" size="small" label="show all" /> */}
-                  </Grid>
-                </Grid>
-                <Slider {...getSettings('last')}>
-                  {last.map(item => (
+              <Slider {...getSettings('running')}>
+                {Object.values(running)
+                  .sort((first, next) => next.id - first.id)
+                  .map(item => (
                     <div
                       key={item.id}
                       className={clsx(classes.father, 'item')}
                       onClick={show(item.id)}>
+                      {console.log(
+                        messages[item.id],
+                        messages[item.id] ? true : false
+                      )}
+                      <LinearProgress
+                        color="primary"
+                        variant="determinate"
+                        value={
+                          messages[item.id] && messages[item.id].length > 0
+                            ? parseInt(
+                                messages[item.id][messages[item.id].length - 1]
+                                  .progress
+                              )
+                            : 0
+                        }
+                        classes={{
+                          barColorPrimary: getClass(messages[item.id]),
+                          root: classes.linearProgressRoot
+                        }}
+                      />
                       <Paper
                         className={classes.file}
                         variant="outlined"
@@ -546,105 +498,208 @@ export default function List(props) {
                           className={classes.content}
                           style={{ minWidth: 0 }}>
                           <Typography noWrap align="left" variant="body2">
-                            {item.records}
+                            {messages[item.id] && messages[item.id].length > 0
+                              ? messages[item.id][messages[item.id].length - 1]
+                                  .description
+                              : 'Starting process...'}
                           </Typography>
                         </div>
                       </Paper>
                     </div>
                   ))}
-                </Slider>
-                {/* <MobileStepper classes={{ root: classes.stepper }} variant="progress" steps={last.length} position="static" activeStep={index.last} LinearProgressProps={{ classes: { root: classes.linearProgressRootSteeps } }} /> */}
-              </>
-            ) : null}
-            {news.length > 0 ? (
-              <>
-                <Grid
-                  container
-                  justify="space-between"
-                  direction="row"
-                  alignItems="flex-end">
-                  <Grid item>
-                    <Typography color="textSecondary" className="mb-2">
-                      {user.role === 'developer'
-                        ? 'Your algorithms'
-                        : 'New algorithms'}
-                      {/* <Chip variant="outlined" component="span" className="ml-2" size="small" label={`${index.news + 1}/${news.length}`} /> */}
-                      <Chip
-                        variant="outlined"
-                        component="span"
-                        className="ml-2"
-                        size="small"
-                        label={`${news.length}`}
-                      />
-                    </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Chip
-                      variant="outlined"
-                      component="span"
-                      className="mb-2"
-                      size="small"
-                      label={user.role === 'developer' ? 'View all' : 'Explore'}
-                      style={{ cursor: 'pointer' }}
-                      onClick={
-                        user.role === 'developer' ? myAlgorithms : algorithms
-                      }
-                    />
-                  </Grid>
+              </Slider>
+            ) : (
+              <Grid container className="mb-3" justify="center" direction="row">
+                <Grid item xs={12} sm={10} md={8} xl={6}>
+                  <Alert
+                    severity="info"
+                    variant="outlined"
+                    className={clsx(classes.alerts)}>
+                    You have no processes running
+                  </Alert>
                 </Grid>
-                <Slider {...getSettings('news')}>
-                  {news.map((item, index) => (
-                    <Grid item xs={12} key={index}>
-                      <Paper
-                        variant="outlined"
-                        className={classes.paper}
-                        classes={{ outlined: classes.paperOutline }}>
-                        <Grid container>
-                          <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
-                            <div
-                              className={classes.background}
-                              style={{
-                                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})`
-                              }}
-                            />
-                          </Grid>
-                          <Grid item xs={7} sm={7} md={8} lg={8} l={8}>
-                            <div className={classes.paperContent}>
-                              <div className={classes.headerNews}>
-                                <Typography noWrap>
-                                  <Link onClick={showModule(item.image_name)}>
-                                    {ucWords(item.name)}
-                                  </Link>
-                                </Typography>
-                                <Typography variant="caption" noWrap>
-                                  <Link onClick={showUser(item.user.id)}>
-                                    {ucWords(
-                                      `${item.user.first_name} ${item.user.last_name}`
-                                    )}
-                                  </Link>
-                                  <span className="ml-1 mr-1">&#183;</span>
-                                  {item.image !== '1'
-                                    ? `${item.image} users`
-                                    : 'One user'}
-                                </Typography>
-                              </div>
-                              <Typography
-                                noWrap
-                                variant="caption"
-                                color="textSecondary"
-                                className="mt-2">
-                                {item.description}
+              </Grid>
+            )}
+
+            <Grid
+              container
+              justify="space-between"
+              direction="row"
+              alignItems="flex-end">
+              <Grid item>
+                <Typography color="textSecondary" className="mb-2">
+                  Completed
+                  {/* <Chip variant="outlined" component="span" className="ml-2" size="small" label={`${index.last + 1}/${last.length}`} /> */}
+                  <Chip
+                    variant="outlined"
+                    component="span"
+                    className="ml-2"
+                    size="small"
+                    label={`${last.length}`}
+                  />
+                </Typography>
+              </Grid>
+              <Grid item>
+                {/* <Chip variant="outlined" component="span" className="mb-2" size="small" label="show all" /> */}
+              </Grid>
+            </Grid>
+            {last.length > 0 ? (
+              <Slider {...getSettings('last')}>
+                {last.map(item => (
+                  <div
+                    key={item.id}
+                    className={clsx(classes.father, 'item')}
+                    onClick={show(item.id)}>
+                    <Paper
+                      className={classes.file}
+                      variant="outlined"
+                      classes={{ outlined: classes.paperOutline }}>
+                      <div className={classes.header}>
+                        <Typography noWrap className="mr-2">
+                          {ucWords(item.docker.name)}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          className={classes.date}>
+                          {getDate(item.updated_at)}
+                        </Typography>
+                      </div>
+                      <div className={classes.content} style={{ minWidth: 0 }}>
+                        <Typography noWrap align="left" variant="body2">
+                          {item.records}
+                        </Typography>
+                      </div>
+                    </Paper>
+                  </div>
+                ))}
+              </Slider>
+            ) : (
+              <Grid container className="mb-3" justify="center" direction="row">
+                <Grid item xs={12} sm={10} md={8} xl={6}>
+                  <Alert
+                    severity="info"
+                    variant="outlined"
+                    className={clsx(classes.alerts)}>
+                    <>
+                        {`You haven't run any algorithm yet, click `}
+                        <Link component="button" onClick={subscriptions}>
+                          here
+                        </Link>
+                        {` to view your subscriptions`}
+                      </>
+                  </Alert>
+                </Grid>
+              </Grid>
+            )}
+
+            <Grid
+              container
+              justify="space-between"
+              direction="row"
+              alignItems="flex-end">
+              <Grid item>
+                <Typography color="textSecondary" className="mb-2">
+                  {user.role === 'developer'
+                    ? 'Your algorithms'
+                    : 'New algorithms'}
+                  {/* <Chip variant="outlined" component="span" className="ml-2" size="small" label={`${index.news + 1}/${news.length}`} /> */}
+                  <Chip
+                    variant="outlined"
+                    component="span"
+                    className="ml-2"
+                    size="small"
+                    label={`${news.length}`}
+                  />
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Chip
+                  variant="outlined"
+                  component="span"
+                  className="mb-2"
+                  size="small"
+                  label={user.role === 'developer' ? 'View all' : 'Explore'}
+                  style={{ cursor: 'pointer' }}
+                  onClick={
+                    user.role === 'developer' ? myAlgorithms : algorithms
+                  }
+                />
+              </Grid>
+            </Grid>
+            {news.length > 0 ? (
+              <Slider {...getSettings('news')}>
+                {news.map((item, index) => (
+                  <Grid item xs={12} key={index}>
+                    <Paper
+                      variant="outlined"
+                      className={classes.paper}
+                      classes={{ outlined: classes.paperOutline }}>
+                      <Grid container>
+                        <Grid item xs={5} sm={5} md={4} lg={4} xl={4}>
+                          <div
+                            className={classes.background}
+                            style={{
+                              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${host}${item.background})`
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={7} sm={7} md={8} lg={8} l={8}>
+                          <div className={classes.paperContent}>
+                            <div className={classes.headerNews}>
+                              <Typography noWrap>
+                                <Link onClick={showModule(item.image_name)}>
+                                  {ucWords(item.name)}
+                                </Link>
+                              </Typography>
+                              <Typography variant="caption" noWrap>
+                                <Link onClick={showUser(item.user.id)}>
+                                  {ucWords(
+                                    `${item.user.first_name} ${item.user.last_name}`
+                                  )}
+                                </Link>
+                                <span className="ml-1 mr-1">&#183;</span>
+                                {item.image !== '1'
+                                  ? `${item.image} users`
+                                  : 'One user'}
                               </Typography>
                             </div>
-                          </Grid>
+                            <Typography
+                              noWrap
+                              variant="caption"
+                              color="textSecondary"
+                              className="mt-2">
+                              {item.description}
+                            </Typography>
+                          </div>
                         </Grid>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Slider>
-                {/* <MobileStepper classes={{ root: classes.stepper }} variant="progress" steps={news.length} position="static" activeStep={index.news} LinearProgressProps={{ classes: { root: classes.linearProgressRootSteeps } }} /> */}
-              </>
-            ) : null}
+                      </Grid>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Slider>
+            ) : (
+              <Grid container className="mb-3" justify="center" direction="row">
+                <Grid item xs={12} sm={10} md={8} xl={6}>
+                  <Alert
+                    severity="info"
+                    variant="outlined"
+                    className={clsx(classes.alerts)}>
+                    {user.role === 'developer' ? (
+                      <>
+                        {`You don't have algorithms yet, click `}
+                        <Link component="button" onClick={deploy}>
+                          here
+                        </Link>
+                        {` to deploy one`}
+                      </>
+                    ) : (
+                      'At the moment, there are no algorithms deployed lately'
+                    )}
+                  </Alert>
+                </Grid>
+              </Grid>
+            )}
           </>
         )}
       </div>

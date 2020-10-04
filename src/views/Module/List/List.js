@@ -316,7 +316,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/modules`, authHeaderJSON())
+      .get(`${host}/modules/`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         const data = res.data.map(item => ({ ...item, anchor: null }));
@@ -477,7 +477,7 @@ export default function List(props) {
                     severity="info"
                     variant="outlined"
                     className={clsx('mt-3', classes.alerts)}>
-                    There are no records
+                    You don't have algorithms yet
                   </Alert>
                 </Grid>
               </Grid>
@@ -817,7 +817,7 @@ export default function List(props) {
                 </Grid>
                 <Grid container justify="flex-end" className="mt-3">
                   <Grid item>
-                    <Tooltip title="Test algorith">
+                    <Tooltip title="New algorith">
                       <Fab
                         size="small"
                         color="primary"

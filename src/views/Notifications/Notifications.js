@@ -142,7 +142,7 @@ export default function List(props) {
 
   useEffect(() => {
     axios
-      .get(`${host}/accounts/notifications`, authHeaderJSON())
+      .get(`${host}/accounts/notifications/`, authHeaderJSON())
       .then(function(res) {
         console.log(res.data);
         const data = res.data.map(item => ({ ...item, anchor: null }));
@@ -283,7 +283,7 @@ export default function List(props) {
                     severity="info"
                     variant="outlined"
                     className={clsx('mt-3', classes.alerts)}>
-                    There are no records
+                    You don't have notifications yet
                   </Alert>
                 </Grid>
               </Grid>

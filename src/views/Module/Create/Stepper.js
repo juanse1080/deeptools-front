@@ -287,7 +287,7 @@ export default function Steppers() {
   useEffect(() => {
     axios
       .post(
-        `${host}/modules/check`,
+        `${host}/modules/check/`,
         { permissions: ['module.add_docker'] },
         authHeaderJSON()
       )
@@ -306,7 +306,7 @@ export default function Steppers() {
     dispatch(actions.startLoading());
     const data = { protocol, ...details, elements: activeElements() };
     axios
-      .post(`${host}/modules/create`, dataToForm(data), authHeaderJSON())
+      .post(`${host}/modules/create/`, dataToForm(data), authHeaderJSON())
       .then(function(res) {
         dispatch(actions.finishLoading());
         build_image(res.data);

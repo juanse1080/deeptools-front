@@ -8,7 +8,10 @@ import {
   Paper,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Icon,
+  IconButton,
+  Tooltip
 } from '@material-ui/core';
 import { Alert, Skeleton } from '@material-ui/lab';
 import axios from 'axios';
@@ -130,6 +133,12 @@ export default function List(props) {
     dispatch(actions.finishLoading());
   };
 
+  const editUser = () => {
+    dispatch(actions.startLoading());
+    history.push(`/account/edit`);
+    dispatch(actions.finishLoading());
+  };
+
   useEffect(() => {
     axios
       .get(
@@ -237,7 +246,13 @@ export default function List(props) {
                       variant="h4"
                       component="h5">
                       {ucWords(`${module.first_name} ${module.last_name}`)}
+                      <Tooltip title="Settings" className="ml-2">
+                        <IconButton onClick={editUser}>
+                          <Icon fontSize="small" className="fal fa-cog" />
+                        </IconButton>
+                      </Tooltip>
                     </Typography>
+
                     <Typography
                       className={classes.name}
                       variant="caption"

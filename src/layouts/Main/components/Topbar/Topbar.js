@@ -30,6 +30,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import { format_date, PushNotification } from 'utils';
 import { actions } from '_redux';
+import logo from 'assets/img/logo--white.svg';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -185,7 +186,7 @@ const Topbar = props => {
 
       axios
         .put(
-          `${host}/accounts/find`,
+          `${host}/accounts/find/`,
           { value: e.target.value },
           authHeaderJSON()
         )
@@ -313,11 +314,7 @@ const Topbar = props => {
         <Container maxWidth="lg">
           <Toolbar className={clsx(classes.flexGrow, classes.container)}>
             <RouterLink to="/dashboard">
-              <img
-                alt="Logo"
-                src="/images/logos/logo--white.svg"
-                className={classes.img}
-              />
+              <img alt="Logo" src={logo} className={classes.img} />
             </RouterLink>
             <div className={classes.flexGrow} />
             {notMobile && user.role !== 'developer' ? (
