@@ -183,6 +183,7 @@ export const updateUser = user => {
       localStorage.setItem('user', JSON.stringify(user));
       dispatch(checkAuthTimeout(3600));
       dispatch(authUpdate(user));
+      // window.location.href = '/account'
       history.push('/account');
     } else {
       alert('User is NULL');

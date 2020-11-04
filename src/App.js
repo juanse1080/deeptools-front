@@ -35,6 +35,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log(navigator.userAgent.toLowerCase())
     dispatch(actions.reloadState());
     setLoading(false);
   }, []);

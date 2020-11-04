@@ -206,7 +206,6 @@ export default function Edit(props) {
     axios
       .put(`${host}/accounts/profile/edit`, form, authHeaderForm())
       .then(res => {
-        console.log(res.data);
         setFormState(formState => ({
           ...formState,
           values: { ...formState.values, ...res.data }
@@ -280,7 +279,6 @@ export default function Edit(props) {
 
   useEffect(() => {
     const errors = validate(formState.values, schema);
-    console.log(Object.keys(formState.touched).length > 0);
     setFormState(formState => ({
       ...formState,
       isValid: errors ? false : true,
@@ -429,7 +427,7 @@ export default function Edit(props) {
                         size="small"
                         type="submit"
                         variant="contained">
-                        Upload profile
+                        Update profile
                       </Button>
                     </Grid>
                   </Grid>

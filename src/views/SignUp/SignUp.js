@@ -158,6 +158,9 @@ const useStyles = makeStyles(theme => ({
   },
   signUpButton: {
     margin: theme.spacing(0, 0, 1, 0)
+  },
+  fontFamily: {
+    fontFamily: '"Raleway", sans-serif'
   }
 }));
 
@@ -256,6 +259,7 @@ const SignUp = props => {
               <img alt="Logo" src={logo} className={classes.img} />
             </div>
             <Typography
+              classes={{ root: classes.fontFamily }}
               className={classes.title}
               variant="h2"
               align="center"

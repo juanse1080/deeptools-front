@@ -292,6 +292,8 @@ export default function({ type, values, ...others }) {
           controls
           playing
           muted
+          pip
+          stopOnUnmount={false}
           loop
           width="100%"
           height="100%"
