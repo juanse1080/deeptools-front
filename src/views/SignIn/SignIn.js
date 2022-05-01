@@ -152,73 +152,93 @@ const SignIn = props => {
     <div className={classes.root}>
       <div className={classes.content}>
         <Box className={classes.paper}>
-          <form className={classes.form} onSubmit={handleSignIn}>
+          <form
+            className={classes.form}
+            onSubmit={handleSignIn}
+          >
             <div className={classes.containerIcon}>
-              <img alt="Logo" src={logo} className={classes.img} />
+              <img
+                alt="Logo"
+                className={classes.img}
+                src={logo}
+              />
             </div>
             <Typography
-              classes={{ root: classes.fontFamily }}
-              className={classes.title}
-              variant="h2"
               align="center"
-              color="primary">
+              className={classes.title}
+              classes={{ root: classes.fontFamily }}
+              color="primary"
+              variant="h2"
+            >
               Sign In
             </Typography>
             <TextField
-              size="small"
-              color="primary"
-              id="email"
               className={classes.textField}
+              color="primary"
               error={hasError('email') || error ? true : null}
               fullWidth
               helperText={hasError('email') ? formState.errors.email[0] : null}
+              id="email"
               label="Email address"
               name="email"
               onChange={handleChange}
+              size="small"
               type="text"
               value={formState.values.email || ''}
               variant="outlined"
             />
             <TextField
-              size="small"
-              color="primary"
               className={classes.textField}
+              color="primary"
               error={hasError('password') || error ? true : null}
               fullWidth
-              label="Password"
-              name="password"
-              onChange={handleChange}
-              type="password"
-              value={formState.values.password || ''}
-              variant="outlined"
               helperText={
                 hasError('password') ? formState.errors.password[0] : null
               }
+              label="Password"
+              name="password"
+              onChange={handleChange}
+              size="small"
+              type="password"
+              value={formState.values.password || ''}
+              variant="outlined"
             />
             {error ? (
-              <Alert severity="error" className={classes.error}>
+              <Alert
+                className={classes.error}
+                severity="error"
+              >
                 {error}
               </Alert>
             ) : null}
             <Grid
-              container
-              justify="space-between"
               alignItems="center"
-              direction="row-reverse">
+              container
+              direction="row-reverse"
+              justify="space-between"
+            >
               <Grid item>
                 <Button
                   color="primary"
                   disabled={!formState.isValid}
+                  size="small"
                   type="submit"
                   variant="contained"
-                  size="small">
+                >
                   {' '}
                   Sign in now{' '}
                 </Button>
               </Grid>
               <Grid item>
-                <Typography color="textSecondary" variant="body1">
-                  <Link component={RouterLink} to="/sign-up" variant="h6">
+                <Typography
+                  color="textSecondary"
+                  variant="body1"
+                >
+                  <Link
+                    component={RouterLink}
+                    to="/sign-up"
+                    variant="h6"
+                  >
                     Create account
                   </Link>
                 </Typography>

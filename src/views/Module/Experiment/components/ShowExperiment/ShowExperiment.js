@@ -1,14 +1,26 @@
 import React from 'react'
 
-import { Order, Full } from '../index'
+import { Order, Full, First } from '../index'
 
 export default function ({ value, to, docker, id, ...others }) {
+  console.log(docker.view)
   const getView = (index) => {
     switch (parseInt(index)) {
-      case 0:        
-        return <Full value={value} types={docker.elements_type}/>
-      case 2:        
-        return <Order value={value} types={docker.elements_type}/>
+      case 0:
+        return <Full
+          types={docker.elements_type}
+          value={value}
+               />
+      case 1:
+        return <First
+          types={docker.elements_type}
+          value={value}
+               />
+      case 2:
+        return <Order
+          types={docker.elements_type}
+          value={value}
+               />
       default:
         break;
     }

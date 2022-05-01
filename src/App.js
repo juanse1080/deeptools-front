@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Router } from 'react-router-dom';
 import { Chart } from 'react-chartjs-2';
 import validate from 'validate.js';
+import axios from 'axios'
 
 // Import Material UI components
 import { ThemeProvider } from '@material-ui/styles';
@@ -19,7 +20,7 @@ import { actions } from '_redux';
 
 // Import CSS, SCSS
 import 'react-perfect-scrollbar/dist/css/styles.css';
-import './assets/scss/index.scss';
+import './assets/css/index.css';
 
 Chart.helpers.extend(Chart.elements.Rectangle.prototype, {
   draw: chartjs.draw
@@ -29,6 +30,21 @@ validate.validators = {
   ...validate.validators,
   ...validators
 };
+
+axios.interceptors.request.use(request => {
+  if (request.method === 'put') {
+    request.method = 'post'
+    request.headers['X-HTTP-Method-Override'] = 'put'
+    console.log(request.headers)
+  }
+
+  if (request.method === 'delete') {
+    request.method = 'post'
+    request.headers['X-HTTP-Method-Override'] = 'delete'
+  }
+
+  return request
+})
 
 const App = () => {
   const dispatch = useDispatch();
